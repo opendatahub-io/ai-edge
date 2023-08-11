@@ -3,4 +3,4 @@ kind: Kustomization
 
 resources:
 - test-namespace.yaml
-- olm-operator-subscription
+- ../olm-operator-subscriptions
