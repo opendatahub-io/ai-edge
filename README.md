@@ -34,3 +34,13 @@ The main objective is to showcase that a user can take a trained model, use a pi
 1. Push the model to the image registry accessible by the near edge cluster(s)
 1. Update the GitOps config for the near edge cluster
 
+### Observability setup
+
+* Core cluster
+   *  Login to the core cluster and run `make install/observability-core` to setup acm-observability on the core cluster.
+* Edge cluster(s)
+   * Login to edge cluster
+   * Enable userWorkloadMonitoring
+      * `oc edit cm cluster-monitoring-config`
+      * Set variable `enableUserWorkload` to `true`
+   *  Run `make install/observability-edge` to create the configmap required for metric whitelisting.
