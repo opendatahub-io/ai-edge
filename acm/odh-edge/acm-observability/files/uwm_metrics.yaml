@@ -1,0 +1,10 @@
+  uwl_metrics_list.yaml: |
+    names:
+      - parallel_request_queue_sum
+      - parallel_request_queue_bucket
+      - parallel_request_queue_count
+      - rest_server_request_duration_seconds_sum
+      - rest_server_request_duration_seconds_bucket
+      - rest_server_request_duration_seconds_count
+      - rest_server_requests_in_progress
+      - rest_server_requests_total
