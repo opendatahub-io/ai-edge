@@ -1,0 +1,11 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: modelMonitor
+spec:
+  endpoints:
+    - port: metrics
+  selector:
+    matchLabels:
+      # edit this to the app-label for the model
+      app: bike-rentals-auto-ml-1
