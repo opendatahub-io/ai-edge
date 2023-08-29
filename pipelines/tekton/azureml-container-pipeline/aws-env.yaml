@@ -1,0 +1,8 @@
+kind: Secret
+apiVersion: v1
+metadata:
+  name: aws-env
+
+stringData:
+  aws-storage-config: |+
+    { "type": "s3", "access_key_id": "$", "secret_access_key": "$", "endpoint_url": "https://example.amazonaws.com/", "bucket": "bucket_name", "region": "us-west-1" }

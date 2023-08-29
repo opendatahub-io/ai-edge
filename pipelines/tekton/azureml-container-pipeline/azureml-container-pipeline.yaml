@@ -1,0 +1,89 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: azureml-container
+spec:
+  params:
+  - name: model-name
+    type: string
+  - default: "1"
+    name: model-version
+    type: string
+  - name: aws-bucket-name
+    type: string
+  tasks:
+  - name: kserve-download-model
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: current-namespace
+      value: $(context.pipelineRun.namespace)
+    - name: aws-bucket-name
+      value: $(params.aws-bucket-name)
+    taskRef:
+      kind: Task
+      name: kserve-download-model
+    workspaces:
+    - name: workspace
+      workspace: buildah-cache
+    - name: aws-secret
+      workspace: aws-secret
+  - name: check-model-exists
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: current-namespace
+      value: $(context.pipelineRun.namespace)
+    runAfter:
+     - kserve-download-model
+    taskRef:
+      kind: Task
+      name: check-model-exists
+    workspaces:
+    - name: workspace
+      workspace: buildah-cache
+  - name: create-imagestream
+    params:
+    - name: SCRIPT
+      value: oc create imagestream $(params.model-name)  --lookup-local=true --dry-run=client
+        -o yaml | oc apply -f -
+    - name: VERSION
+      value: latest
+    runAfter:
+     - check-model-exists
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+  - name: build-mlflow-container
+    params:
+    - name: IMAGE
+      value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)
+    - name: BUILDER_IMAGE
+      value: registry.redhat.io/rhel8/buildah@sha256:0a86ecbdfbe86e9d225b7fe4b090a0dd6d323f8afdfdf2bd933ff223ddb53320
+    - name: STORAGE_DRIVER
+      value: vfs
+    - name: DOCKERFILE
+      value: ./$(params.model-name)/Containerfile
+    - name: CONTEXT
+      value: .
+    - name: TLSVERIFY
+      value: "true"
+    - name: FORMAT
+      value: oci
+    - name: BUILD_EXTRA_ARGS
+      value: ""
+    - name: PUSH_EXTRA_ARGS
+      value: ""
+    - name: SKIP_PUSH
+      value: "false"
+    runAfter:
+    - create-imagestream
+    taskRef:
+      kind: ClusterTask
+      name: buildah
+    workspaces:
+    - name: source
+      workspace: buildah-cache
+  workspaces:
+  - name: buildah-cache
+  - name: aws-secret

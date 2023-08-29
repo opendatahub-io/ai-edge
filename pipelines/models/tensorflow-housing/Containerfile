@@ -1,0 +1,25 @@
+# Create the MLServer container.
+# 
+FROM docker.io/openvino/model_server:latest
+
+USER root
+
+RUN mkdir /models && chown ovms:ovms /models
+
+# CHANGE THIS LINE TO MATCH YOUR MODEL
+COPY --chown=ovms:ovms tensorflow-housing/tf2model /models/1
+RUN rm -f /models/1/fingerprint.pb
+
+RUN chmod o+rwX /models/1
+# https://docs.openshift.com/container-platform/4.13/openshift_images/create-images.html#use-uid_create-images
+RUN chgrp -R 0 /models/1 && chmod -R g=u /models/1
+
+# https://stackoverflow.com/a/41207910/19020549
+# ENTRYPOINT ["/usr/bin/env"]
+
+EXPOSE 9090 8080
+
+USER ovms
+
+# CHANGE THIS LINE TO MATCH YOUR MODEL
+CMD ["/ovms/bin/ovms", "--model_path", "/models", "--model_name", "tensorflow-housing", "--port", "9090", "--rest_port", "8080", "--shape", "auto", "--metrics_enable"]
