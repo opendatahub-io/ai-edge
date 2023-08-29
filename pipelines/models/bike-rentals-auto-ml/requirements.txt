@@ -165,7 +165,7 @@ s3transfer==0.3.7
 scipy==1.5.3
 secretstorage==3.3.3
 semver==2.13.0
-setuptools==49.6.0
+setuptools==65.5.1
 skl2onnx==1.4.9
 sklearn-pandas==1.7.0
 slicer==0.0.7
