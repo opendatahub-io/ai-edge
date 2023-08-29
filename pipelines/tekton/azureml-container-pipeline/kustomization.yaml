@@ -1,7 +1,7 @@
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 resources:
-- azureml-container-dockerfile-cache-pvc.yaml
+- azureml-container-buildah-cache-pvc.yaml
 - kserve-download-model.yaml
 - check-model-exists.yaml
 - azureml-container-pipeline.yaml

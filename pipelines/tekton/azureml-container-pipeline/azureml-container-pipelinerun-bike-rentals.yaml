@@ -17,9 +17,9 @@ spec:
   serviceAccountName: pipeline
   timeout: 1h0m0s
   workspaces:
-  - name: docker
+  - name: buildah-cache
     persistentVolumeClaim:
-      claimName: dockerfile-cache-pvc
+      claimName: buildah-cache-pvc
   - name: aws-secret
     secret:
         secretName: aws-env
