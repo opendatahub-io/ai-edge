@@ -5,4 +5,3 @@ resources:
 - tensorflow-housing-test-data-cm.yaml
 - test-mlflow-rest-svc-task.yaml
 - test-mlflow-image-pipeline.yaml
-# - test-mlflow-image-pipelinerun.yaml
