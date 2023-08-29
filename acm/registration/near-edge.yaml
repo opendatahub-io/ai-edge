@@ -56,7 +56,7 @@ kind: Subscription
 metadata:
   annotations:
     apps.open-cluster-management.io/git-branch: main
-    apps.open-cluster-management.io/git-path: acm/odh-edge
+    apps.open-cluster-management.io/git-path: acm/odh-edge/apps
     apps.open-cluster-management.io/reconcile-option: merge
   labels:
     app: near-edge
