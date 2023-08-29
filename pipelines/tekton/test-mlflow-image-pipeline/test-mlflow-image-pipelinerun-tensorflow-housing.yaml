@@ -14,6 +14,8 @@ spec:
     value: "v1/models/tensorflow-housing/versions/1:predict"
   - name: target-namespace
     value: $(context.pipelineRun.namespace)
+  - name: target-imagerepo
+    value: rhoai-edge
   pipelineRef:
     name: test-mlflow-image
   serviceAccountName: pipeline

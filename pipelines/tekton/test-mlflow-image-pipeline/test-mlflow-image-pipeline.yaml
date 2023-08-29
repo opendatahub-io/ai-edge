@@ -14,8 +14,7 @@ spec:
   - default: $(context.pipelineRun.namespace)
     name: target-namespace
     type: string
-  - default: rhoai-edge
-    name: target-imagerepo
+  - name: target-imagerepo
     type: string
   tasks:
   - name: deploy-container

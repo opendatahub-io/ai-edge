@@ -46,6 +46,8 @@ oc create -f aws-env.yaml
 
 ### Deploy and run the build pipeline
 
+> **NOTE** Make sure to change the `aws-bucket-name` parameter to match your AWS bucket name if using one of the provided `PipelineRun` files.
+
 ```bash
 oc apply -k azureml-container-pipeline/
 oc create -f azureml-container-pipeline/azureml-container-pipelinerun-tensorflow-housing.yaml 
@@ -65,6 +67,8 @@ oc secret link pipeline rhoai-edge-build-pull-secret
 ```
 
 ### Deploy and run the test pipeline
+
+> **NOTE** Make sure to change the `target-imagerepo` parameter to match the name of your Quay namespace if using one of the provided `PipelineRun` files.
 
 ```bash
 oc apply -k test-mlflow-image-pipeline/
