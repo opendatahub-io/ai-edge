@@ -26,6 +26,7 @@ The main objective is to showcase that a user can take a trained model, use a pi
    ```
    $  oc apply -k acm/registration
    ```
+
    * Core - Cluster host the ODH Core components that will be used in the MLOps Engineer workflow to train, build and push the model.  This cluster is not required to be co-located with the ACM Hub but we group them together to simplify the use case
    * Near Edge - Cluster(s) that will host the running model at the edge.  This is the target environment after a new model is available for use
 1. Deploy Open Data Hub to the Core cluster and register any configurations to support pushing models to the edge cluster
