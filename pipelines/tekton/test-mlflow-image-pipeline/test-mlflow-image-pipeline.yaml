@@ -1,0 +1,124 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: test-mlflow-image
+spec:
+  params:
+  - name: model-name
+    type: string
+  - default: "1"
+    name: model-version
+    type: string
+  - name: test-endpoint
+    type: string
+  - default: $(context.pipelineRun.namespace)
+    name: target-namespace
+    type: string
+  - default: rhoai-edge
+    name: target-imagerepo
+    type: string
+  tasks:
+  - name: deploy-container
+    params:
+    - name: SCRIPT
+      value: |
+        cat <<EOF | oc apply -f -
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: $(params.model-name)-$(params.model-version)
+          name: $(params.model-name)-$(params.model-version)
+          namespace: $(params.target-namespace)
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: $(params.model-name)-$(params.model-version)
+          strategy: {}
+          template:
+            metadata:
+              creationTimestamp: null
+              labels:
+                app: $(params.model-name)-$(params.model-version)
+            spec:
+              containers:
+              - image: $(params.model-name):$(params.model-version)
+                name: $(params.model-name)-$(params.model-version)
+                livenessProbe:
+                  failureThreshold: 8
+                  httpGet:
+                    path: /v2/health/live
+                    port: 8080
+                    scheme: HTTP
+                  periodSeconds: 5
+                  successThreshold: 1
+                readinessProbe:
+                  failureThreshold: 8
+                  httpGet:
+                    path: /v2/models/$(params.model-name)/ready
+                    port: 8080
+                    scheme: HTTP
+                  periodSeconds: 5
+                  successThreshold: 1
+                ports:
+                - containerPort: 8080
+                resources: {}
+        status: {}
+        EOF
+        oc wait deployment -n $(params.target-namespace) $(params.model-name)-$(params.model-version) --for condition=Available=True --timeout=120s
+        oc wait pod -n $(params.target-namespace) -l app=$(params.model-name)-$(params.model-version) --for condition=Ready=True --timeout=120s
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+  - name: create-service
+    params:
+    - name: SCRIPT
+      value: oc expose deployment  $(params.model-name)-$(params.model-version) --port=8080
+        --target-port=8080 --selector='app=$(params.model-name)-$(params.model-version)'
+        --dry-run=client -o yaml |  oc apply -f -
+    - name: VERSION
+      value: latest
+    runAfter:
+    - deploy-container
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+  - name: test-mlflow-rest-svc
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: model-version
+      value: $(params.model-version)
+    - name: test-endpoint
+      value: $(params.test-endpoint)
+    runAfter:
+    - create-service
+    taskRef:
+      kind: Task
+      name: test-mlflow-rest-svc
+    workspaces:
+    - name: test-data
+      workspace: test-data
+  - name: skopeo-copy
+    params:
+    - name: srcImageURL
+      value: docker://image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)
+    - name: destImageURL
+      value: docker://quay.io/$(params.target-imagerepo)/$(params.model-name):$(params.model-version)
+    - name: srcTLSverify
+      value: "true"
+    - name: destTLSverify
+      value: "true"
+    runAfter:
+    - test-mlflow-rest-svc
+    taskRef:
+      kind: ClusterTask
+      name: skopeo-copy
+    workspaces:
+    - name: images-url
+      workspace: workspace
+  workspaces:
+  - name: workspace
+  - name: test-data

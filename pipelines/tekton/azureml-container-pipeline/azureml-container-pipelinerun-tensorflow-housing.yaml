@@ -1,0 +1,25 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  labels:
+    tekton.dev/pipeline: azureml-container
+  generateName: azureml-container-tensorflow-housing-
+spec:
+  params:
+  - name: model-name
+    value: tensorflow-housing
+  - name: model-version
+    value: "1"
+  - name: aws-bucket-name
+    value: rhoai-edge-models
+  pipelineRef:
+    name: azureml-container
+  serviceAccountName: pipeline
+  timeout: 1h0m0s
+  workspaces:
+  - name: docker
+    persistentVolumeClaim:
+      claimName: dockerfile-cache-pvc
+  - name: aws-secret
+    secret:
+        secretName: aws-env
