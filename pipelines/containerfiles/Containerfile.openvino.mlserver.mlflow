@@ -22,4 +22,4 @@ EXPOSE 9090 8080
 USER ovms
 
 # CHANGE THIS LINE TO MATCH YOUR MODEL
-CMD ["/ovms/bin/ovms", "--model_path", "/models", "--model_name", "tensorflow-housing", "--port", "9090", "--rest_port", "8080", "--shape", "auto"]
+CMD ["/ovms/bin/ovms", "--model_path", "/models", "--model_name", "tensorflow-housing", "--port", "9090", "--rest_port", "8080", "--shape", "auto", "--metrics_enable"]
