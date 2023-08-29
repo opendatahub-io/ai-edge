@@ -65,7 +65,7 @@ erroranalysis==0.4.2
 executing==1.2.0
 fairlearn==0.8.0
 fire==0.5.0
-flask==2.2.3
+flask==2.2.5
 flask-cors==3.0.10
 flatbuffers==23.3.3
 fonttools==4.39.3
