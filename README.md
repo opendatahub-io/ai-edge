@@ -20,8 +20,12 @@ The main objective is to showcase that a user can take a trained model, use a pi
 1. Configure the default Identity Provider
 1. Install Red Hat Advanced Cluster Management
 1. Register the clusters
-   * Core - Cluster host the ODH Core components that will be used in the MLOps Engineer workflow to train, build and push the model
-   * Near Edge - Cluster that will host the running model at the edge.  This is the target environment after a new model is available for use
+[ACM Application](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html/applications/managing-applications) manifests are located in [acm/registration](acm/registration) to register and configure the target environments required for the AI at the Edge use cases.  The files can be applied to the ACM hub cluster manually:
+   ```
+   $  oc apply -k acm/registration
+   ```
+   * Core - Cluster host the ODH Core components that will be used in the MLOps Engineer workflow to train, build and push the model.  This cluster is not required to be co-located with the ACM Hub but we group them together to simplify the use case
+   * Near Edge - Cluster(s) that will host the running model at the edge.  This is the target environment after a new model is available for use
 1. Deploy Open Data Hub to the Core cluster and register any configurations to support pushing models to the edge cluster
    * GitOps repos
    * Image repos
