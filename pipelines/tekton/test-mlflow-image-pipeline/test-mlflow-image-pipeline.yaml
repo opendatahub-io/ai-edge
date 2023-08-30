@@ -71,11 +71,24 @@ spec:
     taskRef:
       kind: ClusterTask
       name: openshift-client
-  - name: create-service
+  - name: create-default-service
     params:
     - name: SCRIPT
       value: oc expose deployment  $(params.model-name)-$(params.model-version) --port=8080
         --target-port=8080 --selector='app=$(params.model-name)-$(params.model-version)'
+        --dry-run=client -o yaml |  oc apply -f -
+    - name: VERSION
+      value: latest
+    runAfter:
+    - deploy-container
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+  - name: create-metrics-service
+    params:
+    - name: SCRIPT
+      value: oc expose deployment  $(params.model-name)-$(params.model-version) --name=metrics --port=8082
+        --target-port=8082 --selector='app=$(params.model-name)-$(params.model-version)'
         --dry-run=client -o yaml |  oc apply -f -
     - name: VERSION
       value: latest

@@ -5,6 +5,7 @@ metadata:
 spec:
   endpoints:
     - port: metrics
+      path: /metrics
   selector:
     matchLabels:
       # edit this to the app-label for the model

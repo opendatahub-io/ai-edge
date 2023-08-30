@@ -42,11 +42,9 @@ See [pipelines/README.md](pipelines/README.md)
 
 ### Observability setup
 
-* Core cluster
-  * Login to the core cluster and run `make install/observability-core` to setup acm-observability on the core cluster.
 * Edge cluster(s)
   * Login to edge cluster
   * Enable userWorkloadMonitoring
     * `oc edit cm cluster-monitoring-config`
     * Set variable `enableUserWorkload` to `true`
-  * Run `make install/observability-edge` to create the ConfigMap required for metric whitelisting.
+  * Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.
