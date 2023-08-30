@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+
+namespace: tensorflow-housing-app
+namePrefix: tensorflow-housing-app-
+
+commonAnnotations:
+  apps.open-cluster-management.io/git-path: acm/odh-edge/apps/tensorflow-housing-app
+
+replacements:
+- source:
+    kind: Placement
+    group: cluster.open-cluster-management.io
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: apps.open-cluster-management.io
+      kind: Subscription
+    fieldPaths:
+      - spec.placement.placementRef.name
+
+# Can't do this as a "replacement", as needs to be of form namespace/name
+patches:
+- patch: |-
+    - op: replace
+      path: /spec/channel
+      value: tensorflow-housing-app/tensorflow-housing-app-channel
+  target:
+    kind: Subscription
+- patch: |-
+    - op: replace
+      path: /spec/pathname
+      value: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com/edge-user-2/ai-edge-gitops.git
+  target:
+    kind: Channel
