@@ -3,5 +3,13 @@ kind: Kustomization
 
 namespace: tensorflow-housing-app
 
+configurations:
+  - servicemonitor-matchlabels.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: tensorflow-housing-app
+
 resources:
 - ../../base

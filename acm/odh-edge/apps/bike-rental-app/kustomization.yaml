@@ -3,5 +3,13 @@ kind: Kustomization
 
 namespace: bike-rental-app
 
+configurations:
+  - servicemonitor-matchlabels.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app: bike-rental-app
+
 resources:
 - ../../base
