@@ -71,25 +71,37 @@ spec:
     taskRef:
       kind: ClusterTask
       name: openshift-client
-  - name: create-default-service
+  - name: create-service
     params:
     - name: SCRIPT
-      value: oc expose deployment  $(params.model-name)-$(params.model-version) --port=8080
-        --target-port=8080 --selector='app=$(params.model-name)-$(params.model-version)'
-        --dry-run=client -o yaml |  oc apply -f -
-    - name: VERSION
-      value: latest
-    runAfter:
-    - deploy-container
-    taskRef:
-      kind: ClusterTask
-      name: openshift-client
-  - name: create-metrics-service
-    params:
-    - name: SCRIPT
-      value: oc expose deployment  $(params.model-name)-$(params.model-version) --name=metrics --port=8082
-        --target-port=8082 --selector='app=$(params.model-name)-$(params.model-version)'
-        --dry-run=client -o yaml |  oc apply -f -
+      value: |
+        cat <<EOF | oc apply -f -
+        apiVersion: v1
+        kind: Service
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: $(params.model-name)-$(params.model-version)
+          name: $(params.model-name)-$(params.model-version)
+        spec:
+          ports:
+          - name: rest
+            port: 8080
+            protocol: TCP
+            targetPort: 8080
+          - name: seldon-metrics
+            port: 8082
+            protocol: TCP
+            targetPort: 8082
+          - name: grpc
+            port: 9090
+            protocol: TCP
+            targetPort: 9090
+          selector:
+            app: $(params.model-name)-$(params.model-version)
+        status:
+          loadBalancer: {}
+        EOF
     - name: VERSION
       value: latest
     runAfter:
