@@ -4,9 +4,9 @@ metadata:
   name: modelmonitor
 spec:
   endpoints:
-    - port: metrics
+    - port: port
       path: /metrics
   selector:
     matchLabels:
-      # edit this to the app-label for the model
-      app: bike-rentals-auto-ml-1
+      app: app
+

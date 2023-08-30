@@ -5,12 +5,11 @@ resources:
 - namespace.yaml
 - model-deployment.yaml
 - model-service.yaml
-- model-servicemonitor.yaml
 - model-route.yaml
 
 configMapGenerator:
 - files:
-  - files/uwm_metrics.yaml
+  - files/uwl_metrics_list.yaml
   name: observability-metrics-custom-allowlist
   options:
     disableNameSuffixHash: true
