@@ -93,7 +93,7 @@ spec:
     - name: VERSION
       value: latest
     runAfter:
-    - deploy-container
+    - create-default-service
     taskRef:
       kind: ClusterTask
       name: openshift-client
@@ -106,7 +106,7 @@ spec:
     - name: test-endpoint
       value: $(params.test-endpoint)
     runAfter:
-    - create-service
+    - create-metrics-service
     taskRef:
       kind: Task
       name: test-mlflow-rest-svc
