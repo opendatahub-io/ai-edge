@@ -37,6 +37,15 @@ replacements:
       kind: Route
     fieldPaths:
       - spec.to.name
+- source:
+    kind: Service
+    fieldPath: metadata.labels.app
+  targets:
+  - select:
+      group: monitoring.coreos.com
+      kind: ServiceMonitor
+    fieldPaths:
+      - spec.selector.matchLabels.app
 
 images:
 - name: edge-model-template-image
