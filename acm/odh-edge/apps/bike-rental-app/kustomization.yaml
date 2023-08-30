@@ -5,6 +5,7 @@ resources:
 - ../../base
 
 namespace: bike-rental-app
+namePrefix: bike-rental-app-
 
 commonLabels:
   app: bike-rental-app-1
@@ -25,6 +26,17 @@ patches:
                   path: /v2/models/bike-rentals-auto-ml/ready
   target:
     kind: Deployment
+
+replacements:
+- source:
+    kind: Service
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: route.openshift.io
+      kind: Route
+    fieldPaths:
+      - spec.to.name
 
 images:
 - name: edge-model-template-image

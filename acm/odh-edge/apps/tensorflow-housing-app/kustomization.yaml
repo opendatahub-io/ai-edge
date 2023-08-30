@@ -5,6 +5,7 @@ resources:
 - ../../base
 
 namespace: tensorflow-housing-app
+namePrefix: tensorflow-housing-app-
 
 commonLabels:
   app: tensorflow-housing-app-1
@@ -25,6 +26,17 @@ patches:
                   path: /v2/models/tensorflow-housing/ready
   target:
     kind: Deployment
+
+replacements:
+- source:
+    kind: Service
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: route.openshift.io
+      kind: Route
+    fieldPaths:
+      - spec.to.name
 
 images:
 - name: edge-model-template-image
