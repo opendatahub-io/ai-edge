@@ -3,7 +3,10 @@ kind: Kustomization
 
 resources:
 - namespace.yaml
+- model-deployment.yaml
+- model-service.yaml
 - model-servicemonitor.yaml
+- model-route.yaml
 
 configMapGenerator:
 - files:

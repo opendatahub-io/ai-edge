@@ -1,7 +1,53 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: tensorflow-housing-app
-
 resources:
 - ../../base
+
+namespace: tensorflow-housing-app
+namePrefix: tensorflow-housing-app-
+
+commonLabels:
+  app: tensorflow-housing-app-1
+
+patches:
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: model-1
+    spec:
+      template:
+        spec:
+          containers:
+            - name: model
+              readinessProbe:
+                httpGet:
+                  path: /v2/models/tensorflow-housing/ready
+  target:
+    kind: Deployment
+
+replacements:
+- source:
+    kind: Service
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: route.openshift.io
+      kind: Route
+    fieldPaths:
+      - spec.to.name
+- source:
+    kind: Service
+    fieldPath: metadata.labels.app
+  targets:
+  - select:
+      group: monitoring.coreos.com
+      kind: ServiceMonitor
+    fieldPaths:
+      - spec.selector.matchLabels.app
+
+images:
+- name: edge-model-template-image
+  newName: quay.io/rhoai-edge/tensorflow-housing
+  digest: sha256:b776089b1492c03256200429074d0edf692f9e41b54f14cfe4ed6f59f3c19cb4

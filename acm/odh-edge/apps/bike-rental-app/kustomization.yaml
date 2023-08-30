@@ -1,7 +1,53 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namespace: bike-rental-app
-
 resources:
 - ../../base
+
+namespace: bike-rental-app
+namePrefix: bike-rental-app-
+
+commonLabels:
+  app: bike-rental-app-1
+
+patches:
+- patch: |-
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: model-1
+    spec:
+      template:
+        spec:
+          containers:
+            - name: model
+              readinessProbe:
+                httpGet:
+                  path: /v2/models/bike-rentals-auto-ml/ready
+  target:
+    kind: Deployment
+
+replacements:
+- source:
+    kind: Service
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: route.openshift.io
+      kind: Route
+    fieldPaths:
+      - spec.to.name
+- source:
+    kind: Service
+    fieldPath: metadata.labels.app
+  targets:
+  - select:
+      group: monitoring.coreos.com
+      kind: ServiceMonitor
+    fieldPaths:
+      - spec.selector.matchLabels.app
+
+images:
+- name: edge-model-template-image
+  newName: quay.io/rhoai-edge/bike-rentals-auto-ml
+  digest: sha256:2e973cd30b42ba10cc2cec72570db7e00f8de772fd00c6028ee07b39fc41682f
