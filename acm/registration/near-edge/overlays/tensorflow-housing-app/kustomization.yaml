@@ -30,3 +30,9 @@ patches:
       value: tensorflow-housing-app/tensorflow-housing-app-channel
   target:
     kind: Subscription
+- patch: |-
+    - op: replace
+      path: /spec/pathname
+      value: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com/edge-user-2/ai-edge-gitops.git
+  target:
+    kind: Channel
