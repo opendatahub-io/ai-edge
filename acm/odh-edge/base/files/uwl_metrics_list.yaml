@@ -1,0 +1,24 @@
+names:
+  # MLServer metrics
+  - parallel_request_queue_sum
+  - parallel_request_queue_bucket
+  - parallel_request_queue_count
+  - rest_server_request_duration_seconds_sum
+  - rest_server_request_duration_seconds_bucket
+  - rest_server_request_duration_seconds_count
+  - rest_server_requests_in_progress
+  - rest_server_requests_total
+  - ovms_infer_req_active
+  - ovms_infer_req_queue_size
+  - ovms_inference_time_us_bucket
+  - ovms_inference_time_us_count
+  - ovms_inference_time_us_sum
+  - ovms_request_time_us_bucket
+  - ovms_request_time_us_count
+  - ovms_request_time_us_sum
+  - ovms_requests_fail
+  - ovms_requests_success
+  - ovms_streams
+  - ovms_wait_for_infer_req_time_us_bucket
+  - ovms_wait_for_infer_req_time_us_count
+  - ovms_wait_for_infer_req_time_us_sum
