@@ -2,139 +2,131 @@ apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
   name: gitops-update-pipeline
-  namespace: gryan-pipelines
 spec:
   params:
-  - default: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com
-    name: gitServer
-    type: string
-  - default: edge-user-1
-    name: gitOrgName
-    type: string
-  - default: ai-edge-gitops
-    name: gitRepoName
-    type: string
-  - default: sha256:b776089b1492c03256200429074d0edf692f9e41b54f14cfe4ed6f59f3c19cb4
-    name: imageDigest
-    type: string
-  - default: acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
-    name: imageReferenceFilePath
-    type: string
+    - name: gitServer
+      type: string
+    - name: gitOrgName
+      type: string
+    - name: gitRepoName
+      type: string
+    - name: imageDigest
+      type: string
+    - name: imageReferenceFilePath
+      type: string
+    - name: gitApiPrefix
+      default: /api/v1
+      type: string
+    - name: gitTokenName
+      type: string
+    - name: gitTokenKey
+      default: token
+      type: string
   tasks:
-  - name: git-clone
-    params:
-    - name: url
-      value: $(params.gitServer)/$(params.gitOrgName)/$(params.gitRepoName)
-    - name: revision
-      value: ""
-    - name: refspec
-      value: ""
-    - name: submodules
-      value: "true"
-    - name: depth
-      value: "1"
-    - name: sslVerify
-      value: "true"
-    - name: crtFileName
-      value: ca-bundle.crt
-    - name: subdirectory
-      value: /tmp/
-    - name: sparseCheckoutDirectories
-      value: ""
-    - name: deleteExisting
-      value: "true"
-    - name: httpProxy
-      value: ""
-    - name: httpsProxy
-      value: ""
-    - name: noProxy
-      value: ""
-    - name: verbose
-      value: "true"
-    - name: gitInitImage
-      value: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:1a50511583fc02a27012d17d942e247813404104ddd282d7e26f99765174392c
-    - name: userHome
-      value: /home/git
-    taskRef:
-      kind: ClusterTask
-      name: git-clone
-    workspaces:
-    - name: output
-      workspace: git-workspace
-    - name: basic-auth
-      workspace: git-basic-auth
-  - name: commit-image-ref
-    params:
-    - name: BASE_IMAGE
-      value: cgr.dev/chainguard/git:root-2.39@sha256:7759f87050dd8bacabe61354d75ccd7f864d6b6f8ec42697db7159eccd491139
-    - name: GIT_USER_NAME
-      value: Pipeline Image Updater
-    - name: GIT_USER_EMAIL
-      value: pipeline@example.com
-    - name: GIT_SCRIPT
-      value: |-
-        cd /tmp/$(params.gitRepoName)
+    - name: git-clone
+      params:
+        - name: url
+          value: $(params.gitServer)/$(params.gitOrgName)/$(params.gitRepoName)
+        - name: gitInitImage
+          value: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:1a50511583fc02a27012d17d942e247813404104ddd282d7e26f99765174392c
+        - name: subdirectory
+          value: /$(params.gitRepoName)/
+      taskRef:
+        kind: ClusterTask
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: git-workspace
+        - name: basic-auth
+          workspace: git-basic-auth
+    - name: commit-image-ref
+      params:
+        - name: BASE_IMAGE
+          value: cgr.dev/chainguard/git:root-2.39@sha256:7759f87050dd8bacabe61354d75ccd7f864d6b6f8ec42697db7159eccd491139
+        - name: GIT_USER_NAME
+          value: Pipeline Image Updater
+        - name: GIT_USER_EMAIL
+          value: pipeline@example.com
+        - name: GIT_SCRIPT
+          value: |
+            # Move repo to HOME so Git does not complain 
+            # https://stackoverflow.com/a/71941707/19020549
+            cp -r $(workspaces.source.path)/$(params.gitRepoName) ~/$(params.gitRepoName)
 
-        git checkout -b pipeline_$(context.pipelineRun.uid)
+            cd ~/$(params.gitRepoName)
 
-        sed -i -e "s/digest: .*/digest: $(params.imageDigest)/" $(params.imageReferenceFilePath)
+            # Change the origin remote to the one provided by the credentials file.
+            # You could also switch to SSH.
+            # cat ~/.git-credentials | xargs -n 1 -I {} git remote set-url origin {}/$(params.gitOrgName)/$(params.gitRepoName)
 
-        if [ -z "$(git status --porcelain)" ]; then
-            echo "Update didn't cause a modification"
-            exit 0
-        fi
+            PR_BRANCH=pipeline_$(context.pipelineRun.uid)
 
-        git commit -am "Update image ref from pipeline"
-        git push origin $PR_BRANCH:$PR_BRANCH
-    - name: USER_HOME
-      value: /home/git
-    - name: VERBOSE
-      value: "true"
-    runAfter:
-    - git-clone
-    taskRef:
-      kind: ClusterTask
-      name: git-cli
-    workspaces:
-    - name: source
-      workspace: git-workspace
-    - name: basic-auth
-      workspace: git-basic-auth
-  - name: open-pr
-    params:
-    - name: GITHUB_HOST_URL
-      value: $(params.gitServer)
-    - name: API_PATH_PREFIX
-      value: /api/v1
-    - name: REPO_FULL_NAME
-      value: $(params.gitOrgName)/$(params.gitRepoName)
-    - name: GITHUB_TOKEN_SECRET_NAME
-      value: gitea
-    - name: GITHUB_TOKEN_SECRET_KEY
-      value: token
-    - name: AUTH_TYPE
-      value: Bearer
-    - name: HEAD
-      value: pipeline_$(context.pipelineRun.uid)
-    - name: BASE
-      value: main
-    - name: BODY
-      value: |-
-        This pull request was created automatically by an OpenShift Pipeline called $(context.pipeline.name) (run $(context.pipelineRun.name)).
+            git checkout -b $PR_BRANCH
 
-        The intention is to update `$(params.imageReferenceFilePath)` so that it uses the new image digest ($(params.imageDigest))
-    - name: TITLE
-      value: 'Auto: update image ref'
-    runAfter:
-    - commit-image-ref
-    taskRef:
-      kind: Task
-      name: github-open-pr
-    when:
-    - input: $(tasks.git-clone.results.commit)
-      operator: notin
-      values:
-      - $(tasks.commit-image-ref.results.commit)
+            sed -i -e "s/digest: .*/digest: $(params.imageDigest)/" $(params.imageReferenceFilePath)
+
+            if [ -z "$(git status --porcelain)" ]; then
+                echo "Update did not cause a modification"
+                exit 0
+            fi
+
+            git commit -am "Update image ref from pipeline"
+            git push origin $PR_BRANCH:$PR_BRANCH
+        - name: USER_HOME
+          value: /home/git
+        - name: VERBOSE
+          value: "true"
+      runAfter:
+        - git-clone
+      taskRef:
+        kind: ClusterTask
+        name: git-cli
+      workspaces:
+        - name: source
+          workspace: git-workspace
+        - name: basic-auth
+          workspace: git-basic-auth
+    - name: open-pr
+      params:
+        - name: GITHUB_HOST_URL
+          value: $(params.gitServer)
+        - name: API_PATH_PREFIX
+          value: $(params.gitApiPrefix)
+        - name: REPO_FULL_NAME
+          value: $(params.gitOrgName)/$(params.gitRepoName)
+        - name: GITHUB_TOKEN_SECRET_NAME
+          value: $(params.gitTokenName)
+        - name: GITHUB_TOKEN_SECRET_KEY
+          value: $(params.gitTokenKey)
+        - name: AUTH_TYPE
+          value: Bearer
+        - name: HEAD
+          value: pipeline_$(context.pipelineRun.uid)
+        - name: BASE
+          value: main
+        - name: BODY
+          value: |
+            This pull request has been automatically generated by an OpenShift Pipeline in order to update an image ref. Here are the details:
+
+            | Key              | Value                                                                     |
+            |------------------|---------------------------------------------------------------------------|
+            | Pipeline Name    | $(context.pipeline.name)                                                  |
+            | PipelineRun Name | $(context.pipelineRun.name)                                               |
+            | PipelinRun UID   | `$(context.pipelineRun.uid)`                                              |
+            | File Path        | `$(params.imageReferenceFilePath)`                                        |
+            | New Digest       | `$(params.imageDigest)`                                                   |
+        - name: TITLE
+          value: "Auto: update image ref"
+      runAfter:
+        - commit-image-ref
+      taskRef:
+        kind: Task
+        name: github-open-pr
+      when:
+        - input: $(tasks.git-clone.results.commit)
+          operator: notin
+          values:
+            - $(tasks.commit-image-ref.results.commit)
   workspaces:
-  - name: git-workspace
-  - name: git-basic-auth
+    - name: git-workspace
+    - name: git-basic-auth

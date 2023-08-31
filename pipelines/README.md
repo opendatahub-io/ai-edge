@@ -34,7 +34,8 @@ tensorflow-housing/
 
 ## Deploy AzureML Container build pipeline
 
-> **NOTE** Run `cd tekton` before running the commands below, that's where the pipeline files are.
+> **NOTE**
+> Run `cd tekton` before running the commands below, that's where the pipeline files are.
 
 ### Provide S3 credentials
 
@@ -48,7 +49,8 @@ oc create -f azureml-container-pipeline/aws-env.yaml
 
 ### Deploy and run the build pipeline
 
-> **NOTE** Make sure to change the `aws-bucket-name` parameter to match your AWS bucket name if using one of the provided `PipelineRun` files.
+> **NOTE**
+> Make sure to change the `aws-bucket-name` parameter to match your AWS bucket name if using one of the provided `PipelineRun` files.
 
 ```bash
 oc apply -k azureml-container-pipeline/
@@ -70,9 +72,27 @@ oc secret link pipeline rhoai-edge-build-pull-secret
 
 ### Deploy and run the test pipeline
 
-> **NOTE** Make sure to change the `target-imagerepo` parameter to match the name of your Quay namespace if using one of the provided `PipelineRun` files.
+> **NOTE**
+> Make sure to change the `target-imagerepo` parameter to match the name of your Quay namespace if using one of the provided `PipelineRun` files.
 
 ```bash
 oc apply -k test-mlflow-image-pipeline/
 oc create -f test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-tensorflow-housing.yaml
+```
+
+## Deploy the GitOps pipeline
+
+### Git Repository and Credentials
+
+- Clone/Mirror this repository on your Git server
+- Change the provided `gitops-git-user-` files to match your Git credentials
+
+### Deploy and run the GitOps pipeline
+
+> **NOTE**
+> If using one of the provided `PipelineRun` files, make sure all of the parameters match your Git environment.
+
+```bash
+oc apply -k gitops-update-pipeline/
+oc create -f gitops-update-pipeline/gitops-update-pipelinerun-tensorflow-housing.yaml
 ```

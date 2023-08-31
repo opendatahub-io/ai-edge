@@ -1,0 +1,31 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  labels:
+    tekton.dev/pipeline: gitops-update-pipeline
+  generateName: gitops-update-pipeline-bike-rentals-
+spec:
+  params:
+    - name: gitServer
+      value: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com
+    - name: gitOrgName
+      value: edge-user-1
+    - name: gitRepoName
+      value: ai-edge-gitops
+    - name: imageDigest
+      value: sha256:723521f61d4770c50e7952df66a21ffbe6d37e648dd60e6f2106483ef99235b8
+    - name: imageReferenceFilePath
+      value: acm/odh-edge/apps/bike-rental-app/kustomization.yaml
+    - name: gitTokenName
+      value: gitops-git-user-token
+  pipelineRef:
+    name: gitops-update-pipeline
+  serviceAccountName: pipeline
+  timeout: 1h0m0s
+  workspaces:
+    - name: git-workspace
+      persistentVolumeClaim:
+        claimName: git-workspace-pvc
+    - name: git-basic-auth
+      secret:
+        secretName: gitops-git-user-basic-auth
