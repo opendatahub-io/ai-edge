@@ -19,6 +19,18 @@ spec:
   pipelineRef:
     name: test-mlflow-image
   serviceAccountName: pipeline
+  podTemplate:
+    env:
+    - name: MODEL_DEPLOY_CM
+      valueFrom:
+        configMapKeyRef:
+          name: model-deployment
+          key: model-deployment.yaml
+    - name: MODEL_SERVICE_CM
+      valueFrom:
+        configMapKeyRef:
+          name: model-service
+          key: model-service.yaml
   timeout: 1h0m0s
   workspaces:
   - emptyDir: {}

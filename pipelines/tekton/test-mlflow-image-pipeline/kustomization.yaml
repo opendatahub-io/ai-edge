@@ -1,6 +1,8 @@
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
+
 resources:
+- ../../../base/pipelines
 - bike-rentals-test-data-cm.yaml
 - tensorflow-housing-test-data-cm.yaml
 - test-mlflow-rest-svc-task.yaml
