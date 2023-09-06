@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: git-workspace-pvc
+  name: git-workspace-tensorflow-housing
 spec:
   accessModes:
   - ReadWriteOnce

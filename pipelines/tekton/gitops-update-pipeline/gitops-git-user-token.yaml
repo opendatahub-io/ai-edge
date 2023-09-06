@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  name: gitops-git-user-token
-type: Opaque
-stringData:
-  token: b14e9f5de9fabb48a091a56a24140025fa5416ba

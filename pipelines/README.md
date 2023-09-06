@@ -54,7 +54,7 @@ oc create -f azureml-container-pipeline/aws-env.yaml
 
 ```bash
 oc apply -k azureml-container-pipeline/
-oc create -f azureml-container-pipeline/azureml-container-pipelinerun-tensorflow-housing.yaml 
+oc create -f azureml-container-pipeline/azureml-container-pipelinerun-tensorflow-housing.yaml
 ```
 
 ## Deploy Test MLflow Container image pipeline
@@ -66,7 +66,7 @@ oc create -f azureml-container-pipeline/azureml-container-pipelinerun-tensorflow
 - Apply build-secret. E.g.:
 
 ```bash
-oc apply -f <downloaddir>/rhoai-edge-build-secret.yml 
+oc apply -f <downloaddir>/rhoai-edge-build-secret.yml
 oc secret link pipeline rhoai-edge-build-pull-secret
 ```
 
@@ -93,6 +93,6 @@ oc create -f test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-tensorflow
 > If using one of the provided `PipelineRun` files, make sure all of the parameters match your Git environment.
 
 ```bash
-oc apply -k gitops-update-pipeline/
-oc create -f gitops-update-pipeline/gitops-update-pipelinerun-tensorflow-housing.yaml
+oc apply -k tekton/gitops-update-pipeline/
+oc create -f tekton/gitops-update-pipeline/gitops-update-pipelinerun-tensorflow-housing.yaml
 ```

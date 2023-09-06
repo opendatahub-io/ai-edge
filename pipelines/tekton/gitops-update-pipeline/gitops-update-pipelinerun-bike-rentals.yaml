@@ -16,8 +16,8 @@ spec:
       value: sha256:723521f61d4770c50e7952df66a21ffbe6d37e648dd60e6f2106483ef99235b8
     - name: imageReferenceFilePath
       value: acm/odh-edge/apps/bike-rental-app/kustomization.yaml
-    - name: gitTokenName
-      value: gitops-git-user-token
+    - name: gitTokenSecretName
+      value: gitea-edge-user-1
   pipelineRef:
     name: gitops-update-pipeline
   serviceAccountName: pipeline
@@ -25,7 +25,7 @@ spec:
   workspaces:
     - name: git-workspace
       persistentVolumeClaim:
-        claimName: git-workspace-pvc
+        claimName: git-workspace-bike-rentals
     - name: git-basic-auth
       secret:
-        secretName: gitops-git-user-basic-auth
+        secretName: gitea-edge-user-1

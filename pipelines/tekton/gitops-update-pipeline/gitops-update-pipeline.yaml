@@ -17,9 +17,9 @@ spec:
     - name: gitApiPrefix
       default: /api/v1
       type: string
-    - name: gitTokenName
+    - name: gitTokenSecretName
       type: string
-    - name: gitTokenKey
+    - name: gitTokenSecretKey
       default: token
       type: string
   tasks:
@@ -49,18 +49,13 @@ spec:
           value: pipeline@example.com
         - name: GIT_SCRIPT
           value: |
-            # Move repo to HOME so Git does not complain 
+            # Move repo to HOME so Git does not complain
             # https://stackoverflow.com/a/71941707/19020549
             cp -r $(workspaces.source.path)/$(params.gitRepoName) ~/$(params.gitRepoName)
 
             cd ~/$(params.gitRepoName)
 
-            # Change the origin remote to the one provided by the credentials file.
-            # You could also switch to SSH.
-            # cat ~/.git-credentials | xargs -n 1 -I {} git remote set-url origin {}/$(params.gitOrgName)/$(params.gitRepoName)
-
             PR_BRANCH=pipeline_$(context.pipelineRun.uid)
-
             git checkout -b $PR_BRANCH
 
             sed -i -e "s/digest: .*/digest: $(params.imageDigest)/" $(params.imageReferenceFilePath)
@@ -95,9 +90,9 @@ spec:
         - name: REPO_FULL_NAME
           value: $(params.gitOrgName)/$(params.gitRepoName)
         - name: GITHUB_TOKEN_SECRET_NAME
-          value: $(params.gitTokenName)
+          value: $(params.gitTokenSecretName)
         - name: GITHUB_TOKEN_SECRET_KEY
-          value: $(params.gitTokenKey)
+          value: $(params.gitTokenSecretKey)
         - name: AUTH_TYPE
           value: Bearer
         - name: HEAD

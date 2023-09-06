@@ -1,31 +1,31 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
+  generateName: gitops-update-pipeline-tensorflow-housing-
   labels:
     tekton.dev/pipeline: gitops-update-pipeline
-  generateName: gitops-update-pipeline-tensorflow-housing-
 spec:
   params:
-    - name: gitServer
-      value: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com
-    - name: gitOrgName
-      value: edge-user-1
-    - name: gitRepoName
-      value: ai-edge-gitops
-    - name: imageDigest
-      value: sha256:a6d4b8948271771bbe40e0b9ddf2975ee31e7b4d6fad28ae36dfe97ef8460125
-    - name: imageReferenceFilePath
-      value: acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
-    - name: gitTokenName
-      value: gitops-git-user-token
+  - name: gitServer
+    value: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com
+  - name: gitOrgName
+    value: edge-user-2
+  - name: gitRepoName
+    value: ai-edge-gitops
+  - name: imageDigest
+    value: sha256:a6d4b8948271771bbe40e0b9ddf2975ee31e7b4d6fad28ae36dfe97ef8460125
+  - name: imageReferenceFilePath
+    value: acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
+  - name: gitTokenSecretName
+    value: gitea-edge-user-2
   pipelineRef:
     name: gitops-update-pipeline
   serviceAccountName: pipeline
   timeout: 1h0m0s
   workspaces:
-    - name: git-workspace
-      persistentVolumeClaim:
-        claimName: git-workspace-pvc
-    - name: git-basic-auth
-      secret:
-        secretName: gitops-git-user-basic-auth
+  - name: git-workspace
+    persistentVolumeClaim:
+      claimName: git-workspace-tensorflow-housing
+  - name: git-basic-auth
+    secret:
+      secretName: gitea-edge-user-2

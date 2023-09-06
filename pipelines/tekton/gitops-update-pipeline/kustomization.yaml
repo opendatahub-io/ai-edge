@@ -3,7 +3,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 
 resources:
   - https://raw.githubusercontent.com/piotrpdev/catalog/patch-1/task/github-open-pr/0.2/github-open-pr.yaml # Change this once the fix is merged
-  - gitops-update-git-workspace-pvc.yaml
-  - gitops-git-user-basic-auth.yaml
-  - gitops-git-user-token.yaml
+  - gitops-update-git-workspace-bike-rentals-pvc.yaml
+  - gitops-update-git-workspace-tensorflow-housing-pvc.yaml
+  - gitea-edge-user-1-secret.yaml
+  - gitea-edge-user-2-secret.yaml
   - gitops-update-pipeline.yaml
