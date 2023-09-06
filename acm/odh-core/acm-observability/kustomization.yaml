@@ -5,6 +5,16 @@ resources:
   - namespace.yaml
   - multiclusterobservability.yaml
 
+configMapGenerator:
+  - name: grafana-dashboard-edge-inference-health
+    files:
+    - grafana-dashboards/edge-inference-health.json
+    options:
+      annotations:
+        observability.open-cluster-management.io/dashboard-folder: "Edge"
+      labels:
+        grafana-custom-dashboard: "true"
+
 secretGenerator:
 - name: thanos-object-storage
   files:
