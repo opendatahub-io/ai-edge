@@ -34,9 +34,6 @@ tensorflow-housing/
 
 ## Deploy AzureML Container build pipeline
 
-> **NOTE**
-> Run `cd tekton` before running the commands below, that's where the pipeline files are.
-
 ### Provide S3 credentials
 
 After creating the S3 bucket and uploading the models  (see above), fill out `aws-env.yaml` and create the secret:
@@ -44,7 +41,7 @@ After creating the S3 bucket and uploading the models  (see above), fill out `aw
 ![S3 models example](../.github/images/S3-models.png)
 
 ```bash
-oc create -f azureml-container-pipeline/aws-env.yaml
+oc create -f tekton/azureml-container-pipeline/aws-env.yaml
 ```
 
 ### Deploy and run the build pipeline
@@ -53,8 +50,8 @@ oc create -f azureml-container-pipeline/aws-env.yaml
 > Make sure to change the `aws-bucket-name` parameter to match your AWS bucket name if using one of the provided `PipelineRun` files.
 
 ```bash
-oc apply -k azureml-container-pipeline/
-oc create -f azureml-container-pipeline/azureml-container-pipelinerun-tensorflow-housing.yaml
+oc apply -k tekton/azureml-container-pipeline/
+oc create -f tekton/azureml-container-pipeline/azureml-container-pipelinerun-tensorflow-housing.yaml
 ```
 
 ## Deploy Test MLflow Container image pipeline
@@ -76,8 +73,8 @@ oc secret link pipeline rhoai-edge-build-pull-secret
 > Make sure to change the `target-imagerepo` parameter to match the name of your Quay namespace if using one of the provided `PipelineRun` files.
 
 ```bash
-oc apply -k test-mlflow-image-pipeline/
-oc create -f test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-tensorflow-housing.yaml
+oc apply -k tekton/test-mlflow-image-pipeline/
+oc create -f tekton/test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-tensorflow-housing.yaml
 ```
 
 ## Deploy the GitOps pipeline
