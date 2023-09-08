@@ -13,7 +13,7 @@ spec:
   - name: gitRepoName
     value: ai-edge-gitops
   - name: imageDigest
-    value: sha256:723521f61d4770c50e7952df66a21ffbe6d37e648dd60e6f2106483ef99235b8
+    value: sha256:22590bbf246cd231abebc13d7b20761b7f70e614dca9e430a1069510bdba2820
   - name: imageReferenceFilePath
     value: acm/odh-edge/apps/bike-rental-app/kustomization.yaml
   - name: gitTokenSecretName

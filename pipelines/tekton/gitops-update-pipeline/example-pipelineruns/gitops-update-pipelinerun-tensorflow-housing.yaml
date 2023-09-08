@@ -13,7 +13,7 @@ spec:
   - name: gitRepoName
     value: ai-edge-gitops
   - name: imageDigest
-    value: sha256:a6d4b8948271771bbe40e0b9ddf2975ee31e7b4d6fad28ae36dfe97ef8460125
+    value: sha256:19e7312d8cbfcbf21dcab083f9ef99af2f807f156b1216a423267010b7fdd7c0
   - name: imageReferenceFilePath
     value: acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
   - name: gitTokenSecretName
