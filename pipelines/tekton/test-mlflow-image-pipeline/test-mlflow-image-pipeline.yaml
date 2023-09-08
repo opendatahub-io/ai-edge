@@ -118,7 +118,7 @@ spec:
     - name: srcImageURL
       value: docker://image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)
     - name: destImageURL
-      value: docker://quay.io/$(params.target-imagerepo)/$(params.model-name):$(params.model-version)
+      value: docker://quay.io/$(params.target-imagerepo)/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
     - name: srcTLSverify
       value: "true"
     - name: destTLSverify
