@@ -84,12 +84,27 @@ oc create -f tekton/test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-ten
 - Clone/Mirror this repository on your Git server
 - Change the provided `gitops-git-user-` files to match your Git credentials
 
-### Deploy and run the GitOps pipeline
-
-> **NOTE**
-> If using one of the provided `PipelineRun` files, make sure all of the parameters match your Git environment.
+### Deploy the GitOps pipeline
 
 ```bash
 oc apply -k tekton/gitops-update-pipeline/
-oc create -f tekton/gitops-update-pipeline/gitops-update-pipelinerun-tensorflow-housing.yaml
+```
+
+#### Run the GitOps pipeline
+
+The pipeline can be run through the OpenShift Pipelines web console, by specifying all of the details for your environment.
+
+Alternatively, the `tekton/gitops-update-pipeline/example-pipelineruns/` contains some examples that can be modified and used.
+In these examples, notice that there are Secrets containing Git credentials that are referenced by different tasks.
+Create an equivalent Secret with appropriate details for your environment, and change the parameter values in the PipelineRun definition to match.
+The examples use a Gitea server deployed to the core, but any equivalent Git forge that has the same pull request API (e.g. GitHub) should work too.
+
+``` bash
+# Bike rentals app
+oc apply -f tekton/gitops-update-pipeline/example-pipelineruns/gitea-edge-user-1-secret.yaml
+oc create -f tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml
+
+# Tensorflow housing app
+oc apply -f tekton/gitops-update-pipeline/example-pipelineruns/gitea-edge-user-2-secret.yaml
+oc create -f tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml
 ```
