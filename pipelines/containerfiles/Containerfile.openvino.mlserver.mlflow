@@ -2,13 +2,24 @@
 # 
 FROM docker.io/openvino/model_server:latest
 
+ARG MODEL_NAME
+ARG MODEL_DIR=tf2model
+ARG GRPC_PORT=9090
+ARG REST_PORT=8080
+ARG METRICS_PORT
+# onlu approach I could get to work https://stackoverflow.com/a/69301530/19020549
+ENV MODEL_NAME_ENV=$MODEL_NAME
+ENV GRPC_PORT_ENV=$GRPC_PORT
+ENV REST_PORT_ENV=$REST_PORT
+
 USER root
 
 RUN mkdir /models && chown ovms:ovms /models
 
 # CHANGE THIS LINE TO MATCH YOUR MODEL
-COPY --chown=ovms:ovms tensorflow-housing/tf2model /models/1
-RUN rm -f /models/1/fingerprint.pb
+COPY --chown=ovms:ovms $MODEL_DIR /models/1
+# Not deleting this file causes a bug
+RUN if echo "${MODEL_DIR}" | grep -q "tf2model"; then rm -f /models/1/fingerprint.pb; fi
 
 RUN chmod o+rwX /models/1
 # https://docs.openshift.com/container-platform/4.13/openshift_images/create-images.html#use-uid_create-images
@@ -17,9 +28,9 @@ RUN chgrp -R 0 /models/1 && chmod -R g=u /models/1
 # https://stackoverflow.com/a/41207910/19020549
 # ENTRYPOINT ["/usr/bin/env"]
 
-EXPOSE 9090 8080
+EXPOSE $REST_PORT $GRPC_PORT
 
 USER ovms
 
 # CHANGE THIS LINE TO MATCH YOUR MODEL
-CMD ["/ovms/bin/ovms", "--model_path", "/models", "--model_name", "tensorflow-housing", "--port", "9090", "--rest_port", "8080", "--shape", "auto", "--metrics_enable"]
+ENTRYPOINT /ovms/bin/ovms --model_path /models --model_name $MODEL_NAME_ENV --port $GRPC_PORT_ENV --rest_port $REST_PORT_ENV --shape auto --metrics_enable
