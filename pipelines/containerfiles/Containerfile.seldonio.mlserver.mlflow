@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/python-39:1 as env-creator
+FROM registry.access.redhat.com/ubi9/python-39:1-143 as env-creator
 
 ARG MODEL_DIR=.
 

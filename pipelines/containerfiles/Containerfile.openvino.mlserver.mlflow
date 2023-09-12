@@ -1,6 +1,4 @@
-# Create the MLServer container.
-# 
-FROM docker.io/openvino/model_server:latest
+FROM docker.io/openvino/model_server:2023.0
 
 ARG MODEL_NAME
 ARG MODEL_DIR=tf2model
@@ -24,9 +22,6 @@ RUN if echo "${MODEL_DIR}" | grep -q "tf2model"; then rm -f /models/1/fingerprin
 RUN chmod o+rwX /models/1
 # https://docs.openshift.com/container-platform/4.13/openshift_images/create-images.html#use-uid_create-images
 RUN chgrp -R 0 /models/1 && chmod -R g=u /models/1
-
-# https://stackoverflow.com/a/41207910/19020549
-# ENTRYPOINT ["/usr/bin/env"]
 
 EXPOSE $REST_PORT $GRPC_PORT
 
