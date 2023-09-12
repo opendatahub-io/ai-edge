@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: gitops-update-pipeline-tensorflow-housing-
+  labels:
+    tekton.dev/pipeline: gitops-update-pipeline
+spec:
+  params:
+  - name: gitServer
+    value: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com
+  - name: gitOrgName
+    value: edge-user-2
+  - name: gitRepoName
+    value: ai-edge-gitops
+  - name: imageDigest
+    value: sha256:19e7312d8cbfcbf21dcab083f9ef99af2f807f156b1216a423267010b7fdd7c0
+  - name: imageReferenceFilePath
+    value: acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
+  - name: gitTokenSecretName
+    value: gitea-edge-user-2
+  pipelineRef:
+    name: gitops-update-pipeline
+  serviceAccountName: pipeline
+  timeout: 1h0m0s
+  workspaces:
+  - name: git-workspace
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - name: git-basic-auth
+    secret:
+      secretName: gitea-edge-user-2

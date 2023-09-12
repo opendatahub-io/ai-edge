@@ -1,0 +1,6 @@
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+
+resources:
+  - https://raw.githubusercontent.com/piotrpdev/catalog/patch-1/task/github-open-pr/0.2/github-open-pr.yaml # Change this once the fix is merged
+  - gitops-update-pipeline.yaml
