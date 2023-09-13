@@ -11,6 +11,14 @@ spec:
     type: string
   - name: aws-bucket-name
     type: string
+  - name: gitServer
+    type: string
+  - name: gitOrgName
+    type: string
+  - name: gitRepoName
+    type: string
+  - name: containerfileRelativePath
+    type: string
   tasks:
   - name: kserve-download-model
     params:
@@ -28,17 +36,37 @@ spec:
       workspace: buildah-cache
     - name: aws-secret
       workspace: aws-secret
-  - name: check-model-exists
+  - name: git-clone-containerfile-repo
+    params:
+      - name: url
+        value: $(params.gitServer)/$(params.gitOrgName)/$(params.gitRepoName)
+      - name: gitInitImage
+        value: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:1a50511583fc02a27012d17d942e247813404104ddd282d7e26f99765174392c
+      - name: subdirectory
+        value: /containerfile_repo/
+    runAfter:
+      - kserve-download-model
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    workspaces:
+      - name: output
+        workspace: buildah-cache
+      - name: basic-auth
+        workspace: git-basic-auth
+  - name: check-model-and-containerfile-exists
     params:
     - name: model-name
       value: $(params.model-name)
+    - name: containerfilePath
+      value: containerfile_repo/$(params.containerfileRelativePath)
     - name: current-namespace
       value: $(context.pipelineRun.namespace)
     runAfter:
-     - kserve-download-model
+      - git-clone-containerfile-repo
     taskRef:
       kind: Task
-      name: check-model-exists
+      name: check-model-and-containerfile-exists
     workspaces:
     - name: workspace
       workspace: buildah-cache
@@ -50,7 +78,7 @@ spec:
     - name: VERSION
       value: latest
     runAfter:
-     - check-model-exists
+     - check-model-and-containerfile-exists
     taskRef:
       kind: ClusterTask
       name: openshift-client
@@ -63,17 +91,15 @@ spec:
     - name: STORAGE_DRIVER
       value: vfs
     - name: DOCKERFILE
-      value: ./$(params.model-name)/Containerfile
+      value: containerfile_repo/$(params.containerfileRelativePath)
     - name: CONTEXT
-      value: .
+      value: $(params.model-name)
     - name: TLSVERIFY
       value: "true"
     - name: FORMAT
       value: oci
     - name: BUILD_EXTRA_ARGS
-      value: ""
-    - name: PUSH_EXTRA_ARGS
-      value: ""
+      value: "--build-arg MODEL_NAME=$(params.model-name)"
     - name: SKIP_PUSH
       value: "false"
     runAfter:
@@ -87,3 +113,4 @@ spec:
   workspaces:
   - name: buildah-cache
   - name: aws-secret
+  - name: git-basic-auth

@@ -4,6 +4,7 @@ ARG MODEL_NAME
 ARG MODEL_DIR=tf2model
 ARG GRPC_PORT=9090
 ARG REST_PORT=8080
+# OVMS metrics currently only served on REST port https://docs.openvino.ai/2023.0/ovms_docs_metrics.html#enable-metrics
 ARG METRICS_PORT
 # onlu approach I could get to work https://stackoverflow.com/a/69301530/19020549
 ENV MODEL_NAME_ENV=$MODEL_NAME
