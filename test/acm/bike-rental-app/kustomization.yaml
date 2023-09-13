@@ -16,7 +16,7 @@ patches:
 - patch: |-
     - op: replace
       path: /spec/pathname
-      value: https://github.com/my-github-org/ai-edge
+      value: https://github.com/opendatahub-io/ai-edge
   target:
     kind: Channel
 
