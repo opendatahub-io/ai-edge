@@ -47,8 +47,8 @@ See [pipelines/README.md](pipelines/README.md)
 ### Observability setup
 
 * Edge cluster(s)
-  * Login to edge cluster
-  * Enable userWorkloadMonitoring
-    * `oc edit cm cluster-monitoring-config`
+  * Login to the edge cluster using an account with cluster-admin privileges
+  * Enable [monitoring for user-defined projects](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/monitoring/enabling-monitoring-for-user-defined-projects) in OpenShift clusters
+    * `oc -n openshift-monitoring edit configmap cluster-monitoring-config`
     * Set variable `enableUserWorkload` to `true`
   * Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.

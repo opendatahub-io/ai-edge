@@ -5,8 +5,8 @@ install: install/observability-core
 install/observability-core:
 	DOCKER_CONFIG_JSON=`oc extract secret/pull-secret -n openshift-config --to=-`
 	oc create secret generic multiclusterhub-operator-pull-secret -n open-cluster-management-observability --from-literal=.dockerconfigjson="$$DOCKER_CONFIG_JSON" --type=kubernetes.io/dockerconfigjson
-	kustomize build acm/odh-core/acm-observability | kubectl apply -f
+	kustomize build acm/odh-core/acm-observability | kubectl apply -f -
 
 # Create the whitelist for model metrics
 install/observability-edge:
-  kustomize build acm/odh-edge/acm-observability | kubectl apply -f
+  kustomize build acm/odh-edge/acm-observability | kubectl apply -f -
