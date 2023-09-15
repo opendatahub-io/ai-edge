@@ -3,5 +3,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 resources:
 - azureml-container-buildah-cache-pvc.yaml
 - kserve-download-model.yaml
-- check-model-exists.yaml
+- check-model-and-containerfile-exists.yaml
 - azureml-container-pipeline.yaml

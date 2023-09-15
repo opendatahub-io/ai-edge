@@ -12,6 +12,14 @@ spec:
     value: "1"
   - name: aws-bucket-name
     value: rhoai-edge-models
+  - name: gitServer
+    value: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com
+  - name: gitOrgName
+    value: edge-user-2
+  - name: gitRepoName
+    value: ai-edge-gitops
+  - name: containerfileRelativePath
+    value: pipelines/containerfiles/Containerfile.openvino.mlserver.mlflow
   pipelineRef:
     name: azureml-container
   serviceAccountName: pipeline
@@ -23,3 +31,6 @@ spec:
   - name: aws-secret
     secret:
         secretName: aws-env
+  - name: git-basic-auth
+    secret:
+      secretName: gitea-edge-user-2
