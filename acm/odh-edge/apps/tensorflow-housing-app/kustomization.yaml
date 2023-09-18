@@ -12,12 +12,18 @@ labels:
 resources:
 - ../../base
 - housing-servicemonitor.yaml
+- housing-inference-generator.yaml
 
 namespace: tensorflow-housing-app
 namePrefix: tensorflow-housing-app-
 
 commonLabels:
   app: tensorflow-housing-app-1
+
+configMapGenerator:
+- name: test-data
+  files:
+  - files/test-data.json
 
 patches:
 - patch: |-
@@ -55,6 +61,17 @@ replacements:
       kind: ServiceMonitor
     fieldPaths:
       - spec.selector.matchLabels.app
+
+- source:
+    kind: ConfigMap
+    name: test-data
+    fieldPath: metadata.name
+  targets:
+  - select:
+      kind: CronJob
+      name: housing-inference-generator
+    fieldPaths:
+    - spec.jobTemplate.spec.template.spec.volumes.*.configMap.name
 
 images:
 - name: edge-model-template-image

@@ -1,0 +1,66 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: housing-inference-generator
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: test-mlflow-container
+            image: quay.io/rhoai-edge/ab-jq
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              seccompProfile:
+                type: "RuntimeDefault"
+              capabilities:
+                drop:
+                - ALL
+            command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Test inference REST web service"
+              echo "Data:"
+              cat /workspace/test-data/test-data.json
+              # Add your expected response here or remove this line if not needed
+              INDEX=$(( RANDOM % 20 ))
+              
+              # Number of requests between 100 and 1000
+              R_COUNT=$(( RANDOM % 901 + 100 ))
+              # Number of concurrent requests between 100 and R_COUNT
+              R_RATE=$(( RANDOM % ($R_COUNT - 99) + 100 ))
+
+              # Randomly selects a record from data.json
+              RANDOM_ROW=$(cat /workspace/test-data/test-data.json | jq -r ".data | .[$INDEX]")
+              PAYLOAD="{\"instances\":[$RANDOM_ROW]}}"
+              echo "Payload: $PAYLOAD"
+              echo "$PAYLOAD" > /tmp/payload.json
+
+
+              # Call the service
+              SRVC_URL="http://$(MODEL_NAME)-$(MODEL_VERSION):8080/$(TEST_ENDPOINT)"
+              echo ""
+              echo "Call inference service $SRVC_URL :"
+              echo "Number of requests: ${R_COUNT} concurrent requests: ${R_RATE}"
+              echo ""
+              # Use ab for load testing with 100 concurrent requests
+              ab -p /tmp/payload.json -T "application/json" -c $R_RATE -n $R_COUNT $SRVC_URL
+            env:
+            - name: MODEL_NAME
+              value: "tensorflow-housing-app-model"  # modify this, this is a guess to the actual value
+            - name: MODEL_VERSION
+              value: "1"  # modify this if needed
+            - name: TEST_ENDPOINT
+              value: "v1/models/tensorflow-housing/versions/1:predict"  # modify this
+            volumeMounts:
+            - name: test-data-volume
+              mountPath: /workspace/test-data
+          volumes:
+          - name: test-data-volume
+            configMap:
+              name: to-be-replaced-by-kustomize
+          restartPolicy: OnFailure
