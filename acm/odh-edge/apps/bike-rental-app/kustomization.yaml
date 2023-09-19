@@ -12,12 +12,19 @@ labels:
 resources:
 - ../../base
 - bike-servicemonitor.yaml
+- bike-rental-inference-generator-cronjob.yaml
 
 namespace: bike-rental-app
 namePrefix: bike-rental-app-
 
 commonLabels:
   app: bike-rental-app-1
+
+configMapGenerator:
+- name: test-data
+  files:
+  - files/test-data.json
+
 
 patches:
 - patch: |-
@@ -55,6 +62,16 @@ replacements:
       kind: ServiceMonitor
     fieldPaths:
       - spec.selector.matchLabels.app
+- source:
+    kind: ConfigMap
+    name: test-data
+    fieldPath: metadata.name
+  targets:
+  - select:
+      kind: CronJob
+      name: bike-rental-inference-generator
+    fieldPaths:
+    - spec.jobTemplate.spec.template.spec.volumes.*.configMap.name
 
 images:
 - name: edge-model-template-image
