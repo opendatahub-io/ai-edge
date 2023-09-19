@@ -20,7 +20,8 @@ The main objective is to showcase that a user can take a trained model, use a pi
 1. Configure the default Identity Provider
 1. Install Red Hat Advanced Cluster Management
 1. Register the clusters
-[ACM Application](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html/applications/managing-applications) manifests are located in [acm/registration](acm/registration) to register and configure the target environments required for the AI at the Edge use cases.  The files can be applied to the ACM hub cluster manually:
+
+   [ACM Application](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html/applications/managing-applications) manifests are located in [acm/registration](acm/registration) to register and configure the target environments required for the AI at the Edge use cases.  The files can be applied to the ACM hub cluster manually:
    ```
    $  oc apply -k acm/registration
    ```
