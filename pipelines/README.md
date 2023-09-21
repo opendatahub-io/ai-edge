@@ -44,6 +44,19 @@ After creating the S3 bucket and uploading the models  (see above), fill out `aw
 oc create -f tekton/azureml-container-pipeline/aws-env.yaml
 ```
 
+### Provide Git credentials
+
+See the GitOps pipeline section below for more details on how to do this, e.g.:
+
+```bash
+# Bike rentals app
+cp pipelines/tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml /tmp/gitea-edge-user-1-secret.yaml
+$EDITOR /tmp/gitea-edge-user-1-secret.yaml # make changes for your specific environment
+oc apply -f /tmp/gitea-edge-user-1-secret.yaml
+```
+
+and change the parameter values in the `pipelines/tekton/azureml-container-pipelinerun-bike-rentals.yaml` file to match (if using the provided `PipelineRun` files).
+
 ### Deploy and run the build pipeline
 
 > **NOTE**
