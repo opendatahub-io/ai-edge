@@ -58,7 +58,7 @@ oc create -f tekton/azureml-container-pipeline/azureml-container-pipelinerun-ten
 
 ### Quay Repository and Robot Permissions
 
-- Create a repository, add a robot account to push images and set write Permissions for the robot on the repository.
+- In your Quay namespace, create repository `tensorflow-housing`, add a robot account to push images and set write Permissions for the robot on the repository.
 - Download `build-secret.yml`
 - Apply build-secret. E.g.:
 
