@@ -32,7 +32,7 @@ tensorflow-housing/
 - S3 bucket for storing the models
 - A clone of this repository
 
-## Deploy AzureML Container build pipeline
+## Deploy build pipeline for AI runtime container images
 
 ### Provide S3 credentials
 
