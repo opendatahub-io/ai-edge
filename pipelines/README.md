@@ -25,7 +25,6 @@ tensorflow-housing/
 
 ## Prerequisites
 
-- Trained AzureML model including MLflow environment (see above)
 - OpenShift cluster with [OpenShift Pipelines Operator](https://docs.openshift.com/container-platform/4.13/cicd/pipelines/installing-pipelines.html) installed
 - OpenShift project / namespace. E.g.  `oc new-project azureml-model-to-edge`
 - A repository on [Quay.io](https://quay.io/)
