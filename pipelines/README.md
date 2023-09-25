@@ -2,7 +2,7 @@
 
 ## Models
 
-These pipelines come with the following trained example MLflow models: [bike-rentals-auto-ml](models/bike-rentals-auto-ml/) and [tensorflow-housing](models/tensorflow-housing/):
+This repository contains the following trained example MLflow models: [bike-rentals-auto-ml](models/bike-rentals-auto-ml/) and [tensorflow-housing](models/tensorflow-housing/):
 
 ```plaintext
 bike-rentals-auto-ml/
@@ -22,6 +22,8 @@ tensorflow-housing/
     ├── saved_model.pb
     └── ...
 ```
+
+They are also referenced by these names in the example pipeline YAML files.
 
 ## Prerequisites
 
