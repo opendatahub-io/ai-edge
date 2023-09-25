@@ -34,11 +34,16 @@ tensorflow-housing/
 
 ## Deploy AzureML Container build pipeline
 
-### Provide S3 credentials
+### Setup S3 bucket and credentials
 
-After creating the S3 bucket and uploading the models  (see above), fill out `aws-env.yaml` and create the secret:
+Create an S3 bucket and upload the directories with the models:
 
 ![S3 models example](../.github/images/S3-models.png)
+
+Fill information about access to your S3 bucket in [`aws-env.yaml`](tekton/azureml-container-pipeline/aws-env.yaml).
+If you don't have or know your access key, generate one in AWS account's Security credentials > Access keys.
+
+Then store the credentials in an OpenShift secret:
 
 ```bash
 oc create -f tekton/azureml-container-pipeline/aws-env.yaml
