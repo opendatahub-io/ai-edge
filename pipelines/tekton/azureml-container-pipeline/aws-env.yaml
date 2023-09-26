@@ -5,4 +5,4 @@ metadata:
 
 stringData:
   aws-storage-config: |+
-    { "type": "s3", "access_key_id": "$", "secret_access_key": "$", "endpoint_url": "https://example.amazonaws.com/", "bucket": "rhoai-edge-models", "region": "us-west-1" }
+    { "type": "s3", "access_key_id": "$", "secret_access_key": "$", "endpoint_url": "https://example.amazonaws.com/", "region": "us-west-1" }
