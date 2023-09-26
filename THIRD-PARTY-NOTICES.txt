@@ -3,3 +3,7 @@ This repository uses third-party software and datasets.
 Bike Sharing Dataset
 ====================
 Fanaee-T,Hadi. (2013). Bike Sharing Dataset. UCI Machine Learning Repository. https://doi.org/10.24432/C5W894 under (CC BY 4.0) license. 
+
+California Housing Dataset
+====================
+Pace, R. Kelley and Ronald Barry, Sparse Spatial Autoregressions, Statistics and Probability Letters, 33 (1997) 291-297.  https://scikit-learn.org/stable/datasets/real_world.html#california-housing-dataset. 
