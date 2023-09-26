@@ -35,14 +35,21 @@ They are also referenced by these names in the example pipeline YAML files.
 
 ## Deploy AzureML Container build pipeline
 
-### Provide S3 credentials
+### Setup S3 bucket and credentials
 
-After creating the S3 bucket and uploading the models  (see above), fill out `aws-env.yaml` and create the secret:
+Create an S3 bucket and upload the directories with the models:
 
 ![S3 models example](../.github/images/S3-models.png)
 
+Fill information about access to your S3 bucket in a copy of [`aws-env.yaml`](tekton/azureml-container-pipeline/aws-env.yaml).
+If you don't have or know your access key, generate one in AWS account's Security credentials > Access keys.
+
+Then store the credentials in an OpenShift secret:
+
 ```bash
-oc create -f tekton/azureml-container-pipeline/aws-env.yaml
+cp tekton/azureml-container-pipeline/aws-env.yaml tekton/azureml-container-pipeline/aws-env-real.yaml
+vi tekton/azureml-container-pipeline/aws-env-real.yaml
+oc create -f tekton/azureml-container-pipeline/aws-env-real.yaml
 ```
 
 ### Deploy and run the build pipeline
