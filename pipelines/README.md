@@ -47,11 +47,18 @@ oc create -f tekton/azureml-container-pipeline/aws-env.yaml
 
 ### Deploy and run the build pipeline
 
-> **NOTE**
-> Make sure to change the `aws-bucket-name` parameter to match your AWS bucket name if using one of the provided `PipelineRun` files.
+Update the `aws-bucket-name` parameter value from its default `rhoai-edge-models` in
+[`azureml-container-pipelinerun-bike-rentals.yaml`](tekton/azureml-container-pipeline/azureml-container-pipelinerun-bike-rentals.yaml)
+and/or
+[`azureml-container-pipelinerun-tensorflow-housing.yaml`](tekton/azureml-container-pipeline/azureml-container-pipelinerun-tensorflow-housing.yaml)
+to match your S3 bucket name.
+
+Then create the pipeline(s) to build the container image with AI runtime:
 
 ```bash
 oc apply -k tekton/azureml-container-pipeline/
+oc create -f tekton/azureml-container-pipeline/azureml-container-pipelinerun-bike-rentals.yaml
+# and / or
 oc create -f tekton/azureml-container-pipeline/azureml-container-pipelinerun-tensorflow-housing.yaml
 ```
 
