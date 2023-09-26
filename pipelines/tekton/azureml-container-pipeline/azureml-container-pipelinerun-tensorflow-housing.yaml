@@ -13,11 +13,11 @@ spec:
   - name: aws-bucket-name
     value: rhoai-edge-models
   - name: gitServer
-    value: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com
+    value: https://github.com
   - name: gitOrgName
-    value: edge-user-2
+    value: opendatahub-io
   - name: gitRepoName
-    value: ai-edge-gitops
+    value: ai-edge
   - name: containerfileRelativePath
     value: pipelines/containerfiles/Containerfile.openvino.mlserver.mlflow
   pipelineRef:
