@@ -31,6 +31,3 @@ spec:
   - name: aws-secret
     secret:
         secretName: aws-env
-  - name: git-basic-auth
-    secret:
-      secretName: gitea-edge-user-2
