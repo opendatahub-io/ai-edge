@@ -14,14 +14,6 @@ configMapGenerator:
         observability.open-cluster-management.io/dashboard-folder: "Edge"
       labels:
         grafana-custom-dashboard: "true"
-  - name: grafana-dashboard-edge-inference-metrics-housing-and-binking
-    files:
-    - grafana-dashboards/inference-metrics-housing-and-biking-app.json
-    options:
-      annotations:
-        observability.open-cluster-management.io/dashboard-folder: "Edge"
-      labels:
-        grafana-custom-dashboard: "true"
 
 secretGenerator:
 - name: thanos-object-storage
