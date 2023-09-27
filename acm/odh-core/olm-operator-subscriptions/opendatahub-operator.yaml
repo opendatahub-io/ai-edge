@@ -4,7 +4,7 @@ metadata:
   name: opendatahub-operator
   namespace: odh-core-operators
 spec:
-  channel: rolling
+  channel: fast
   name: opendatahub-operator
   source: community-operators
   sourceNamespace: openshift-marketplace
