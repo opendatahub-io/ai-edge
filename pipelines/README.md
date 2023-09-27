@@ -69,6 +69,24 @@ oc create -f tekton/azureml-container-pipeline/azureml-container-pipelinerun-bik
 oc create -f tekton/azureml-container-pipeline/azureml-container-pipelinerun-tensorflow-housing.yaml
 ```
 
+Check what objects were created and what pipelines executed either in OpenShift Console
+in Pipelines > Pipelines, Storage > PersistentVolumeClaims,
+and Builds > ImageStreams,
+or with CLI find the names of the objects with
+```
+oc get persistentvolumeclaim
+oc get pipeline.tekton.dev
+oc get task.tekton.dev
+oc get pipelinerun.tekton.dev
+oc get imagestream
+```
+and then run `oc describe` on them, for example
+```
+oc describe pipelinerun.tekton.dev/azureml-container-bike-rentals-66q8n
+# or
+oc describe imagestream/tensorflow-housing
+```
+
 ## Deploy Test MLflow Container image pipeline
 
 ### Quay Repository and Robot Permissions
