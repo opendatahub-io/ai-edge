@@ -55,6 +55,10 @@ See [pipelines/README.md](pipelines/README.md)
     * Set variable `enableUserWorkload` to `true`
   * Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.
 
-### Contributing
+## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Development
+
+See [DEVELOPMENT.md](DEVELOPMENT.md).
