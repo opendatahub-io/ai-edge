@@ -61,10 +61,25 @@ We use a mix of AWS and GCP to host these clusters for diversity. Typically you 
 * Substitute the values of the `GIT_REPO_URL`, `GIT_BRANCH`, and `TEST_NAMESPACE` variables in this `make` command appropriately:
 NOTE: Escape the `:` in the `https://` protocol part of the `GIT_REPO_URL` value
 ```bash
-make -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" \
+make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" \
      -e GIT_BRANCH=my-git-branch \
      -e TEST_NAMESPACE=my-test-namespace \
-     test-acm-bike-rental-app-deploy # or test-acm-tensorflow-housing-deploy
+     test-acm-bike-rental-app-generate # or test-acm-tensorflow-housing-generate
+```
+* You can also do a dry-run apply of these manifests, by piping the output to `oc apply -f - --dry-run=client`, like this:
+
+```bash
+make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" \
+     -e GIT_BRANCH=my-git-branch \
+     -e TEST_NAMESPACE=my-test-namespace \
+     test-acm-bike-rental-app-generate # or test-acm-tensorflow-housing-generate | oc apply -f - --dry-run=client
+```
+* If everything looks correct, run the make target again and apply the manifests to the hub cluster without the dry-run option
+```bash
+make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" \
+     -e GIT_BRANCH=my-git-branch \
+     -e TEST_NAMESPACE=my-test-namespace \
+     test-acm-bike-rental-app-generate  | oc apply -f -
 ```
 * Add your dev namespace to the near-edge Cluster Set's `Namespace Bindings`.
   * In the OpenShift Console, navigate to `All Clusters (dropdown in top left) -> Infrastructure -> Clusters -> Cluster sets -> <cluster-set-name> -> Namespace Bindings`.

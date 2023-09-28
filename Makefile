@@ -1,4 +1,4 @@
-.PHONY: install install/observability-core install/observability-edge test-acm-%-deploy
+.PHONY: install install/observability-core install/observability-edge test-acm-%-generate
 
 install: install/observability-core install/observability-edge
 
@@ -12,11 +12,11 @@ install/observability-core: acm/odh-core/acm-observability/kustomization.yaml
 install/observability-edge: acm/odh-edge/acm-observability/kustomization.yaml
 	kustomize build acm/odh-edge/acm-observability | kubectl apply -f -
 
-# Deploy app using ACM GitOps flow, from custom GitHub org/branch, to custom namespace
+# Generate app manifests using ACM GitOps flow, from custom GitHub org/branch, to custom namespace
 # Example invocations:
-# make -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" -e GIT_BRANCH=my-git-branch -e TEST_NAMESPACE=my-test-namespace test-acm-bike-rental-app-deploy
-# make -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" -e GIT_BRANCH=my-git-branch -e TEST_NAMESPACE=my-test-namespace test-acm-tensorflow-housing-app-deploy
-test-acm-%-deploy: test/acm/%/kustomization.yaml
+# make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" -e GIT_BRANCH=my-git-branch -e TEST_NAMESPACE=my-test-namespace test-acm-bike-rental-app-generate
+# make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" -e GIT_BRANCH=my-git-branch -e TEST_NAMESPACE=my-test-namespace test-acm-tensorflow-housing-app-generate
+test-acm-%-generate: test/acm/%/kustomization.yaml
 ifndef GIT_REPO_URL
 	$(error GIT_REPO_URL is undefined)
 endif
@@ -26,5 +26,4 @@ endif
 ifndef TEST_NAMESPACE
 	$(error TEST_NAMESPACE is undefined)
 endif
-	kustomize build test/acm/$(subst -deploy,,$(subst test-acm-,,$@))/ | sed -e "s|https://github.com/opendatahub-io/ai-edge|$(GIT_REPO_URL)|g" -e "s|my-git-branch|$(GIT_BRANCH)|g" -e "s|my-test-namespace|$(TEST_NAMESPACE)|g" | oc apply -f - --dry-run=client
-	kustomize build test/acm/$(subst -deploy,,$(subst test-acm-,,$@))/ | sed -e "s|https://github.com/opendatahub-io/ai-edge|$(GIT_REPO_URL)|g" -e "s|my-git-branch|$(GIT_BRANCH)|g" -e "s|my-test-namespace|$(TEST_NAMESPACE)|g" | oc apply -f -
+	kustomize build test/acm/$(subst -generate,,$(subst test-acm-,,$@))/ | sed -e "s|https://github.com/opendatahub-io/ai-edge|$(GIT_REPO_URL)|g" -e "s|my-git-branch|$(GIT_BRANCH)|g" -e "s|my-test-namespace|$(TEST_NAMESPACE)|g"
