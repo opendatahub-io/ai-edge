@@ -12,7 +12,7 @@ Artifacts in support of ODH Edge use cases that integration with Red Hat Advance
 
 ## Proof of Concept Edge use case with ACM
 
-The main objective is to showcase that a user can take a trained model, use a pipeline to package it with all the dependencies and deploy it at the near edge location(s) in a centralized way.
+The main objective is to showcase that a user can take a trained model, use a pipeline to package it with all the dependencies into a container image, and deploy it at the near edge location(s) (represented by ACM-managed clusters) in a centralized way.
 
 ### Infrastructure Configuration
 
