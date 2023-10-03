@@ -87,6 +87,16 @@ oc describe pipelinerun.tekton.dev/azureml-container-bike-rentals-66q8n
 oc describe imagestream/tensorflow-housing
 ```
 
+To get the information about the built container image with the runtime and model
+in one of the Image Streams, try
+```
+oc get -o json imagestream/tensorflow-housing | jq -r '.status.tags[0].items[0].dockerImageReference'
+```
+
+In the next steps we will automate testing the behaviour of a container
+started from the newly built container image, and push the image to dedicated
+container image repository if the test passes.
+
 ## Deploy Test MLflow Container image pipeline
 
 ### Quay Repository and Robot Permissions
