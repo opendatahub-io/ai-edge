@@ -78,7 +78,7 @@ We are relying on the [gitea-operator](https://github.com/rhpds/gitea-operator) 
    kind: Gitea
    metadata:
      name: gitea-ai-edge
-     name: gitea
+     namespace: gitea
    spec:
      # Create the admin user
      giteaAdminUser: admin-edge
