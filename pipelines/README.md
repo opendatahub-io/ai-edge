@@ -91,13 +91,21 @@ oc describe imagestream/tensorflow-housing
 
 ### Quay Repository and Robot Permissions
 
-- In your Quay namespace, create repository `tensorflow-housing`, add a robot account to push images and set write Permissions for the robot on the repository.
-- Download `build-secret.yml`
-- Apply build-secret. E.g.:
+- In your Quay namespace:
+  - Create repositories `tensorflow-housing` and/or `bike-rentals-auto-ml`.
+  - Add a robot account to push images and set write Permissions for the robot account on the repositories.
+  - Download the Kubernetes Secret of the robot account and store it in a YAML file.
+- Inspect the file with the pull secret and note the name of the secret, or edit it.
+- Create the secret and link it to the `pipeline` Service Account that was created by the Red Hat OpenShift Pipelines operator using a Tekton Config. E.g.:
 
 ```bash
 oc apply -f <downloaddir>/rhoai-edge-build-secret.yml
 oc secret link pipeline rhoai-edge-build-pull-secret
+```
+
+Check that the secret is listed in the `Mountable secrets` of
+```bash
+oc describe sa/pipeline
 ```
 
 ### Deploy and run the test pipeline
