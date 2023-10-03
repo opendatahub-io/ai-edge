@@ -59,7 +59,7 @@ See [pipelines/README.md](pipelines/README.md)
 ### Gitea in cluster git server for GitOps workflow
 We are relying on the [gitea-operator](https://github.com/rhpds/gitea-operator) to manage the Gitea server installation in the cluster.  This will simplify the setup of Gitea so that we can create a minimal [Gitea](https://github.com/rhpds/gitea-operator#migrating-repositories-for-created-users) CR to configure and install the Gitea server.  The gitea-operator will be installed on the `odh-core` cluster as part of the ACM application rollout.
 
-1. Wait for the gitea-operator installation to complete and the `gitea.pfe-rhdps.com` CRD is available on the `odh-core` cluster
+1. Wait for the gitea-operator installation to complete and the `gitea.pfe-rhpds.com` CRD is available on the `odh-core` cluster
    ```
    $ oc get crd gitea.pfe.rhpds.com
    NAME                  CREATED AT
