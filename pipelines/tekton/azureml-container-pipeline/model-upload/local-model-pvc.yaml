@@ -1,0 +1,24 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: local-model-pvc-template
+objects:
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: ${PVC}
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${SIZE} #1Gi
+parameters:
+- name: PVC
+  description: Name of PVC to be mounted to pod
+  from: '[A-Z0-9]{8}'
+  generate: expression
+- name: SIZE
+  description: Size of the PVC
+  from: '[A-Z0-9]{8}'
+  generate: expression

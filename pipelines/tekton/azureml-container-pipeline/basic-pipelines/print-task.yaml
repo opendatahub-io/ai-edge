@@ -1,0 +1,18 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: print-task
+spec:
+  description: Print the model file task 
+  params:
+  - name: model-path
+    type: string
+  steps:
+  - name: print-model-contents
+    image: ubi9
+    script: |
+      echo "Print task"
+      cat $(workspaces.pipeline-workspace.path)/$(params.model-path)
+  workspaces:
+  - description: The workspace that we copy the model to and use in the future
+    name: pipeline-workspace
