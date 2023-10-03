@@ -120,13 +120,41 @@ oc describe sa/pipeline
 
 ### Deploy and run the test pipeline
 
-> **NOTE**
-> Make sure to change the `target-imagerepo` parameter to match the name of your Quay namespace if using one of the provided `PipelineRun` files.
+Update the `target-imagerepo` parameter value from its default `rhoai-edge` in
+[`test-mlflow-image-pipelinerun-tensorflow-housing.yaml`](tekton/test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-tensorflow-housing.yaml)
+and/or
+[`test-mlflow-image-pipelinerun-bike-rental.yaml`](tekton/test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-bike-rental.yaml)
+to match the name of your Quay namespace.
+
+Then create the pipeline(s) to test the container images behaviour using
+test data in [`tensorflow-housing-test-data-cm.yaml`](tekton/test-mlflow-image-pipeline/tensorflow-housing-test-data-cm.yaml)
+and/or [`bike-rentals-test-data-cm.yaml`](tekton/test-mlflow-image-pipeline/bike-rentals-test-data-cm.yaml):
 
 ```bash
 oc apply -k tekton/test-mlflow-image-pipeline/
 oc create -f tekton/test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-tensorflow-housing.yaml
+# and/or
+oc create -f tekton/test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-bike-rental.yaml
 ```
+
+Check what pipeline was created and run and what applications started either in OpenShift Console in Pipelines > Pipelines, Topology > select the application and its Resources and Pod logs, or with CLI find the names of the objects with
+
+```bash
+oc get pipeline
+oc get pipelinerun
+oc get deployment
+```
+and then run `oc describe` or `oc logs` on them, for example
+```bash
+oc describe deployment/bike-rentals-auto-ml-1
+# or
+oc logs deployment/tensorflow-housing-1
+```
+
+If the Pipeline Runs passed, the last Cluster Task `skopeo-copy` copied
+the built container image(s) to your Quay repository. Check in Quay's WebUI
+or with `podman pull` that the pushed container image has the same SHA-256
+checksum as the one shown in the Image Stream.
 
 ## Deploy the GitOps pipeline
 
