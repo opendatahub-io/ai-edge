@@ -1,6 +1,6 @@
 # ODH AI Edge Use Cases
 
-Artifacts in support of ODH Edge use cases that integration with Red Hat Advanced Cluster Management(Open Cluster Management)
+Artifacts in support of ODH Edge use cases that show integration with Red Hat Advanced Cluster Management (Open Cluster Management)
 
 | Components                           | Version |
 |--------------------------------------|---------|
