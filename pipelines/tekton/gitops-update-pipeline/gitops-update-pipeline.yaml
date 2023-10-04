@@ -6,6 +6,8 @@ spec:
   params:
     - name: gitServer
       type: string
+    - name: gitApiServer
+      type: string
     - name: gitOrgName
       type: string
     - name: gitRepoName
@@ -18,7 +20,7 @@ spec:
     - name: imageReferenceFilePath
       type: string
     - name: gitApiPrefix
-      default: /api/v1
+      default: ''
       type: string
     - name: gitTokenSecretName
       type: string
@@ -87,7 +89,7 @@ spec:
     - name: open-pr
       params:
         - name: GITHUB_HOST_URL
-          value: $(params.gitServer)
+          value: $(params.gitApiServer)
         - name: API_PATH_PREFIX
           value: $(params.gitApiPrefix)
         - name: REPO_FULL_NAME
