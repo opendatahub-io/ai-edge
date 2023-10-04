@@ -3,3 +3,37 @@ kind: Kustomization
 
 resources:
 - odh-core.application.yaml
+
+replacements:
+- source:
+    group: apps.open-cluster-management.io
+    kind: Channel
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: apps.open-cluster-management.io
+      kind: Subscription
+    fieldPaths:
+      - spec.channel
+
+- source:
+    group: cluster.open-cluster-management.io
+    kind: Placement
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: apps.open-cluster-management.io
+      kind: Subscription
+    fieldPaths:
+      - spec.placement.placementRef.name
+
+- source:
+    group: cluster.open-cluster-management.io
+    kind: ManagedClusterSet
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: apps.open-cluster-management.io
+      kind: Placement
+    fieldPaths:
+      - spec.clusterSets.0
