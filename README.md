@@ -68,6 +68,7 @@ We are relying on the [gitea-operator](https://github.com/rhpds/gitea-operator) 
 
 1. Create the Gitea CustomResource to deploy the server with an admin user
    ```
+   cat <<EOF | oc apply -f -
    ---
    apiVersion: v1
    kind: Namespace
@@ -97,6 +98,7 @@ We are relying on the [gitea-operator](https://github.com/rhpds/gitea-operator) 
      - repo: https://github.com/opendatahub-io/ai-edge.git
        name: ai-edge-gitops
        private: false
+    EOF
    ```
 
 ## Contributing
