@@ -84,19 +84,6 @@ spec:
     taskRef:
       kind: ClusterTask
       name: openshift-client
-  - name: create-metrics-service
-    params:
-    - name: SCRIPT
-      value: oc expose deployment  $(params.model-name)-$(params.model-version) --name=metrics --port=8082
-        --target-port=8082 --selector='app=$(params.model-name)-$(params.model-version)'
-        --dry-run=client -o yaml |  oc apply -f -
-    - name: VERSION
-      value: latest
-    runAfter:
-    - create-default-service
-    taskRef:
-      kind: ClusterTask
-      name: openshift-client
   - name: test-mlflow-rest-svc
     params:
     - name: model-name
@@ -106,7 +93,7 @@ spec:
     - name: test-endpoint
       value: $(params.test-endpoint)
     runAfter:
-    - create-metrics-service
+    - create-default-service
     taskRef:
       kind: Task
       name: test-mlflow-rest-svc
