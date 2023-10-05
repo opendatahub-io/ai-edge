@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: azureml-container
+  name: build-container-image
 spec:
   params:
   - name: model-name
