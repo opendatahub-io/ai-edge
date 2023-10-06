@@ -28,7 +28,7 @@ They are also referenced by these names in the example pipeline YAML files.
 ## Prerequisites
 
 - OpenShift cluster with [OpenShift Pipelines Operator](https://docs.openshift.com/container-platform/4.13/cicd/pipelines/installing-pipelines.html) installed
-- OpenShift project / namespace. E.g.  `oc new-project azureml-model-to-edge`
+- OpenShift project / namespace. E.g.  `oc new-project model-to-edge`
 - A repository on [Quay.io](https://quay.io/)
 - S3 bucket for storing the models
 - A clone of this repository
@@ -41,32 +41,32 @@ Create an S3 bucket and upload the directories with the models:
 
 ![S3 models example](../.github/images/S3-models.png)
 
-Fill information about access to your S3 bucket in a copy of [`aws-env.yaml`](tekton/azureml-container-pipeline/aws-env.yaml).
+Fill information about access to your S3 bucket in a copy of [`aws-env.yaml`](tekton/build-container-image-pipeline/aws-env.yaml).
 If you don't have or know your access key, generate one in AWS account's Security credentials > Access keys.
 
 Then store the credentials in an OpenShift secret:
 
 ```bash
-cp tekton/azureml-container-pipeline/aws-env.yaml tekton/azureml-container-pipeline/aws-env-real.yaml
-vi tekton/azureml-container-pipeline/aws-env-real.yaml
-oc create -f tekton/azureml-container-pipeline/aws-env-real.yaml
+cp tekton/build-container-image-pipeline/aws-env.yaml tekton/build-container-image-pipeline/aws-env-real.yaml
+vi tekton/build-container-image-pipeline/aws-env-real.yaml
+oc create -f tekton/build-container-image-pipeline/aws-env-real.yaml
 ```
 
 ### Deploy and run the build pipeline
 
 Update the `aws-bucket-name` parameter value from its default `rhoai-edge-models` in
-[`azureml-container-pipelinerun-bike-rentals.yaml`](tekton/azureml-container-pipeline/azureml-container-pipelinerun-bike-rentals.yaml)
+[`build-container-image-pipelinerun-bike-rentals.yaml`](tekton/build-container-image-pipeline/build-container-image-pipelinerun-bike-rentals.yaml)
 and/or
-[`azureml-container-pipelinerun-tensorflow-housing.yaml`](tekton/azureml-container-pipeline/azureml-container-pipelinerun-tensorflow-housing.yaml)
+[`build-container-image-pipelinerun-tensorflow-housing.yaml`](tekton/build-container-image-pipeline/build-container-image-pipelinerun-tensorflow-housing.yaml)
 to match your S3 bucket name.
 
 Then create the pipeline(s) to build the container image with AI runtime:
 
 ```bash
-oc apply -k tekton/azureml-container-pipeline/
-oc create -f tekton/azureml-container-pipeline/azureml-container-pipelinerun-bike-rentals.yaml
+oc apply -k tekton/build-container-image-pipeline/
+oc create -f tekton/build-container-image-pipeline/build-container-image-pipelinerun-bike-rentals.yaml
 # and / or
-oc create -f tekton/azureml-container-pipeline/azureml-container-pipelinerun-tensorflow-housing.yaml
+oc create -f tekton/build-container-image-pipeline/build-container-image-pipelinerun-tensorflow-housing.yaml
 ```
 
 Check what objects were created and what pipelines executed either in OpenShift Console
@@ -82,7 +82,7 @@ oc get imagestream
 ```
 and then run `oc describe` on them, for example
 ```
-oc describe pipelinerun.tekton.dev/azureml-container-bike-rentals-66q8n
+oc describe pipelinerun.tekton.dev/build-container-image-bike-rentals-66q8n
 # or
 oc describe imagestream/tensorflow-housing
 ```

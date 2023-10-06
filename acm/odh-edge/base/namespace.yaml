@@ -2,4 +2,4 @@ apiVersion: v1
 kind: Namespace
 metadata:
   # edit this to the namespace where the model is deployed
-  name: azureml-model-to-edge
+  name: model-to-edge
