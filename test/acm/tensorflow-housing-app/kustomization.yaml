@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../../acm/registration/near-edge/overlays/tensorflow-housing-app/
+
+namespace: my-test-namespace
+
+patches:
+- patch: |-
+    - op: replace
+      path: /spec/channel
+      value: my-test-namespace/tensorflow-housing-app-channel
+  target:
+    kind: Subscription
+- patch: |-
+    - op: replace
+      path: /spec/pathname
+      value: https://github.com/opendatahub-io/ai-edge
+  target:
+    kind: Channel
+
+commonAnnotations:
+  apps.open-cluster-management.io/git-branch: my-git-branch
+  apps.open-cluster-management.io/git-path: test/gitops/tensorflow-housing-app/

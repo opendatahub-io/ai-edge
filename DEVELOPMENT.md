@@ -57,19 +57,35 @@ We use a mix of AWS and GCP to host these clusters for diversity. Typically you 
 > These instructions will assume that you are making changes to the existing `bike-rental-app`.
 
 * Create a new testing branch on your fork of the `opendatahub-io/ai-edge` repo, preferably named `<your-kerberos-name>-acm-dev`.
-* Update and push these files (please see [this example](https://github.com/grdryn/ai-edge/commit/39a89e5bcacb6ae5a5b649797e2341889a94ea42)):
-  * `acm/registration/near-edge/overlays/bike-rental-app/kustomization.yaml`
-    * Change the namespace, Git path, and channel patch to your fork.
-  * `acm/registration/near-edge/base/near-edge.yaml`
-    * Change the Git branch **and namespace** to your dev one.
-  * `acm/odh-edge/apps/bike-rental-app/kustomization.yaml`
-    * Change the namespace to your own dev one.
-* `oc apply -k acm/registration`
+* Ensure that you change `namespace` in either `test/gitops/bike-rental-app/kustomization.yaml` or `test/gitops/tensorflow-housing-app/kustomization.yaml`, or both, as appropriate.
+* Substitute the values of the `GIT_REPO_URL`, `GIT_BRANCH`, and `TEST_NAMESPACE` variables in this `make` command appropriately:
+NOTE: Escape the `:` in the `https://` protocol part of the `GIT_REPO_URL` value
+```bash
+make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" \
+     -e GIT_BRANCH=my-git-branch \
+     -e TEST_NAMESPACE=my-test-namespace \
+     test-acm-bike-rental-app-generate # or test-acm-tensorflow-housing-generate
+```
+* You can also do a dry-run apply of these manifests, by piping the output to `oc apply -f - --dry-run=client`, like this:
+
+```bash
+make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" \
+     -e GIT_BRANCH=my-git-branch \
+     -e TEST_NAMESPACE=my-test-namespace \
+     test-acm-bike-rental-app-generate # or test-acm-tensorflow-housing-generate | oc apply -f - --dry-run=client
+```
+* If everything looks correct, run the make target again and apply the manifests to the hub cluster without the dry-run option
+```bash
+make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" \
+     -e GIT_BRANCH=my-git-branch \
+     -e TEST_NAMESPACE=my-test-namespace \
+     test-acm-bike-rental-app-generate  | oc apply -f -
+```
 * Add your dev namespace to the near-edge Cluster Set's `Namespace Bindings`.
   * In the OpenShift Console, navigate to `All Clusters (dropdown in top left) -> Infrastructure -> Clusters -> Cluster sets -> <cluster-set-name> -> Namespace Bindings`.
 
       OR
-  
+
   * ```bash
       cat << EOF | oc apply -f -
       apiVersion: cluster.open-cluster-management.io/v1beta2
