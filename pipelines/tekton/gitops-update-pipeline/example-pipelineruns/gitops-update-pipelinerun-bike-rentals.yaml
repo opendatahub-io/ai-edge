@@ -12,6 +12,8 @@ spec:
     value: edge-user-1
   - name: gitRepoName
     value: ai-edge-gitops
+  - name: gitRepoBranchBase
+    value: main
   - name: imageDigest
     value: sha256:22590bbf246cd231abebc13d7b20761b7f70e614dca9e430a1069510bdba2820
   - name: imageReferenceFilePath
