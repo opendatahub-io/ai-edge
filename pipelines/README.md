@@ -137,12 +137,24 @@ oc create -f tekton/test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-ten
 oc create -f tekton/test-mlflow-image-pipeline/test-mlflow-image-pipelinerun-bike-rental.yaml
 ```
 
-Check what pipeline was created and run and what applications started either in OpenShift Console in Pipelines > Pipelines, Topology > select the application and its Resources and Pod logs, or with CLI find the names of the objects with
-
+Check what pipeline was created and run either in OpenShift Console in Pipelines > Pipelines,
+or using the CLI to find the names of the objects by issuing commands like
 ```bash
 oc get pipeline
 oc get pipelinerun
+```
+and then running `oc describe` on the reported objects.
+
+If you add
+```
+   - name: upon-end
+     value: keep
+```
+to the PipelineRun's `params`, the applications that got created for testing will not get deleted and you can inspect them in OpenShift Console for example in Topology > select the application and its Resources and Pod logs, or with CLI find the names of the objects with
+
+```bash
 oc get deployment
+oc get all
 ```
 and then run `oc describe` or `oc logs` on them, for example
 ```bash

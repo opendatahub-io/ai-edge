@@ -16,6 +16,9 @@ spec:
     type: string
   - name: target-imagerepo
     type: string
+  - name: upon-end
+    type: string
+    default: delete
   tasks:
   - name: deploy-container
     params:
@@ -100,6 +103,27 @@ spec:
     workspaces:
     - name: test-data
       workspace: test-data
+  - name: stop-deployment
+    params:
+    - name: SCRIPT
+      value: |
+        if [ "$(params.upon-end)" == "stop" ]; then
+          oc scale deployment.apps/$(params.model-name)-$(params.model-version) --replicas=0
+        elif [ "$(params.upon-end)" == "delete" ]; then
+          oc delete all --selector=app=$(params.model-name)-$(params.model-version)
+        elif [ "$(params.upon-end)" == "keep" ]; then
+          echo "Keeping the deployment running."
+        else
+          echo "Invalid value for upon-end parameter."
+          exit 1
+        fi
+    - name: VERSION
+      value: latest
+    runAfter:
+    - test-mlflow-rest-svc
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
   - name: skopeo-copy
     params:
     - name: srcImageURL
