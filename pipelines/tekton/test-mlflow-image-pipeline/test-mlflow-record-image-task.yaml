@@ -1,0 +1,21 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: record-image
+spec:
+  description: Record SHA of the built image
+  params:
+  - name: namespace
+    type: string
+  - name: model-name
+    type: string
+  - name: model-version
+    type: string
+  steps:
+  - name: get-image-sha
+    image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+    script: |
+      oc get -n $(params.namespace) -o jsonpath='{.status.tags[?(@.tag == "$(params.model-version)")].items[0].image}' imagestream/$(params.model-name) | tee $(results.image-sha.path)
+  results:
+  - name: image-sha
+    description: The image checksum

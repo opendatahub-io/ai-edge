@@ -19,6 +19,9 @@ spec:
   - name: upon-end
     type: string
     default: delete
+  results:
+  - name: image-sha
+    value: $(tasks.record-image.results.image-sha)
   tasks:
   - name: deploy-container
     params:
@@ -124,6 +127,19 @@ spec:
     taskRef:
       kind: ClusterTask
       name: openshift-client
+  - name: record-image
+    taskRef:
+      kind: Task
+      name: record-image
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: model-version
+      value: $(params.model-version)
+    - name: namespace
+      value: $(params.target-namespace)
+    runAfter:
+    - test-mlflow-rest-svc
   - name: skopeo-copy
     params:
     - name: srcImageURL

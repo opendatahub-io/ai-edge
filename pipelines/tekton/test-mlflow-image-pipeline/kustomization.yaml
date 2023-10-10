@@ -4,4 +4,5 @@ resources:
 - bike-rentals-test-data-cm.yaml
 - tensorflow-housing-test-data-cm.yaml
 - test-mlflow-rest-svc-task.yaml
+- test-mlflow-record-image-task.yaml
 - test-mlflow-image-pipeline.yaml
