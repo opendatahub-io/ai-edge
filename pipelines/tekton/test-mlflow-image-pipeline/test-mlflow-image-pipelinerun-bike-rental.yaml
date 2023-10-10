@@ -1,8 +1,6 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  labels:
-    tekton.dev/pipeline: test-mlflow-image
   generateName: test-mlflow-image-bike-rentals-
 spec:
   params:
