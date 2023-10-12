@@ -2,14 +2,15 @@
 
 Artifacts in support of ODH Edge use cases that show integration with Red Hat Advanced Cluster Management (Open Cluster Management)
 
-| Components                           | Version |
-|--------------------------------------|---------|
-| OpenShift                            | 4.13    |
-| Open Data Hub                        | 2.x     |
-| Red Hat Advanced Cluster Management  | 2.8     |
-| OpenShift Pipelines                  | 1.11.x  |
-| Quay Registry                        | 2.8     |
-| Gitea                                | 1.20.2  |
+| Components                                          | Version        |
+|-----------------------------------------------------|----------------|
+| OpenShift clusters (at least two) with admin access | 4.12 or higher |
+| GitHub account or Gitea installation                | [github.com](https://github.com/) |
+| AWS account with access to S3                       | [s3.console.aws.amazon.com](https://s3.console.aws.amazon.com/) |
+| Red Hat OpenShift Pipelines                         | 1.11 or higher |
+| Quay Registry account                               | [quay.io](https://quay.io/) |
+| Advanced Cluster Management for Kubernetes          | 2.8            |
+| Open Data Hub (optional)                            | 1.x or 2.x     |
 
 ## Proof of Concept Edge use case with ACM
 
