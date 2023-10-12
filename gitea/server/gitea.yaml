@@ -1,0 +1,30 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gitea
+---
+apiVersion: pfe.rhpds.com/v1
+kind: Gitea
+metadata:
+  name: gitea-ai-edge
+  namespace: gitea
+spec:
+  # Create the admin user
+  giteaAdminUser: admin-edge
+  giteaAdminEmail: admin@ai-edge
+  giteaAdminPassword: "opendatahub"
+
+  # Create the gitea users accounts to access the cluster
+  giteaCreateUsers: true
+  giteaGenerateUserFormat: "edge-user-%d"
+  # Change this to the number of users you want to pre-populate on the Gitea server
+  giteaUserNumber: 3
+  giteaUserPassword: "opendatahub"
+
+  # Populate each gitea user org with a clone of the entries in the giteaRepositoriesList
+  giteaMigrateRepositories: true
+  giteaRepositoriesList:
+  - repo: https://github.com/opendatahub-io/ai-edge.git
+    name: ai-edge-gitops
+    private: false

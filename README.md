@@ -6,15 +6,15 @@ For the purpose of a "near edge" Proof of Concept, the edge environment is repre
 managed from a core OpenShift cluster using Red Hat Advanced Cluster Management (ACM),
 based on the Open Cluster Management project.
 
-| Components                                          | Version        |
-|-----------------------------------------------------|----------------|
-| OpenShift clusters (at least two) with admin access | 4.12 or higher |
-| GitHub account or Gitea installation                | [github.com](https://github.com/) |
-| AWS account with access to S3                       | [s3.console.aws.amazon.com](https://s3.console.aws.amazon.com/) |
-| Red Hat OpenShift Pipelines                         | 1.11 or higher |
-| Quay Registry account                               | [quay.io](https://quay.io/) |
-| Advanced Cluster Management for Kubernetes          | 2.8            |
-| Open Data Hub (optional)                            | 1.x or 2.x     |
+| Components                                              | Version        |
+|---------------------------------------------------------|----------------|
+| OpenShift clusters (at least two) with admin access     | 4.12 or higher |
+| GitHub account or [Gitea installation](gitea/README.md) | [github.com](https://github.com/) |
+| AWS account with access to S3                           | [s3.console.aws.amazon.com](https://s3.console.aws.amazon.com/) |
+| Red Hat OpenShift Pipelines                             | 1.11 or higher |
+| Quay Registry account                                   | [quay.io](https://quay.io/) |
+| Advanced Cluster Management for Kubernetes              | 2.8            |
+| Open Data Hub (optional)                                | 1.x or 2.x     |
 
 ## Proof of Concept Edge use case with ACM
 
@@ -142,53 +142,6 @@ Everything should be shown green. If it is not, click the icon of the faulty obj
     * `oc -n openshift-monitoring edit configmap cluster-monitoring-config`
     * Set variable `enableUserWorkload` to `true`
   * Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.
-
-### Gitea in cluster git server for GitOps workflow
-
-You can use your own git server instead of GitHub.
-For example, the [gitea-operator](https://github.com/rhpds/gitea-operator) can be used to manage the Gitea server installation in the cluster.  It will simplify the setup so that you can create a minimal [Gitea](https://github.com/rhpds/gitea-operator#migrating-repositories-for-created-users) CR to configure and install the Gitea server.
-
-1. Wait for the gitea-operator installation to complete and the `gitea.pfe-rhpds.com` CRD is available on the `odh-core` cluster
-   ```
-   $ oc get crd gitea.pfe.rhpds.com
-   NAME                  CREATED AT
-   gitea.pfe.rhpds.com   2023-08-25T03:00:13Z
-   ```
-
-1. Create the Gitea CustomResource to deploy the server with an admin user
-   ```
-   cat <<EOF | oc apply -f -
-   ---
-   apiVersion: v1
-   kind: Namespace
-   metadata:
-     name: gitea
-   ---
-   apiVersion: pfe.rhpds.com/v1
-   kind: Gitea
-   metadata:
-     name: gitea-ai-edge
-     namespace: gitea
-   spec:
-     # Create the admin user
-     giteaAdminUser: admin-edge
-     giteaAdminEmail: admin@ai-edge
-     giteaAdminPassword: "opendatahub"
-
-     # Create the gitea users accounts to access the cluster
-     giteaCreateUsers: true
-     giteaGenerateUserFormat: "edge-user-%d"
-     giteaUserNumber: 3
-     giteaUserPassword: "opendatahub"
-
-     # Populate each gitea user org with a clone of the entries in the giteaRepositoriesList
-     giteaMigrateRepositories: true
-     giteaRepositoriesList:
-     - repo: https://github.com/opendatahub-io/ai-edge.git
-       name: ai-edge-gitops
-       private: false
-    EOF
-   ```
 
 ## Contributing
 
