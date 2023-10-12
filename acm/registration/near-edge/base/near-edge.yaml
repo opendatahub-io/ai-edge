@@ -1,9 +1,4 @@
 ---
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: near-edge-acm-template
----
 apiVersion: app.k8s.io/v1beta1
 kind: Application
 metadata:
