@@ -187,6 +187,14 @@ The `tekton/gitops-update-pipeline/example-pipelineruns/` contains some examples
 In these examples, notice that there is a template Secret file for the Git credentials that are referenced by different tasks.
 Create an equivalent Secret with appropriate details for your environment, and change the parameter values in the PipelineRun definition to match.
 
+NOTE: If you are using a branch other than `main` for your gitops workflow, you will need to modify the `PipelineRuns` examples under `tekton/gitops-update-pipeline/example-pipelineruns/` to set the `gitRepoBranchBase` parameter to your custom branch name
+```
+spec:
+  params:
+  - name: gitRepoBranchBase
+    value: <CUSTOM BRANCH NAME>
+```
+
 ``` bash
 # Bike rentals app
 cp pipelines/tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml /tmp/gitea-edge-user-1-secret.yaml
