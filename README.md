@@ -62,7 +62,9 @@ See [pipelines/README.md](pipelines/README.md)
   * Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.
 
 ### Gitea in cluster git server for GitOps workflow
-We are relying on the [gitea-operator](https://github.com/rhpds/gitea-operator) to manage the Gitea server installation in the cluster.  This will simplify the setup of Gitea so that we can create a minimal [Gitea](https://github.com/rhpds/gitea-operator#migrating-repositories-for-created-users) CR to configure and install the Gitea server.  The gitea-operator will be installed on the `odh-core` cluster as part of the ACM application rollout.
+
+You can use your own git server instead of GitHub.
+For example, the [gitea-operator](https://github.com/rhpds/gitea-operator) can be used to manage the Gitea server installation in the cluster.  It will simplify the setup so that you can create a minimal [Gitea](https://github.com/rhpds/gitea-operator#migrating-repositories-for-created-users) CR to configure and install the Gitea server.
 
 1. Wait for the gitea-operator installation to complete and the `gitea.pfe-rhpds.com` CRD is available on the `odh-core` cluster
    ```
