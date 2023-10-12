@@ -72,6 +72,7 @@ spec:
             PR_BRANCH=pipeline_$(context.pipelineRun.uid)
             git checkout -b $PR_BRANCH
 
+            sed -i -e "s%newName: .*%newName: $(tasks.retrieve-image-info.results.target-registry-url)%" $(params.imageReferenceFilePath)
             sed -i -e "s/digest: .*/digest: $(tasks.retrieve-image-info.results.image-sha)/" $(params.imageReferenceFilePath)
 
             if [ -z "$(git status --porcelain)" ]; then
@@ -124,6 +125,7 @@ spec:
             | PipelineRun Name | $(context.pipelineRun.name)                                               |
             | PipelinRun UID   | `$(context.pipelineRun.uid)`                                              |
             | File Path        | `$(params.imageReferenceFilePath)`                                        |
+            | Image registry   | `$(tasks.retrieve-image-info.results.target-registry-url)`                |
             | New Digest       | `$(tasks.retrieve-image-info.results.image-sha)`                          |
         - name: TITLE
           value: "Auto: update image ref"
