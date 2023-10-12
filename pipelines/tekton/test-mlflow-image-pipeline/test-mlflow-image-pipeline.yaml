@@ -143,7 +143,7 @@ spec:
   - name: skopeo-copy
     params:
     - name: srcImageURL
-      value: docker://image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)
+      value: docker://image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name)@$(tasks.record-image.results.image-sha)
     - name: destImageURL
       value: docker://quay.io/$(params.target-imagerepo)/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
     - name: srcTLSverify
@@ -151,7 +151,7 @@ spec:
     - name: destTLSverify
       value: "true"
     runAfter:
-    - test-mlflow-rest-svc
+    - record-image
     taskRef:
       kind: ClusterTask
       name: skopeo-copy
