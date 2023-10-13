@@ -33,6 +33,6 @@ patches:
 - patch: |-
     - op: replace
       path: /spec/pathname
-      value: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com/edge-user-2/ai-edge-gitops.git
+      value: https://github.com/opendatahub-io/ai-edge
   target:
     kind: Channel
