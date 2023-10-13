@@ -1,6 +1,10 @@
-# ODH AI Edge Use Cases
+# Open Data Hub / AI Edge Use Cases
 
-Artifacts in support of ODH Edge use cases that show integration with Red Hat Advanced Cluster Management (Open Cluster Management)
+This repository contains artifacts to show and support Open Data Hub and Red Hat OpenShift Data Science Edge use cases.
+
+For the purpose of a "near edge" Proof of Concept, the edge environment is represented by separate OpenShift cluster(s),
+managed from a core OpenShift cluster using Red Hat Advanced Cluster Management (ACM),
+based on the Open Cluster Management project.
 
 | Components                           | Version |
 |--------------------------------------|---------|
