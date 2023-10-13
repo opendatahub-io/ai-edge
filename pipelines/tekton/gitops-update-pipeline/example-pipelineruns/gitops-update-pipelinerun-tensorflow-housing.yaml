@@ -6,6 +6,8 @@ metadata:
     tekton.dev/pipeline: gitops-update-pipeline
 spec:
   params:
+  - name: model-name
+    value: tensorflow-housing
   - name: gitServer
     value: https://github.com
   - name: gitApiServer
@@ -16,8 +18,6 @@ spec:
     value: ai-edge-gitops
   - name: gitRepoBranchBase
     value: main
-  - name: imageDigest
-    value: sha256:19e7312d8cbfcbf21dcab083f9ef99af2f807f156b1216a423267010b7fdd7c0
   - name: imageReferenceFilePath
     value: acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
   - name: gitTokenSecretName

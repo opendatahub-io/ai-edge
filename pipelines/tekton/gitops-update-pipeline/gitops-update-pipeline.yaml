@@ -4,6 +4,8 @@ metadata:
   name: gitops-update-pipeline
 spec:
   params:
+    - name: model-name
+      type: string
     - name: gitServer
       type: string
     - name: gitApiServer
@@ -14,8 +16,6 @@ spec:
       type: string
     - name: gitRepoBranchBase
       default: main
-      type: string
-    - name: imageDigest
       type: string
     - name: imageReferenceFilePath
       type: string
@@ -28,6 +28,15 @@ spec:
       default: token
       type: string
   tasks:
+    - name: retrieve-image-info
+      taskRef:
+        kind: Task
+        name: retrieve-image-info
+      params:
+      - name: namespace
+        value: $(context.pipelineRun.namespace)
+      - name: model-name
+        value: $(params.model-name)
     - name: git-clone
       params:
         - name: url
@@ -63,7 +72,8 @@ spec:
             PR_BRANCH=pipeline_$(context.pipelineRun.uid)
             git checkout -b $PR_BRANCH
 
-            sed -i -e "s/digest: .*/digest: $(params.imageDigest)/" $(params.imageReferenceFilePath)
+            sed -i -e "s%newName: .*%newName: $(tasks.retrieve-image-info.results.target-registry-url)%" $(params.imageReferenceFilePath)
+            sed -i -e "s/digest: .*/digest: $(tasks.retrieve-image-info.results.image-sha)/" $(params.imageReferenceFilePath)
 
             if [ -z "$(git status --porcelain)" ]; then
                 echo "Update did not cause a modification"
@@ -77,6 +87,7 @@ spec:
         - name: VERBOSE
           value: "true"
       runAfter:
+        - retrieve-image-info
         - git-clone
       taskRef:
         kind: ClusterTask
@@ -114,7 +125,8 @@ spec:
             | PipelineRun Name | $(context.pipelineRun.name)                                               |
             | PipelinRun UID   | `$(context.pipelineRun.uid)`                                              |
             | File Path        | `$(params.imageReferenceFilePath)`                                        |
-            | New Digest       | `$(params.imageDigest)`                                                   |
+            | Image registry   | `$(tasks.retrieve-image-info.results.target-registry-url)`                |
+            | New Digest       | `$(tasks.retrieve-image-info.results.image-sha)`                          |
         - name: TITLE
           value: "Auto: update image ref"
       runAfter:

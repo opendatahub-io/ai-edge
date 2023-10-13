@@ -1,0 +1,22 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: retrieve-image-info
+spec:
+  description: Retrieve location and SHA of the built image from the previous PipelineRun
+  params:
+  - name: namespace
+    type: string
+  - name: model-name
+    type: string
+  steps:
+  - name: get-image-sha
+    image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+    script: |
+      oc get -n $(params.namespace) pipelinerun --selector tekton.dev/pipeline=test-mlflow-image --sort-by=.status.completionTime -o jsonpath='{range .items[?(@.spec.params[0].name == "model-name")]}{.spec.params[?(@.name == "model-name")].value} {.status.results[?(@.name == "image-sha")].value} {.status.results[?(@.name == "target-registry-url")].value}{"\n"}{end}' | awk -v model=$(params.model-name) '$1 == model && NF == 3 { print $2, $3 }' | tail -1 | tee /dev/stderr | while read sha registry ; do echo -n "$sha" > $(results.image-sha.path) ; echo -n "$registry" > $(results.target-registry-url.path) ; done ;
+      test -s $(results.image-sha.path) && test -s $(results.target-registry-url.path)
+  results:
+  - name: target-registry-url
+    description: The target-registry-url where the image will be stored
+  - name: image-sha
+    description: The image checksum

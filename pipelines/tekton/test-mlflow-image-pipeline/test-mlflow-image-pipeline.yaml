@@ -19,6 +19,11 @@ spec:
   - name: upon-end
     type: string
     default: delete
+  results:
+  - name: target-registry-url
+    value: $(tasks.record-image.results.target-registry-url)
+  - name: image-sha
+    value: $(tasks.record-image.results.image-sha)
   tasks:
   - name: deploy-container
     params:
@@ -124,18 +129,33 @@ spec:
     taskRef:
       kind: ClusterTask
       name: openshift-client
+  - name: record-image
+    taskRef:
+      kind: Task
+      name: record-image
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: model-version
+      value: $(params.model-version)
+    - name: namespace
+      value: $(params.target-namespace)
+    - name: target-registry-url
+      value: quay.io/$(params.target-imagerepo)/$(params.model-name)
+    runAfter:
+    - test-mlflow-rest-svc
   - name: skopeo-copy
     params:
     - name: srcImageURL
-      value: docker://image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)
+      value: docker://image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name)@$(tasks.record-image.results.image-sha)
     - name: destImageURL
-      value: docker://quay.io/$(params.target-imagerepo)/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
+      value: docker://$(tasks.record-image.results.target-registry-url):$(params.model-version)-$(context.pipelineRun.uid)
     - name: srcTLSverify
       value: "true"
     - name: destTLSverify
       value: "true"
     runAfter:
-    - test-mlflow-rest-svc
+    - record-image
     taskRef:
       kind: ClusterTask
       name: skopeo-copy

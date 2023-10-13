@@ -192,6 +192,9 @@ in your Git server.
 
 ### Deploy and run the GitOps pipeline
 
+The `gitops-update-pipeline` will fetch information about the last successfuly built and tested container image for the given model
+from the PipelineRun of the above Pipelines, and record information about that image in your git repo.
+
 ```bash
 oc apply -k tekton/gitops-update-pipeline/
 oc apply -f tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml
