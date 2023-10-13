@@ -7,9 +7,11 @@ metadata:
 spec:
   params:
   - name: gitServer
-    value: http://gitea-ai-edge-rhoai-edge-acm.apps.rhoai-edge-acm-poc.rhaiseng.com
+    value: https://github.com
+  - name: gitApiServer
+    value: api.github.com
   - name: gitOrgName
-    value: edge-user-1
+    value: username
   - name: gitRepoName
     value: ai-edge-gitops
   - name: gitRepoBranchBase
@@ -19,7 +21,7 @@ spec:
   - name: imageReferenceFilePath
     value: acm/odh-edge/apps/bike-rental-app/kustomization.yaml
   - name: gitTokenSecretName
-    value: gitea-edge-user-1
+    value: edge-user-1
   pipelineRef:
     name: gitops-update-pipeline
   serviceAccountName: pipeline
@@ -35,4 +37,4 @@ spec:
             storage: 1Gi
   - name: git-basic-auth
     secret:
-      secretName: gitea-edge-user-1
+      secretName: edge-user-1

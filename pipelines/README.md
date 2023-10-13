@@ -170,43 +170,36 @@ checksum as the one shown in the Image Stream.
 
 ## Deploy the GitOps pipeline
 
+We have so far worked with the upstream source repo.
+
+In this last pipeline we will use a clone of that repo to show how the identifier of the newly built and tested container image
+can be recorded in the repository via a pull request. For that we will need a clone or copy of this repository, in GitHub or
+in your Git server.
+
 ### Git Repository and Credentials
 
 - Clone/Mirror this repository on your Git server
-- Change the provided `gitops-git-user-` files to match your Git credentials
+- Update the `git*` parameters in
+  [`gitops-update-pipelinerun-bike-rentals.yaml`](tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml)
+  and/or
+  [`gitops-update-pipelinerun-tensorflow-housing.yaml`](tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml)
+  to match location of your repository and the target branch for the pull request.
+  The defaults assume `https://github.com/username/ai-edge-gitops` and `main`.
+- Update the [`example-git-credentials-secret.yaml`](tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml)
+  with your repository information and credentials.
+  For GitHub, the token can be generated at Settings > Developer Settings > Personal access tokens > Fine-grained tokens
+  and it should have Read access to metadata and Read and Write access to code and pull requests permissions to the repository you use.
 
-### Deploy the GitOps pipeline
+### Deploy and run the GitOps pipeline
 
 ```bash
 oc apply -k tekton/gitops-update-pipeline/
-```
-
-#### Run the GitOps pipeline
-
-The `tekton/gitops-update-pipeline/example-pipelineruns/` contains some examples that can be modified and used.
-In these examples, notice that there is a template Secret file for the Git credentials that are referenced by different tasks.
-Create an equivalent Secret with appropriate details for your environment, and change the parameter values in the PipelineRun definition to match.
-
-NOTE: If you are using a branch other than `main` for your gitops workflow, you will need to modify the `PipelineRuns` examples under `tekton/gitops-update-pipeline/example-pipelineruns/` to set the `gitRepoBranchBase` parameter to your custom branch name
-```
-spec:
-  params:
-  - name: gitRepoBranchBase
-    value: <CUSTOM BRANCH NAME>
-```
-
-``` bash
-# Bike rentals app
-cp pipelines/tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml /tmp/gitea-edge-user-1-secret.yaml
-$EDITOR /tmp/gitea-edge-user-1-secret.yaml # make changes for your specific environment
-oc apply -f /tmp/gitea-edge-user-1-secret.yaml
-
-oc create -f tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml
-
-# Tensorflow housing app
-cp pipelines/tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml /tmp/gitea-edge-user-2-secret.yaml
-$EDITOR /tmp/gitea-edge-user-2-secret.yaml # make changes for your specific environment
-oc apply -f /tmp/gitea-edge-user-2-secret.yaml
-
+oc apply -f tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml
 oc create -f tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml
+# and/or
+oc create -f tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml
 ```
+
+After the Pipeline Run(s) finish, check your git repository -- there should be a pull request with an update of the respective
+`acm/odh-edge/apps/*/kustomization.yaml` file with the SHA-256 of the new container image that got built, tested, and pushed to Quay
+in previous steps.
