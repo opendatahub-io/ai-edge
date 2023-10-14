@@ -18,39 +18,121 @@ based on the Open Cluster Management project.
 
 ## Proof of Concept Edge use case with ACM
 
-The main objective is to showcase that a user can take a trained model, use a pipeline to package it with all the dependencies into a container image, and deploy it at the near edge location(s) (represented by ACM-managed clusters) in a centralized way.
+The main objective is to showcase that a user can take a trained model,
+use pipelines to package it with all the dependencies into a container image,
+and deploy it at the near edge location(s) (represented by ACM-managed clusters) in a centralized way.
 
-### Infrastructure Configuration
+### Developing and training a model
 
-1. Provision OpenShift Cluster
-1. Configure the default Identity Provider
-1. Install Red Hat Advanced Cluster Management
-1. Register the clusters
+This step is out of scope of this Proof of Concept repository,
+as this repository already contains trained models in the [pipelines/models/](pipelines/models/) directory.
 
-   [ACM Application](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html/applications/managing-applications) manifests are located in [acm/registration](acm/registration) to register and configure the target environments required for the AI at the Edge use cases.  The files can be applied to the ACM hub cluster manually:
-   ```
-   $  oc apply -k acm/registration/
-   ```
-   * Core - Cluster host the ODH Core components that will be used in the MLOps Engineer workflow to train, build and push the model.  This cluster is not required to be co-located with the ACM Hub but we group them together to simplify the use case
-   * Near Edge - Cluster(s) that will host the running model at the edge.  This is the target environment after a new model is available for use
-1. Deploy Open Data Hub to the Core cluster and register any configurations to support pushing models to the edge cluster
-   * Open Data Hub - v2.x of the operator will be installed as part of the dependencies for the core cluster.  Manual installation of the [DataScienceCluster](https://github.com/opendatahub-io/opendatahub-operator#example-datasciencecluster) object will be required to deploy the Open Data Hub core stack to support the data science workflow
-   * GitOps repos
-   * Image repos
-1. Manage the edge cluster environments to support deployment of models and support for monitoring
-   * Configure ACM Observability
-   * Deploy the Model container
+If you wish to develop and train different models,
+Jupyter notebooks provided by [Open Data Hub](https://opendatahub.io/) (ODH)
+or [Red Hat OpenShift Data Science](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science) (RHODS) can be used.
+To install ODH or RHODS operators, admin privileges in the OpenShift cluster are needed.
 
-### MLOps Engineer workflows
+Working and deploying your own models might require bigger changes
+to the definition and configuration of the pipelines and ACM setup below,
+so you might want to start with the pre-built models first.
 
-1. Develop the model in an ODH Jupyter notebook
-1. Build the model from the notebook using Data Science Pipelines
-1. Push the model to the image registry accessible by the near edge cluster(s)
-1. Update the GitOps config for the near edge cluster
+### Building container image(s) with a model and serving runtime
 
-### Pipelines setup
+In [pipelines/README.md](pipelines/README.md) we show how to take the trained models,
+store them in a S3 bucket,
+build container image(s) with the model and serving runtime using OpenShift Pipelines,
+push the container image(s) to an image registry accessible by the near edge cluster(s),
+and update a clone of this repository with a pull request,
+configuring `acm/odh-edge/apps/*/kustomization.yaml` with location and digest (SHA-256) of the built images.
 
-See [pipelines/README.md](pipelines/README.md)
+You can skip this step if you do not wish to rebuild the container images.
+If you use the default configuration as shown in this git repository,
+you will use already built container images from the https://quay.io/organization/rhoai-edge repositories.
+
+### Serving to near edge remote clusters
+
+We assume that you have admin access to an OpenShift cluster where you can install and configure
+the Red Hat Advanced Cluster Management operator and which will serve as the central ACM hub.
+We also assume you have admin access to other OpenShift cluster(s) that you will import to the ACM hub cluster,
+these will play the role of near edge location(s) managed from the central ACM hub.
+
+#### ACM setup
+
+The following setup steps need to be done as an admin user with `cluster-admin` privileges.
+We will describe how to do them using the OpenShift Console but there may be other ways to achieve the same results.
+
+1. On the ACM hub cluster, install the Advanced Cluster Management for Kubernetes operator.
+   In the OpenShift Console of the cluster, find and install the operator
+   in Menu > Operators > OperatorHub.
+1. Create the MultiClusterHub.
+   In the OpenShift Console in Menu > Operators > Installed Operators > Advanced Cluster Management for Kubernetes >
+   the MultiClusterHub tab, use the "Create MultiClusterHub" button to create its configuration.
+1. Refresh the OpenShift Console page.
+1. Create a cluster set for your near edge clusters.
+   In the OpenShift Console this can be done in All Clusters menu > Infrastructure > Clusters > Cluster sets tab.
+   This repository assumes the name `poc-near-edge` in `clusterSets`
+   in [`acm/registration/near-edge/base/near-edge.yaml`](acm/registration/near-edge/base/near-edge.yaml)
+   so update that YAML file if you use a different name.
+1. Import the near edge cluster(s).
+   In the OpenShift Console this can be done in All Clusters menu > Infrastructure > Clusters > Cluster list tab.
+   In the Cluster set popup menu, select the cluster set you created for the near edge clusters.
+   If you use the Import mode of "Enter your server URL and API token for the existing cluster",
+   obtain the address of the server and the token on the other cluster's OpenShift Console 
+   at the top-right corner user menu > Copy login command, for an admin user.
+
+#### Create namespaces for applications
+
+For each of the deployed models-turned-into-application, we will create a separate namespace/project on the ACM hub cluster.
+The ACM setup in this repository expects namespaces `tensorflow-housing-app` and `bike-rental-app`.
+
+As a regular user in the OpenShift Console, in the local-cluster > Developer menu, Project popup, use the "Create Project" button;
+alternatively, run
+```bash
+oc new-project tensorflow-housing-app
+oc new-project bike-rental-app
+```
+
+#### Bind namespaces to the cluster set
+
+The newly created namespaces need to be bound to the cluster set that contains the near edge clusters.
+
+On the ACM hub cluster, in the OpenShift Console in the All Clusters menu > Infrastructure > Clusters > Cluster sets tab,
+click the three-dot button at the right of the cluster set, select Edit namespace bindings, and add the namespaces you've created.
+
+This is the last step that needs to be done as an admin user with `cluster-admin` privileges.
+
+#### Deploy the applications to remote clusters
+
+With the remote near edge clusters now in the cluster set and that cluster set bound to the application namespaces,
+it is now possible to deploy the applications to remote clusters through
+ACM [Channels](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html-single/applications/index#channels),
+[Subscriptions](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html-single/applications/index#subscriptions),
+[Placements](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html-single/applications/index#placement-rules),
+and [Applications](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html-single/applications/index#applications).
+
+We will create the objects in the respective namespaces from the `acm/registration/` directory structure.
+
+However, it is important to note that the actual application configuration, stored in `acm/odh-edge/`,
+does not come from our local git repository checkout.
+Instead, [`acm/registration/near-edge/overlays/tensorflow-housing-app/kustomization.yaml`](acm/registration/near-edge/overlays/tensorflow-housing-app/kustomization.yaml)
+and [`acm/registration/near-edge/overlays/bike-rental-app/kustomization.yaml`](acm/registration/near-edge/overlays/bike-rental-app/kustomization.yaml)
+contain source URLs of the git repositories that will become configurations of the ACM Channels,
+and the applications in those remote git repositories will be deployed.
+By default, [github.com/opendatahub-io/ai-edge](https://github.com/opendatahub-io/ai-edge) is configured;
+edit the URLs to match your repositories.
+
+Then run as a regular (non-admin) user
+```bash
+oc apply -k acm/registration/
+```
+
+#### View the application deployments
+
+In the OpenShift Console of the ACM hub cluster in All Clusters > Applications, filter for Subscriptions.
+You should see `tensorflow-housing-app-application` and `bike-rental-app-application` with Git resources.
+Clicking on the Subscription name and then on the Topology tab, you can see what objects were created on the remote cluster(s).
+
+Everything should be shown green. If it is not, click the icon of the faulty object and check the displayed information for debugging clues.
 
 ### Observability setup
 
