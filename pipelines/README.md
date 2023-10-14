@@ -28,6 +28,8 @@ They are also referenced by these names in the example pipeline YAML files.
 ## Prerequisites
 
 - OpenShift cluster with [OpenShift Pipelines Operator](https://docs.openshift.com/container-platform/4.13/cicd/pipelines/installing-pipelines.html) installed
+  - To install the operator, you need to log in as an admin user with `cluster-admins` privileges.
+  - All the following steps can and should be done as a regular user with no extra privileges.
 - OpenShift project / namespace. E.g.  `oc new-project model-to-edge`
 - A repository on [Quay.io](https://quay.io/)
 - S3 bucket for storing the models
