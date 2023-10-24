@@ -1,6 +1,6 @@
 # Open Data Hub / AI Edge Use Cases
 
-This repository contains artifacts to show and support Open Data Hub and Red Hat OpenShift Data Science Edge use cases.
+This repository contains artifacts to show and support Open Data Hub use cases.
 
 For the purpose of a "near edge" Proof of Concept, the edge environment is represented by separate OpenShift cluster(s),
 managed from a core OpenShift cluster using Red Hat Advanced Cluster Management (ACM),
@@ -14,13 +14,18 @@ based on the Open Cluster Management project.
 | Red Hat OpenShift Pipelines                             | 1.11 or higher |
 | Quay Registry account                                   | [quay.io](https://quay.io/) |
 | Advanced Cluster Management for Kubernetes              | 2.8            |
-| Open Data Hub (optional)                                | 1.x or 2.x     |
+| Open Data Hub                                           | 2.x            |
 
 ## Proof of Concept Edge use case with ACM
 
 The main objective is to showcase that a user can take a trained model,
 use pipelines to package it with all the dependencies into a container image,
 and deploy it at the near edge location(s) (represented by ACM-managed clusters) in a centralized way.
+
+The goal is to develop & incubate features in Open Data Hub that supports delivering and observing
+models running in Edge environments.  As this work continues, Open Data Hub will support the
+end-to-end workflow of building, training and pushing models to distributed environments within the 
+Open Data Hub user experience.
 
 ### Developing and training a model
 
@@ -29,8 +34,7 @@ as this repository already contains trained models in the [pipelines/models/](pi
 
 If you wish to develop and train different models,
 Jupyter notebooks provided by [Open Data Hub](https://opendatahub.io/) (ODH)
-or [Red Hat OpenShift Data Science](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science) (RHODS) can be used.
-To install ODH or RHODS operators, admin privileges in the OpenShift cluster are needed.
+To install ODH, admin privileges to install operators from OpenShift OperatorHub are required.
 
 Working and deploying your own models might require bigger changes
 to the definition and configuration of the pipelines and ACM setup below,
