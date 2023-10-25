@@ -6,4 +6,3 @@ resources:
   - operatorgroup.yaml
   - opendatahub-operator.yaml
   - openshift-pipelines.yaml
-  - ../gitea
