@@ -7,9 +7,12 @@ assignees: ''
 
 ---
 
+## Details
+
+### Description
+
 <!-- As an MLOps engineer I would like... -->
 
 ### Sub-tasks
 
 - [ ] #(issue number)
-
