@@ -4,6 +4,14 @@ kind: Kustomization
 resources:
 - ../../base
 
+# When authenticated Channel is required, set the user and accessToken,
+# and uncomment this section and the replacements section below
+#secretGenerator:
+#- name: git-credentials
+#  literals:
+#  - user=username
+#  - accessToken=access_token
+
 namespace: tensorflow-housing-app
 namePrefix: tensorflow-housing-app-
 
@@ -21,6 +29,18 @@ replacements:
       kind: Subscription
     fieldPaths:
       - spec.placement.placementRef.name
+#- source:
+#    kind: Secret
+#    name: git-credentials
+#    fieldPath: metadata.name
+#  targets:
+#  - select:
+#      group: apps.open-cluster-management.io
+#      kind: Channel
+#    fieldPaths:
+#      - spec.secretRef.name
+#    options:
+#      create: true
 
 # Can't do this as a "replacement", as needs to be of form namespace/name
 patches:
