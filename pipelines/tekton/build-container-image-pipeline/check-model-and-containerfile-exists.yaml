@@ -12,6 +12,8 @@ spec:
     type: string
   - name: containerfilePath
     type: string
+  - name: modelRelativePath
+    type: string
   steps:
   - name: check-model-and-containerfile
     image: registry.access.redhat.com/ubi9/ubi-micro
@@ -19,7 +21,7 @@ spec:
       #!/usr/bin/env bash
 
       # Check model files exist
-      ls -l $(params.model-name)/
+      ls -l model_dir/$(params.modelRelativePath)/$(params.model-name)/
 
       # Check containerfile exists
       cat $(params.containerfilePath)

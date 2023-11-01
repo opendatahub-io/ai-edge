@@ -19,7 +19,37 @@ spec:
     type: string
   - name: containerfileRelativePath
     type: string
+  - name: modelRelativePath
+    type: string
+  - name: fetch-git-model
+    type: string
+  - name: fetch-s3-model
+    type: string
+  - name: git-model-repo
+    type: string
+  - name: git-revision
+    type: string
   tasks:
+  - name: git-clone-model-repo
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    params:
+    - name: url
+      value: $(params.git-model-repo) 
+    - name: revision
+      value: $(params.git-revision)
+    - name: gitInitImage
+      value: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:1a50511583fc02a27012d17d942e247813404104ddd282d7e26f99765174392c
+    - name: subdirectory
+      value: /model_dir/
+    workspaces:
+    - name: output
+      workspace: buildah-cache
+    when:
+    - input: "$(params.fetch-git-model)"
+      operator: in
+      values: ["true"]
   - name: kserve-download-model
     params:
     - name: model-name
@@ -36,6 +66,10 @@ spec:
       workspace: buildah-cache
     - name: aws-secret
       workspace: aws-secret
+    when:
+    - input: "$(params.fetch-s3-model)"
+      operator: in
+      values: ["true"]
   - name: git-clone-containerfile-repo
     params:
       - name: url
@@ -44,8 +78,6 @@ spec:
         value: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:1a50511583fc02a27012d17d942e247813404104ddd282d7e26f99765174392c
       - name: subdirectory
         value: /containerfile_repo/
-    runAfter:
-      - kserve-download-model
     taskRef:
       kind: ClusterTask
       name: git-clone
@@ -58,6 +90,8 @@ spec:
     params:
     - name: model-name
       value: $(params.model-name)
+    - name: modelRelativePath
+      value: model_dir/$(params.modelRelativePath)
     - name: containerfilePath
       value: containerfile_repo/$(params.containerfileRelativePath)
     - name: current-namespace
@@ -93,7 +127,7 @@ spec:
     - name: DOCKERFILE
       value: containerfile_repo/$(params.containerfileRelativePath)
     - name: CONTEXT
-      value: $(params.model-name)
+      value: model_dir/$(params.modelRelativePath)/$(params.model-name)
     - name: TLSVERIFY
       value: "true"
     - name: FORMAT

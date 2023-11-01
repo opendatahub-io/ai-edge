@@ -12,30 +12,14 @@ spec:
     type: string
   - name: aws-bucket-name
     type: string
-  - name: fetch-github-model
-    type: string
-    default: "true"
-  - name: fetch-S3-model
-    type: string
-    default: "false"
-  - name: github-url
-    type: string
-    default: https://github.com/opendatahub-io/ai-edge/raw/3dd0242871371cf66af3f20e3a8924a4b5fc1658/pipelines/models/bike-rentals-auto-ml/model.pkl
   steps:
-  - name: download-model-github
-    image: curlimages/curl:latest
-    script: |
-      if [ "$(params.fetch-github-model)" = "true" ]; then
-        curl -L $(params.github-url) -o $(workspaces.workspace.path)/$(params.model-name).pkl
-      fi  
   - name: download-model-s3
     image: quay.io/opendatahub/kserve-storage-initializer:v0.11
     script: |
-      if [ "$(params.fetch-S3-model)" = "true" ]; then
+        mkdir -p $(workspaces.workspace.path)/model_dir/
         STORAGE_CONFIG="$(cat $(workspaces.aws-secret.path)/aws-storage-config)" /storage-initializer/scripts/initializer-entrypoint \
         's3://$(params.aws-bucket-name)/$(params.model-name)' \
-        $(workspaces.workspace.path)/$(params.model-name)
-      fi
+        $(workspaces.workspace.path)/model_dir/$(params.model-name)
   workspaces:
   - description: The workspace for the downloaded model.
     name: workspace
