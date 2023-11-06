@@ -1,4 +1,4 @@
-.PHONY: install install/observability-core install/observability-edge test-acm-%-generate
+.PHONY: install install/observability-core install/observability-edge test-acm-%-generate test
 
 install: install/observability-core install/observability-edge
 
@@ -27,3 +27,7 @@ ifndef TEST_NAMESPACE
 	$(error TEST_NAMESPACE is undefined)
 endif
 	kustomize build test/acm/$(subst -generate,,$(subst test-acm-,,$@))/ | sed -e "s|https://github.com/opendatahub-io/ai-edge|$(GIT_REPO_URL)|g" -e "s|my-git-branch|$(GIT_BRANCH)|g" -e "s|my-test-namespace|$(TEST_NAMESPACE)|g"
+
+# Dummy target to allow onboarding to openshift-ci
+test:
+	echo "The tests will be run here"
