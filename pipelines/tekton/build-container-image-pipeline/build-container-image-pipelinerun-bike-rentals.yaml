@@ -20,10 +20,8 @@ spec:
     value: ai-edge
   - name: containerfileRelativePath
     value: pipelines/containerfiles/Containerfile.seldonio.mlserver.mlflow
-  - name: fetch-git-model
-    value: "true"
-  - name: fetch-s3-model
-    value: "false"
+  - name: fetch-model
+    value: "git"
   - name: git-model-repo
     value: https://github.com/opendatahub-io/ai-edge.git
   - name: modelRelativePath
@@ -33,7 +31,7 @@ spec:
   pipelineRef:
     name: build-container-image
   serviceAccountName: pipeline
-  timeout: 1h0m0s  
+  timeout: 1h0m0s
   workspaces:
   - name: buildah-cache
     persistentVolumeClaim:
