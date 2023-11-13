@@ -30,6 +30,22 @@ spec:
     type: string
     default: "main"
   tasks:
+  - name: copy-model-from-pvc
+    taskRef:
+      kind: Task
+      name: copy-model-from-pvc
+    params:
+    - name: modelRelativePath
+      value: model_dir/$(params.modelRelativePath)
+    workspaces:
+    - name: source-workspace
+      workspace: model-workspace
+    - name: destination-workspace
+      workspace: buildah-cache
+    when:
+    - input: "$(params.fetch-model)"
+      operator: in
+      values: ["pvc"]
   - name: git-clone-model-repo
     taskRef:
       kind: ClusterTask
@@ -149,6 +165,7 @@ spec:
       workspace: buildah-cache
   workspaces:
   - name: buildah-cache
+  - name: model-workspace
   - name: aws-secret
   - name: git-basic-auth
     optional: true

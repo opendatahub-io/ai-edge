@@ -5,3 +5,4 @@ resources:
 - kserve-download-model.yaml
 - check-model-and-containerfile-exists.yaml
 - build-container-image-pipeline.yaml
+- copy-model-from-pvc.yaml

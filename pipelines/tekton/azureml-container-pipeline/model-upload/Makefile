@@ -6,7 +6,8 @@ create:
 
 .PHONY: upload_model
 upload_model:
-	@oc cp ${MODEL_PATH} local-model-to-pvc-pod:/workspace/${PVC}/file.txt
+	@oc exec local-model-to-pvc-pod -- mkdir workspace/${PVC}/model_dir/pipelines/models/ -p
+	@oc cp ${MODEL_PATH} local-model-to-pvc-pod:/workspace/${PVC}/model_dir/pipelines/models/${NAME}
 
 .PHONY: clean
 clean:
