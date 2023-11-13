@@ -78,6 +78,9 @@ spec:
       value: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:1a50511583fc02a27012d17d942e247813404104ddd282d7e26f99765174392c
     - name: subdirectory
       value: /containerfile_repo/
+    runAfter:
+    - kserve-download-model
+    - git-clone-model-repo
     taskRef:
       kind: ClusterTask
       name: git-clone
@@ -86,9 +89,6 @@ spec:
       workspace: buildah-cache
     - name: basic-auth
       workspace: git-basic-auth
-    runAfter:
-    - kserve-download-model
-    - git-clone-model-repo
   - name: check-model-and-containerfile-exists
     params:
     - name: model-name
