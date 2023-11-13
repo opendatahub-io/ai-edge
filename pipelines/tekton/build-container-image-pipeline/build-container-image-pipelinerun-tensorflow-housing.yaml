@@ -20,6 +20,10 @@ spec:
     value: ai-edge
   - name: containerfileRelativePath
     value: pipelines/containerfiles/Containerfile.openvino.mlserver.mlflow
+  - name: fetch-model
+    value: "s3"
+  - name: modelRelativePath
+    value: ""
   pipelineRef:
     name: build-container-image
   serviceAccountName: pipeline

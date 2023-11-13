@@ -25,8 +25,10 @@ spec:
     type: string
   - name: git-model-repo
     type: string
+    default: ""
   - name: git-revision
     type: string
+    default: "main"
   tasks:
   - name: git-clone-model-repo
     taskRef:
