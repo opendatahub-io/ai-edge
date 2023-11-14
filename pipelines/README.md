@@ -32,7 +32,7 @@ They are also referenced by these names in the example pipeline YAML files.
   - All the following steps can and should be done as a regular user with no extra privileges.
 - OpenShift project / namespace. E.g.  `oc new-project model-to-edge`
 - A repository on [Quay.io](https://quay.io/)
-- S3 bucket for storing the models
+- S3 bucket for storing the models or Git repository storing the model files
 - A clone of this repository
 
 ## Deploy build pipeline for AI runtime container images
@@ -56,11 +56,15 @@ oc create -f tekton/build-container-image-pipeline/aws-env-real.yaml
 
 ### Deploy and run the build pipeline
 
+#### For S3 fetch
 Update the `aws-bucket-name` parameter value from its default `rhoai-edge-models` in
 [`build-container-image-pipelinerun-bike-rentals.yaml`](tekton/build-container-image-pipeline/build-container-image-pipelinerun-bike-rentals.yaml)
 and/or
 [`build-container-image-pipelinerun-tensorflow-housing.yaml`](tekton/build-container-image-pipeline/build-container-image-pipelinerun-tensorflow-housing.yaml)
 to match your S3 bucket name.
+
+#### For Git fetch
+Update the `git-model-repo` parameter with the repository url, the `modelRelativePath` parameter to the model files path and the `git-revision` parameter for the version/branch of the repository in [`build-container-image-pipelinerun-bike-rentals.yaml`](tekton/build-container-image-pipeline/build-container-image-pipelinerun-bike-rentals.yaml).
 
 Then create the pipeline(s) to build the container image with AI runtime:
 
