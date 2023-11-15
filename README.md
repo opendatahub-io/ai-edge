@@ -141,7 +141,9 @@ Everything should be shown green. If it is not, click the icon of the faulty obj
   * Enable [monitoring for user-defined projects](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/monitoring/enabling-monitoring-for-user-defined-projects) in OpenShift clusters
     * `oc -n openshift-monitoring edit configmap cluster-monitoring-config`
     * Set variable `enableUserWorkload` to `true`
+* Core/Hub cluster
   * Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.
+  * Install the ACM observability stack by running `make install`
 
 ## Contributing
 

@@ -21,3 +21,8 @@ secretGenerator:
   - secrets/thanos.yaml
   options:
     disableNameSuffixHash: true
+- name: observability-metrics-custom-allowlist
+  files:
+  - files/metrics_list.yaml
+  options:
+    disableNameSuffixHash: true
