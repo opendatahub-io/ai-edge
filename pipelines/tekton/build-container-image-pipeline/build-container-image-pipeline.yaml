@@ -19,7 +19,37 @@ spec:
     type: string
   - name: containerfileRelativePath
     type: string
+  - name: modelRelativePath
+    type: string
+  - name: fetch-model
+    type: string
+  - name: git-model-repo
+    type: string
+    default: ""
+  - name: git-revision
+    type: string
+    default: "main"
   tasks:
+  - name: git-clone-model-repo
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    params:
+    - name: url
+      value: $(params.git-model-repo)
+    - name: revision
+      value: $(params.git-revision)
+    - name: gitInitImage
+      value: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:1a50511583fc02a27012d17d942e247813404104ddd282d7e26f99765174392c
+    - name: subdirectory
+      value: /model_dir/
+    workspaces:
+    - name: output
+      workspace: buildah-cache
+    when:
+    - input: "$(params.fetch-model)"
+      operator: in
+      values: ["git"]
   - name: kserve-download-model
     params:
     - name: model-name
@@ -36,34 +66,41 @@ spec:
       workspace: buildah-cache
     - name: aws-secret
       workspace: aws-secret
+    when:
+    - input: "$(params.fetch-model)"
+      operator: in
+      values: ["s3"]
   - name: git-clone-containerfile-repo
     params:
-      - name: url
-        value: $(params.gitServer)/$(params.gitOrgName)/$(params.gitRepoName)
-      - name: gitInitImage
-        value: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:1a50511583fc02a27012d17d942e247813404104ddd282d7e26f99765174392c
-      - name: subdirectory
-        value: /containerfile_repo/
+    - name: url
+      value: $(params.gitServer)/$(params.gitOrgName)/$(params.gitRepoName)
+    - name: gitInitImage
+      value: registry.redhat.io/openshift-pipelines/pipelines-git-init-rhel8@sha256:1a50511583fc02a27012d17d942e247813404104ddd282d7e26f99765174392c
+    - name: subdirectory
+      value: /containerfile_repo/
     runAfter:
-      - kserve-download-model
+    - kserve-download-model
+    - git-clone-model-repo
     taskRef:
       kind: ClusterTask
       name: git-clone
     workspaces:
-      - name: output
-        workspace: buildah-cache
-      - name: basic-auth
-        workspace: git-basic-auth
+    - name: output
+      workspace: buildah-cache
+    - name: basic-auth
+      workspace: git-basic-auth
   - name: check-model-and-containerfile-exists
     params:
     - name: model-name
       value: $(params.model-name)
+    - name: modelRelativePath
+      value: model_dir/$(params.modelRelativePath)
     - name: containerfilePath
       value: containerfile_repo/$(params.containerfileRelativePath)
     - name: current-namespace
       value: $(context.pipelineRun.namespace)
     runAfter:
-      - git-clone-containerfile-repo
+    - git-clone-containerfile-repo
     taskRef:
       kind: Task
       name: check-model-and-containerfile-exists
@@ -78,7 +115,7 @@ spec:
     - name: VERSION
       value: latest
     runAfter:
-     - check-model-and-containerfile-exists
+    - check-model-and-containerfile-exists
     taskRef:
       kind: ClusterTask
       name: openshift-client
@@ -93,7 +130,7 @@ spec:
     - name: DOCKERFILE
       value: containerfile_repo/$(params.containerfileRelativePath)
     - name: CONTEXT
-      value: $(params.model-name)
+      value: model_dir/$(params.modelRelativePath)/$(params.model-name)
     - name: TLSVERIFY
       value: "true"
     - name: FORMAT

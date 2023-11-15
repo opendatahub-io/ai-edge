@@ -20,6 +20,14 @@ spec:
     value: ai-edge
   - name: containerfileRelativePath
     value: pipelines/containerfiles/Containerfile.seldonio.mlserver.mlflow
+  - name: fetch-model
+    value: "git"
+  - name: git-model-repo
+    value: https://github.com/opendatahub-io/ai-edge.git
+  - name: modelRelativePath
+    value: pipelines/models/
+  - name: git-revision
+    value: "main"
   pipelineRef:
     name: build-container-image
   serviceAccountName: pipeline
