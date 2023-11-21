@@ -1,3 +1,8 @@
+# Used for uploading local model files to the cluster through a 
+# PVC. Use create to create the pod and PVC needed, then use
+# upload model to upload a local file the PVC that the pod
+# is mounted to
+
 # Creates a PVC and a pod which mounts the PVC create
 # SIZE - size of the storage used in the PVC created
 # PVC - name of the PVC 
