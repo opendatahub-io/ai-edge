@@ -1,25 +1,22 @@
 package support
 
 import (
-	"flag"
 	"k8s.io/client-go/kubernetes"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
+	"os"
 	"path/filepath"
 )
 
 func ClusterClientSet() (*kubernetes.Clientset, error) {
-	var kubeConfig *string
-	if home := homedir.HomeDir(); home != "" {
-		kubeConfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeConfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
+	kubeConfig := os.Getenv("KUBECONFIG")
+	if kubeConfig == "" {
+		kubeConfig = getDefaultKubeConfigLocation()
 	}
-	flag.Parse()
 
 	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeConfig)
+	config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -30,4 +27,8 @@ func ClusterClientSet() (*kubernetes.Clientset, error) {
 	}
 
 	return clientset, nil
+}
+
+func getDefaultKubeConfigLocation() string {
+	return filepath.Join(homedir.HomeDir(), ".kube", "config")
 }
