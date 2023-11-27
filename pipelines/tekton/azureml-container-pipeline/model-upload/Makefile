@@ -22,7 +22,6 @@ upload_model:
 	@oc cp ${MODEL_PATH} local-model-to-pvc-pod:/workspace/${PVC}/model_dir/pipelines/models/${NAME}
 
 # deletes the pod created from the template
-# PVC - name of he PVC that is mounted to the pod
 .PHONY: clean
 clean:
-	@oc process -f local-model-to-pvc-pod.yaml -p PVC=${PVC} | oc delete -f -
+	@oc delete pod local-model-to-pvc-pod

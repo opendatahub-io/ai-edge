@@ -25,5 +25,4 @@ objects:
 parameters:
 - name: PVC
   description: Name of PVC to be mounted to pod
-  from: '[A-Z0-9]{8}'
-  generate: expression
+  value: local-model
