@@ -1,3 +1,5 @@
+GO=go
+
 .PHONY: test
 test:
-	@(cd tests && go test)
+	@(cd tests && ${GO} test)
