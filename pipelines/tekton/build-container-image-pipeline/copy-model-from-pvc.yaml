@@ -5,20 +5,24 @@ metadata:
 spec:
   description: This Task can be used to copy a model from another pvc
   params:
-  - name: modelRelativePath
+  - name: model-name
     type: string
   steps:
   - name: download-model-s3
     image: quay.io/opendatahub/kserve-storage-initializer:v0.11
     script: |
-      echo "Copying model file $(workspaces.source-workspace.path)/$(params.modelRelativePath)"
-      echo "to $(workspaces.destination-workspace.path)/$(params.modelRelativePath)"
+      SOURCE_PATH="$(workspaces.source-workspace.path)/model_dir/$(params.model-name)"
+      
+      DEST_PATH="$(workspaces.destination-workspace.path)/model_dir/$(params.model-name)"
 
-      DIR_PATH="$(dirname $(workspaces.destination-workspace.path)/$(params.modelRelativePath))"
+      echo "Copying model file $SOURCE_PATH"
+      echo "to $DEST_PATH"
+
+      DIR_PATH="$(dirname $(workspaces.destination-workspace.path)/model_dir/$(params.model-name))"
 
       mkdir -p $DIR_PATH
 
-      cp $(workspaces.source-workspace.path)/$(params.modelRelativePath) $(workspaces.destination-workspace.path)/$(params.modelRelativePath)
+      cp $SOURCE_PATH $DEST_PATH 
   workspaces:
   - description: The workspace the model is being copied from
     name: source-workspace

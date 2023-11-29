@@ -35,8 +35,8 @@ spec:
       kind: Task
       name: copy-model-from-pvc
     params:
-    - name: modelRelativePath
-      value: model_dir/$(params.modelRelativePath)
+    - name: model-name
+      value: $(params.model-name)
     workspaces:
     - name: source-workspace
       workspace: model-workspace
