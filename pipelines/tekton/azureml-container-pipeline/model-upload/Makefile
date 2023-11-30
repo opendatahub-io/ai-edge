@@ -1,12 +1,12 @@
 # Used for uploading local model files to the cluster through a 
-# PVC. Use create to create the pod and PVC needed, then use
-# upload model to upload a local file the PVC that the pod
-# is mounted to
+# pod to a PVC. Use the create target to create the pod and PVC
+# needed and upload the file
 
 SIZE=1G
 PVC=model-upload-pvc
 
-# Creates a PVC and a pod which mounts the PVC create
+# Creates a PVC and a pod which mounts the PVC created
+# then uploads the file given
 # SIZE - size of the storage used in the PVC created
 # PVC - name of the PVC 
 # MODEL_PATH - local path to model file to upload 
@@ -22,11 +22,9 @@ create:
 	@oc exec local-model-to-pvc-pod -- mkdir workspace/${PVC}/model_dir/ -p
 	@oc cp ${MODEL_PATH} local-model-to-pvc-pod:/workspace/${PVC}/model_dir/${NAME}
 
+# delete pod
+	@oc delete pod local-model-to-pvc-pod
+
 	@echo "PVC name: ${PVC}" 
 	@echo "Size: ${SIZE}" 
 	@echo "Model path in pod: /workspace/${PVC}/model_dir/${NAME}" 
-
-# deletes the pod created from the template
-.PHONY: clean
-clean:
-	@oc delete pod local-model-to-pvc-pod
