@@ -145,6 +145,31 @@ Everything should be shown green. If it is not, click the icon of the faulty obj
   * Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.
   * Install the ACM observability stack by running `make install`
 
+### Using local models in pipelines
+
+In `pipelines/tekton/azureml-container-pipeline/model-upload/` you can upload a local 
+model file to be used in our pipelines. This is done by uploading a model to a PVC
+and copying that model to our pipeline's workspace for use while it is running.
+
+Upload model to PVC:
+```bash
+make MODEL_PATH="PATH_TO_A_FILE" NAME=my-model create
+```
+You should get a final output showing details of the upload
+```
+PVC name: model-upload-pvc
+Size: 1G
+Model path in pod: /workspace/model-upload-pvc/model_dir/model.model
+```
+You can set the `SIZE` and `PVC` values aswell
+```bash
+make MODEL_PATH="PATH_TO_A_FILE" NAME=my-model SIZE=1G PVC=my-new-PVC create
+```
+
+In `pipelines/tekton/build-container-image-pipeline` you can set the 
+`fetch-model` to `pvc` for the pipeline to copy the file from the 
+`model-workspace` which can be set to the PVC created in the last step
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).

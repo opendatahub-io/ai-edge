@@ -1,0 +1,28 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: local-model-to-pvc-pod-template
+objects:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    name: local-model-to-pvc-pod
+  spec:
+    volumes:
+      - name: ${PVC}
+        persistentVolumeClaim:
+          claimName: ${PVC}
+    containers:
+    - name: local-model-to-pvc-container
+      image: ubi9
+      stdin: true
+      tty: true
+      securityContext:
+        allowPrivilegeEscalation: false
+      volumeMounts:
+          - mountPath: /workspace/${PVC}
+            name: ${PVC}
+parameters:
+- name: PVC
+  description: Name of PVC to be mounted to pod
+  value: local-model

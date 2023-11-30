@@ -33,6 +33,9 @@ spec:
   serviceAccountName: pipeline
   timeout: 1h0m0s
   workspaces:
+  - name: model-workspace
+    persistentVolumeClaim:
+      claimName: basic-pvc
   - name: buildah-cache
     persistentVolumeClaim:
       claimName: buildah-cache-pvc
