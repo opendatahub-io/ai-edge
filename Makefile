@@ -28,6 +28,8 @@ ifndef TEST_NAMESPACE
 endif
 	kustomize build test/acm/$(subst -generate,,$(subst test-acm-,,$@))/ | sed -e "s|https://github.com/opendatahub-io/ai-edge|$(GIT_REPO_URL)|g" -e "s|my-git-branch|$(GIT_BRANCH)|g" -e "s|my-test-namespace|$(TEST_NAMESPACE)|g"
 
-# Dummy target to allow onboarding to openshift-ci
+GO=go
+GOFLAGS=""
+
 test:
-	echo "The tests will be run here"
+	@(cd test/e2e-tests/tests && ${GO} test)
