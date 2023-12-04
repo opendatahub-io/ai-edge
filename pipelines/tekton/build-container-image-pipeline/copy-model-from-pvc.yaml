@@ -8,11 +8,11 @@ spec:
   - name: model-name
     type: string
   steps:
-  - name: download-model-s3
+  - name: copy-model-from-pvc
     image: quay.io/opendatahub/kserve-storage-initializer:v0.11
     script: |
       SOURCE_PATH="$(workspaces.source-workspace.path)/model_dir/$(params.model-name)"
-      
+
       DEST_PATH="$(workspaces.destination-workspace.path)/model_dir/$(params.model-name)"
 
       echo "Copying model file $SOURCE_PATH"
@@ -22,7 +22,7 @@ spec:
 
       mkdir -p $DIR_PATH
 
-      cp $SOURCE_PATH $DEST_PATH 
+      cp -r $SOURCE_PATH $DEST_PATH
   workspaces:
   - description: The workspace the model is being copied from
     name: source-workspace
