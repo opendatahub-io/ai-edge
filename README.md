@@ -147,7 +147,7 @@ Everything should be shown green. If it is not, click the icon of the faulty obj
 
 ### Using local models in pipelines
 
-In `pipelines/tekton/azureml-container-pipeline/model-upload/` you can upload a local 
+In `pipelines/model-upload/` you can upload a local 
 model file to be used in our pipelines. This is done by uploading a model to a PVC
 and copying that model to our pipeline's workspace for use while it is running.
 
