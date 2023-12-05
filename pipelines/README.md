@@ -2,7 +2,11 @@
 
 ## Models
 
-This repository contains the following trained example MLflow models: [bike-rentals-auto-ml](models/bike-rentals-auto-ml/) and [tensorflow-housing](models/tensorflow-housing/):
+This repository contains the following trained examples.
+
+### MLflow models
+
+The [bike-rentals-auto-ml](models/bike-rentals-auto-ml/) and [tensorflow-housing](models/tensorflow-housing/):
 
 ```plaintext
 bike-rentals-auto-ml/
@@ -24,6 +28,43 @@ tensorflow-housing/
 ```
 
 They are also referenced by these names in the example pipeline YAML files.
+
+### OVMS models
+
+The [MNIST](models/onnx-mnist) and the [Face Detection](models/tensorflow-facedetection):
+```plaintext
+onnx-mnist/
+├── 1
+│   ├── mnist.onnx
+│   └── schema
+│       └── schema.json
+└── README.md
+
+tensorflow-facedetection/
+├── 1
+│   ├── face-detection-retail-0004.bin
+│   └── face-detection-retail-0004.xml
+└── README.md
+
+```
+### Seldon ML Server models
+
+The [Iris](models/lightgbm-iris) and the [Mushrooms](models/lightgbm-mushrooms):
+```plaintext
+lightgbm-iris/
+├── iris-lightgbm.bst
+├── model-settings.json
+├── README.md
+└── settings.json
+
+lightgbm-mushrooms/
+├── model-settings.json
+├── mushroom-lightgbm.bst
+├── README.md
+└── settings.json
+
+
+```
 
 ## Prerequisites
 
