@@ -212,3 +212,23 @@ oc create -f tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pi
 After the Pipeline Run(s) finish, check your git repository -- there should be a pull request with an update of the respective
 `acm/odh-edge/apps/*/kustomization.yaml` file with the SHA-256 of the new container image that got built, tested, and pushed to Quay
 in previous steps.
+
+#### View the PipelineRun results
+
+If the PipelineRun completes successfully, you can see the results in the OpenShift Console by going to Pipelines > PipelineRuns > (Select your PipelineRun and scroll down).
+
+You can also click on the "YAML" tab in the PipelineRun and scroll down to the `pipelineResults` section, it will look something like this:
+
+<details><summary>Typical GitOps pipeline results</summary>
+
+```yaml
+  pipelineResults:
+    - name: target-registry-url
+      value: quay.io/pplaczek/tensorflow-housing
+    - name: image-sha
+      value: 'sha256:0cc9a636c2f18b0f15224a234995ecd27a3dc2e5eb7ffefc8ecfd72c099da31f'
+    - name: pr-url
+      value: 'https://github.com/piotrpdev/ai-edge/pull/5'
+```
+
+</details>

@@ -4,4 +4,4 @@ resources:
 - check-model-and-containerfile-exists.yaml
 - kserve-download-model.yaml
 - test-model-rest-svc-task.yaml
-- retrieve-image-digest.task.yaml
+- retrieve-build-image-info.task.yaml

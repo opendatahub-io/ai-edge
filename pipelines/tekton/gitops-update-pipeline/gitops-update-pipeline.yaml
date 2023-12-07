@@ -27,6 +27,19 @@ spec:
     - name: gitTokenSecretKey
       default: token
       type: string
+    - name: useMergedBuildTestPipeline
+      type: string
+      default: "false"
+  results:
+    - name: target-registry-url
+      description: The url of the target registry (e.g. quay.io/rhoai-models/ai-model/)
+      value: $(tasks.retrieve-image-info.results.target-registry-url)
+    - name: image-sha
+      description: The image digest used to tag the image
+      value: $(tasks.retrieve-image-info.results.image-sha)
+    - name: pr-url
+      description: The URL of the pull request
+      value: $(tasks.open-pr.results.URL)
   tasks:
     - name: retrieve-image-info
       taskRef:
@@ -37,6 +50,8 @@ spec:
         value: $(context.pipelineRun.namespace)
       - name: model-name
         value: $(params.model-name)
+      - name: useMergedBuildTestPipeline
+        value: $(params.useMergedBuildTestPipeline)
     - name: git-clone
       params:
         - name: url
