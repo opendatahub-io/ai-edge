@@ -5,5 +5,4 @@ commonLabels:
   app.kubernetes.io/part-of: rhoai-edge-pipelines
 resources:
 - tasks/
-- build-container-image-buildah-cache-pvc.yaml
 - aiedge-e2e.pipeline.yaml
