@@ -14,6 +14,7 @@ spec:
   - name: s3-bucket-name
     type: string
     description: "[S3 ONLY] S3 bucket name where the model is stored"
+    default: ""
   - name: gitServer
     type: string
     description: Root domain of the Git server
