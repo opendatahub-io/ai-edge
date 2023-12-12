@@ -1,0 +1,27 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: kserve-download-model
+spec:
+  description: This Task can be used to a download a model
+  params:
+  - name: model-name
+    type: string
+  - name: current-namespace
+    default: "default"
+    type: string
+  - name: s3-bucket-name
+    type: string
+  steps:
+  - name: download-model-s3
+    image: quay.io/opendatahub/kserve-storage-initializer:v0.11
+    script: |
+      mkdir -p $(workspaces.workspace.path)/model_dir/
+      STORAGE_CONFIG="$(cat $(workspaces.s3-secret.path)/s3-storage-config)" /storage-initializer/scripts/initializer-entrypoint \
+      's3://$(params.s3-bucket-name)/$(params.model-name)' \
+      $(workspaces.workspace.path)/model_dir/$(params.model-name)
+  workspaces:
+  - description: The workspace for the downloaded model.
+    name: workspace
+  - description: The S3 secret.
+    name: s3-secret

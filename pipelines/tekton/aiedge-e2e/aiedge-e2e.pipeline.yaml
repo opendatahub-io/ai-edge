@@ -1,0 +1,323 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: aiedge-e2e
+spec:
+  params:
+  - name: model-name
+    type: string
+    description: Name of the directory where the model files are stored
+  - default: "1"
+    name: model-version
+    type: string
+    description: Version of the model
+  - name: s3-bucket-name
+    type: string
+    description: "[S3 ONLY] S3 bucket name where the model is stored"
+    default: ""
+  - name: gitServer
+    type: string
+    description: Root domain of the Git server
+  - name: gitOrgName
+    type: string
+    description: Organization or Group name where the repo is located
+  - name: gitRepoName
+    type: string
+    description: Git repository name
+  - name: containerfileRelativePath
+    type: string
+    description: Path to the Containerfile in the git repository for model server imagebuild
+  - name: modelRelativePath
+    type: string
+    description: "Location of the model within the context of the source location.  Leave blank if the model files are at the root of the source location."
+  - name: fetch-model
+    type: string
+    description: "Fetch the model from Git or S3. Valid values in [s3, git]"
+  - name: git-model-repo
+    type: string
+    description: The git repo url where the model files are stored
+    default: ""
+  - name: git-revision
+    type: string
+    description: The Git ref to use when cloning the git repo with the saved model
+    default: "main"
+  - name: test-endpoint
+    type: string
+    description: The inferencing endpoint for the model to use for testing
+  - default: $(context.pipelineRun.namespace)
+    name: target-namespace
+    type: string
+  - name: target-imagerepo
+    type: string
+    description: "The image registry name where the model container for the final image push. Currently supports using quay.io/<target-imagerepo>"
+  - name: upon-end
+    type: string
+    description: "Action to perform on the k8s deployment created to test the model container image. Valid values in [delete, keep, stop]"
+    default: delete
+  results:
+  - name: target-registry-url
+    value: $(tasks.retrieve-image-digest.results.target-registry-url)
+  - name: image-sha
+    value: $(tasks.retrieve-image-digest.results.image-sha)
+  tasks:
+  - name: fetch-model-git
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    params:
+    - name: url
+      value: $(params.git-model-repo)
+    - name: revision
+      value: $(params.git-revision)
+    - name: subdirectory
+      value: /model_dir/
+    workspaces:
+    - name: output
+      workspace: buildah-cache
+    when:
+    - input: "$(params.fetch-model)"
+      operator: in
+      values: ["git"]
+  # Use kserve-download-model container image to fetch from S3 storage
+  - name: fetch-model-s3
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: current-namespace
+      value: $(context.pipelineRun.namespace)
+    - name: s3-bucket-name
+      value: $(params.s3-bucket-name)
+    taskRef:
+      kind: Task
+      name: kserve-download-model
+    workspaces:
+    - name: workspace
+      workspace: buildah-cache
+    - name: s3-secret
+      workspace: s3-secret
+    when:
+    - input: "$(params.fetch-model)"
+      operator: in
+      values: ["s3"]
+  - name: git-clone-containerfile-repo
+    params:
+    - name: url
+      value: $(params.gitServer)/$(params.gitOrgName)/$(params.gitRepoName)
+    - name: subdirectory
+      value: /containerfile_repo/
+    runAfter:
+    - fetch-model-s3
+    - fetch-model-git
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: buildah-cache
+    - name: basic-auth
+      workspace: git-basic-auth
+  - name: check-model-and-containerfile-exists
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: modelRelativePath
+      value: $(params.modelRelativePath)
+    - name: containerfilePath
+      value: containerfile_repo/$(params.containerfileRelativePath)
+    - name: current-namespace
+      value: $(context.pipelineRun.namespace)
+    runAfter:
+    - git-clone-containerfile-repo
+    taskRef:
+      kind: Task
+      name: check-model-and-containerfile-exists
+    workspaces:
+    - name: workspace
+      workspace: buildah-cache
+  - name: create-imagestream
+    params:
+    - name: SCRIPT
+      value: oc create imagestream $(params.model-name)  --lookup-local=true --dry-run=client
+        -o yaml | oc apply -f -
+    - name: VERSION
+      value: latest
+    runAfter:
+    - check-model-and-containerfile-exists
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+  - name: build-container
+    params:
+    - name: IMAGE
+      value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)
+    - name: BUILDER_IMAGE
+      value: registry.redhat.io/rhel8/buildah@sha256:0a86ecbdfbe86e9d225b7fe4b090a0dd6d323f8afdfdf2bd933ff223ddb53320
+    - name: STORAGE_DRIVER
+      value: vfs
+    - name: DOCKERFILE
+      value: containerfile_repo/$(params.containerfileRelativePath)
+    - name: CONTEXT
+      value: model_dir/$(params.modelRelativePath)/$(params.model-name)
+    - name: TLSVERIFY
+      value: "true"
+    - name: FORMAT
+      value: oci
+    - name: BUILD_EXTRA_ARGS
+      value: "--build-arg MODEL_NAME=$(params.model-name)"
+    - name: SKIP_PUSH
+      value: "false"
+    runAfter:
+    - create-imagestream
+    taskRef:
+      kind: ClusterTask
+      name: buildah
+    workspaces:
+    - name: source
+      workspace: buildah-cache
+  - name: test-container-deploy
+    params:
+    - name: SCRIPT
+      value: |
+        cat <<EOF | oc apply -f -
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: $(params.model-name)-$(params.model-version)
+          name: $(params.model-name)-$(params.model-version)
+          namespace: $(params.target-namespace)
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: $(params.model-name)-$(params.model-version)
+          strategy: {}
+          template:
+            metadata:
+              creationTimestamp: null
+              labels:
+                app: $(params.model-name)-$(params.model-version)
+            spec:
+              containers:
+              - image: $(params.model-name):$(params.model-version)
+                name: $(params.model-name)-$(params.model-version)
+                livenessProbe:
+                  failureThreshold: 8
+                  httpGet:
+                    path: /v2/health/live
+                    port: 8080
+                    scheme: HTTP
+                  periodSeconds: 5
+                  successThreshold: 1
+                readinessProbe:
+                  failureThreshold: 8
+                  httpGet:
+                    path: /v2/models/$(params.model-name)/ready
+                    port: 8080
+                    scheme: HTTP
+                  periodSeconds: 5
+                  successThreshold: 1
+                ports:
+                - containerPort: 8080
+                resources: {}
+        status: {}
+        EOF
+        oc wait deployment -n $(params.target-namespace) $(params.model-name)-$(params.model-version) --for condition=Available=True --timeout=120s
+        oc wait pod -n $(params.target-namespace) -l app=$(params.model-name)-$(params.model-version) --for condition=Ready=True --timeout=120s
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+    runAfter:
+      - build-container
+  - name: create-default-service
+    params:
+    - name: SCRIPT
+      value: oc expose deployment  $(params.model-name)-$(params.model-version) --port=8080
+        --target-port=8080 --selector='app=$(params.model-name)-$(params.model-version)'
+        --dry-run=client -o yaml |  oc apply -f -
+    - name: VERSION
+      value: latest
+    runAfter:
+    - test-container-deploy
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+  - name: test-model-rest-svc
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: model-version
+      value: $(params.model-version)
+    - name: test-endpoint
+      value: $(params.test-endpoint)
+    runAfter:
+    - create-default-service
+    taskRef:
+      kind: Task
+      name: test-model-rest-svc
+    workspaces:
+    - name: test-data
+      workspace: test-data
+  - name: stop-deployment
+    params:
+    - name: SCRIPT
+      value: |
+        if [ "$(params.upon-end)" == "stop" ]; then
+          oc scale deployment.apps/$(params.model-name)-$(params.model-version) --replicas=0
+        elif [ "$(params.upon-end)" == "delete" ]; then
+          oc delete all --selector=app=$(params.model-name)-$(params.model-version)
+        elif [ "$(params.upon-end)" == "keep" ]; then
+          echo "Keeping the deployment running."
+        else
+          echo "Invalid value for upon-end parameter."
+          exit 1
+        fi
+    - name: VERSION
+      value: latest
+    runAfter:
+    - test-model-rest-svc
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+  - name: retrieve-image-digest
+    taskRef:
+      kind: Task
+      name: retrieve-image-digest
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: model-version
+      value: $(params.model-version)
+    - name: namespace
+      value: $(params.target-namespace)
+    - name: target-registry-url
+      value: quay.io/$(params.target-imagerepo)/$(params.model-name)
+    runAfter:
+    - test-model-rest-svc
+    - stop-deployment
+  - name: skopeo-copy
+    params:
+    - name: srcImageURL
+      value: docker://image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name)@$(tasks.retrieve-image-digest.results.image-sha)
+    - name: destImageURL
+      value: docker://$(tasks.retrieve-image-digest.results.target-registry-url):$(params.model-version)-$(context.pipelineRun.uid)
+    - name: srcTLSverify
+      value: "true"
+    - name: destTLSverify
+      value: "true"
+    runAfter:
+    - retrieve-image-digest
+    taskRef:
+      kind: ClusterTask
+      name: skopeo-copy
+    workspaces:
+    - name: images-url
+      workspace: workspace
+  workspaces:
+  - name: buildah-cache
+  - name: s3-secret
+  - name: git-basic-auth
+    optional: true
+  - name: workspace
+  - name: test-data

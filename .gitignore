@@ -159,8 +159,8 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-*-secret.yaml
-*-secret.yml
+*[.-]secret.yaml
+*[.-]secret.yml
 aws-storage-config
 pipelines/tekton/build-container-image-pipeline/build-container-image-aws-creds-real.yaml
 pipelines/tekton/build-container-image-pipeline/aws-env-real.yaml
