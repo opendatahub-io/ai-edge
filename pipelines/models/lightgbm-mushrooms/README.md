@@ -6,7 +6,7 @@ This model classifies mushrooms based on the input image.
 
 This model was trained using the [Mushroom Classification](https://www.kaggle.com/datasets/uciml/mushroom-classification) dataset.
 ## Test
-### Run Seldon ML Server with Mushrooms model
+### Run Seldon MLServer with Mushrooms model
 Execute the following command from the [pipelines](../../) folder:
 ```
 docker run -d -u $(id -u) --rm -v ${PWD}/models:/opt/models:Z -p 8080:8080 -p 8081:8081 -p 8082:8082 -ti seldonio/mlserver:1.3.5-lightgbm mlserver start /opt/models/lightgbm-mushroom
