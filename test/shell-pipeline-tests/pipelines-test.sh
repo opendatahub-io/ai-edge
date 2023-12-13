@@ -8,6 +8,9 @@ NAMESPACE="pipeline-test"
 oc delete project "$NAMESPACE" --ignore-not-found --timeout=60s
 oc new-project "$NAMESPACE"
 
+echo "Waiting for OpenShift Pipelines operator to be fully installed"
+waitForOpResult 60 "True" "N/A" "oc get tektonconfig -n openshift-operators config -o jsonpath={.status.conditions[?\(@.type==\'Ready\'\)].status}"
+
 ##### BUILD CONTAINER IMAGE PIPELINE #####
 BUILD_CONTAINER_IMAGE_PIPELINE_PATH="$PIPELINES_DIR"/tekton/build-container-image-pipeline
 

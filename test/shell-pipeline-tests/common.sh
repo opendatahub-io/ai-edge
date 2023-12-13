@@ -28,7 +28,7 @@ function waitForOpResult() {
 function saveArtifacts() {
     ## Backup all Pipeline Runs, Task Runs
     local PIPELINE_RUN_NAME=$1
-    local LOGS_DIR="${ARTIFACT_DIR}/$PIPELINE_RUN_NAME"
+    local LOGS_DIR="${ARTIFACT_DIR}/$PIPELINE_RUN_NAME" # ARTIFACT_DIR is an env var on OpenShift-CI
     mkdir -p "$LOGS_DIR"
     echo "Archiving YAML definitions and logs for '$PIPELINE_RUN_NAME' to '$LOGS_DIR'"
     oc get pipeline -o yaml > "${LOGS_DIR}"/pipelines.txt
