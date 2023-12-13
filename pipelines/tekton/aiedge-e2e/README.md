@@ -90,3 +90,64 @@ Update the `s3-bucket-name` parameter value from its default `rhoai-edge-models`
 #### For Git fetch
 Update the `git-model-repo` parameter with the repository url, the `modelRelativePath` parameter to the model files path and the `git-revision` parameter for the version/branch of the repository in [`aiedge-e2e.pipelinerun.yaml`](pipelines/tekton/aiedge-e2e/aiedge-e2e.pipelinerun.yaml).
 
+#### View the PipelineRun results
+
+If the PipelineRun completes successfully, you can see the results in the OpenShift Console by going to Pipelines > PipelineRuns > (Select your PipelineRun and scroll down).
+
+You can also click on the "YAML" tab in the PipelineRun and scroll down to the `pipelineResults` section, it will look something like this:
+
+<details><summary>Typical E2E pipeline results</summary>
+
+```yaml
+  pipelineResults:
+    - name: git-model-fetched-commit
+      value: f89e2bc61e6ff7f539c52fded3a2bdc991a55b7c
+    - name: git-model-fetched-url
+      value: 'https://github.com/piotrpdev/ai-edge.git'
+    - name: git-model-fetched-commit-epoch
+      value: '1702404808'
+    - name: git-containerfile-fetched-commit
+      value: f89e2bc61e6ff7f539c52fded3a2bdc991a55b7c
+    - name: git-containerfile-fetched-url
+      value: 'https://github.com/piotrpdev/ai-edge'
+    - name: git-containerfile-fetched-commit-epoch
+      value: '1702404808'
+    - name: model-files-size
+      value: |
+        2084
+    - name: model-files-list
+      value: |
+        MLmodel
+        README.md
+        conda.yaml
+        convert_csv_to_json.py
+        dataset.csv
+        python_env.yaml
+        requirements.txt
+        tf2model/
+    - name: internal-registry-url
+      value: >
+        image-registry.openshift-image-registry.svc:5000/pplaczek-pipeline-dev/tensorflow-housing:1
+    - name: target-registry-url
+      value: quay.io/pplaczek/tensorflow-housing
+    - name: internal-image-url
+      value: >-
+        image-registry.openshift-image-registry.svc:5000/pplaczek-pipeline-dev/tensorflow-housing@sha256:0cc9a636c2f18b0f15224a234995ecd27a3dc2e5eb7ffefc8ecfd72c099da31f
+    - name: target-image-url
+      value: >-
+        quay.io/pplaczek/tensorflow-housing:1-fa9e93e0-c66c-4075-9333-61769420f102
+    - name: internal-image-size
+      value: '126507187'
+    - name: buildah-sha
+      value: 'sha256:0cc9a636c2f18b0f15224a234995ecd27a3dc2e5eb7ffefc8ecfd72c099da31f'
+    - name: model-name
+      value: tensorflow-housing
+    - name: model-version
+      value: '1'
+    - name: internal-image-created-at
+      value: '2023-12-12T18:39:25Z'
+    - name: internal-image-buildah-version
+      value: 1.24.2
+```
+
+</details>

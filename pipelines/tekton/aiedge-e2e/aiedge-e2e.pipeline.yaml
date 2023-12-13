@@ -55,10 +55,63 @@ spec:
     description: "Action to perform on the k8s deployment created to test the model container image. Valid values in [delete, keep, stop]"
     default: delete
   results:
+  - name: s3-model-fetched-url
+    description: The S3 URL used to download the model
+    value: $(tasks.fetch-model-s3.results.s3-url)
+  - name: git-model-fetched-commit
+    description: The commit hash of the git repo where the model files were fetched from
+    value: $(tasks.fetch-model-git.results.commit)
+  - name: git-model-fetched-url
+    description: The url of the git repo where the model files were fetched from
+    value: $(tasks.fetch-model-git.results.url)
+  - name: git-model-fetched-commit-epoch
+    description: The commit timestamp of the git repo where the model files were fetched from
+    value: $(tasks.fetch-model-git.results.committer-date)
+  - name: git-containerfile-fetched-commit
+    description: The commit hash of the git repo where the containerfile was fetched from
+    value: $(tasks.git-clone-containerfile-repo.results.commit)
+  - name: git-containerfile-fetched-url
+    description: The url of the git repo where the containerfile was fetched from
+    value: $(tasks.git-clone-containerfile-repo.results.url)
+  - name: git-containerfile-fetched-commit-epoch
+    description: The commit timestamp of the git repo where the containerfile was fetched from
+    value: $(tasks.git-clone-containerfile-repo.results.committer-date)
+  - name: model-files-size
+    description: The size of the model files
+    value: $(tasks.check-model-and-containerfile-exists.results.model-files-size)
+  - name: model-files-list
+    description: The list of model files
+    value: $(tasks.check-model-and-containerfile-exists.results.model-files-list)
+  - name: internal-registry-url
+    description: The tag where the model container image was pushed to in the internal registry (e.g. image-reg...svc:5000/rhoai-models/ai-model:1-232)
+    value: $(tasks.build-container.results.IMAGE_URL)
   - name: target-registry-url
-    value: $(tasks.retrieve-image-digest.results.target-registry-url)
-  - name: image-sha
-    value: $(tasks.retrieve-image-digest.results.image-sha)
+    description: The url of the target registry (e.g. quay.io/rhoai-models/ai-model/)
+    value: $(tasks.retrieve-build-image-info.results.target-registry-url)
+  - name: internal-image-url
+    description: The url of the image in the internal registry
+    value: $(tasks.retrieve-build-image-info.results.internal-image-url)
+  - name: target-image-url
+    description: The url of the image in the target registry (e.g. quay.io/rhoai-models/ai-model:1-232)
+    value: $(tasks.retrieve-build-image-info.results.target-image-url)
+  - name: internal-image-size
+    description: The size of the model container image in the internal registry in bytes
+    value: $(tasks.retrieve-build-image-info.results.internal-image-size)
+  - name: buildah-sha
+    description: The SHA digest of the model container image
+    value: $(tasks.build-container.results.IMAGE_DIGEST)
+  - name: model-name
+    description: The model name
+    value: $(tasks.retrieve-build-image-info.results.model-name)
+  - name: model-version
+    description: The model version
+    value: $(tasks.retrieve-build-image-info.results.model-version)
+  - name: internal-image-created-at
+    description: Timestamp of when the model container image was created in UTC format
+    value: $(tasks.retrieve-build-image-info.results.internal-image-created-at)
+  - name: internal-image-buildah-version
+    description: The buildah version used to build the model container image
+    value: $(tasks.retrieve-build-image-info.results.internal-image-buildah-version)
   tasks:
   - name: fetch-model-git
     taskRef:
@@ -280,10 +333,10 @@ spec:
     taskRef:
       kind: ClusterTask
       name: openshift-client
-  - name: retrieve-image-digest
+  - name: retrieve-build-image-info
     taskRef:
       kind: Task
-      name: retrieve-image-digest
+      name: retrieve-build-image-info
     params:
     - name: model-name
       value: $(params.model-name)
@@ -291,6 +344,10 @@ spec:
       value: $(params.model-version)
     - name: namespace
       value: $(params.target-namespace)
+    - name: buildah-sha
+      value: $(tasks.build-container.results.IMAGE_DIGEST)
+    - name: pipeline-run-uid
+      value: $(context.pipelineRun.uid)
     - name: target-registry-url
       value: quay.io/$(params.target-imagerepo)/$(params.model-name)
     runAfter:
@@ -299,15 +356,15 @@ spec:
   - name: skopeo-copy
     params:
     - name: srcImageURL
-      value: docker://image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name)@$(tasks.retrieve-image-digest.results.image-sha)
+      value: docker://$(tasks.retrieve-build-image-info.results.internal-image-url)
     - name: destImageURL
-      value: docker://$(tasks.retrieve-image-digest.results.target-registry-url):$(params.model-version)-$(context.pipelineRun.uid)
+      value: docker://$(tasks.retrieve-build-image-info.results.target-image-url)
     - name: srcTLSverify
       value: "true"
     - name: destTLSverify
       value: "true"
     runAfter:
-    - retrieve-image-digest
+    - retrieve-build-image-info
     taskRef:
       kind: ClusterTask
       name: skopeo-copy

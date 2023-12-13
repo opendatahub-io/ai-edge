@@ -14,6 +14,11 @@ spec:
     type: string
   - name: modelRelativePath
     type: string
+  results:
+  - name: model-files-size
+    description: Total size of the model files
+  - name: model-files-list
+    description: Space separated list of model files
   steps:
   - name: check-model-and-containerfile
     image: registry.access.redhat.com/ubi9/ubi-micro
@@ -22,9 +27,15 @@ spec:
 
       # Check model files exist
       if [ -n "$(params.modelRelativePath)" ]; then
-        ls -l model_dir/$(params.modelRelativePath)/$(params.model-name)/
+        ls -l model_dir/$(params.modelRelativePath)/$(params.model-name)/ ;
+
+        du -s model_dir/$(params.modelRelativePath)/$(params.model-name)/ | cut -f1 | tee $(results.model-files-size.path) ;
+        ls -p model_dir/$(params.modelRelativePath)/$(params.model-name)/ | tee $(results.model-files-list.path) ;
       else
         ls -l model_dir/$(params.model-name)/
+
+        du -s model_dir/$(params.model-name)/ | cut -f1 | tee $(results.model-files-size.path) ;
+        ls -p model_dir/$(params.model-name)/ | tee $(results.model-files-list.path) ;
       fi
 
       # Check containerfile exists

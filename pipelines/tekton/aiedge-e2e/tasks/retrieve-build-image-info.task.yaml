@@ -1,0 +1,60 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: retrieve-build-image-info
+spec:
+  description: Return information about the built image
+  params:
+  - name: namespace
+    type: string
+  - name: model-name
+    type: string
+  - name: model-version
+    type: string
+  - name: buildah-sha
+    type: string
+  - name: pipeline-run-uid
+    type: string
+  - name: target-registry-url
+    type: string
+  steps:
+  - name: get-image-sha
+    image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+    script: |
+      echo -n "$(params.model-name)" | tee $(results.model-name.path) ;
+      echo ;
+      echo -n "$(params.model-version)" | tee $(results.model-version.path) ;
+      echo ;
+      echo -n "$(params.target-registry-url)" | tee $(results.target-registry-url.path) ;
+      echo ;
+      export DOCKER_IMAGE_REF=$(oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageReference}' imagestreamtag/$(params.model-name):$(params.model-version)) ;
+      if [[ $DOCKER_IMAGE_REF != *"$(params.buildah-sha)"* ]]; then
+        echo "ImageStreamTag doesn't contain the correct image SHA"
+        exit 1 ;
+      fi
+      echo -n $DOCKER_IMAGE_REF | tee $(results.internal-image-url.path) ;
+      echo ;
+      oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageMetadata.Size}' imagestreamtag/$(params.model-name):$(params.model-version) | tee $(results.internal-image-size.path) ;
+      echo ;
+      oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageMetadata.Created}' imagestreamtag/$(params.model-name):$(params.model-version) | tee $(results.internal-image-created-at.path) ;
+      echo ;
+      oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageMetadata.Config.Labels.io\.buildah\.version}' imagestreamtag/$(params.model-name):$(params.model-version) | tee $(results.internal-image-buildah-version.path) ;
+      echo ;
+      echo -n "$(params.target-registry-url):$(params.model-version)-$(params.pipeline-run-uid)" | tee $(results.target-image-url.path) ;
+  results:
+  - name: model-name
+    description: The name of the model
+  - name: model-version
+    description: The version of the model
+  - name: internal-image-size
+    description: The size of the image
+  - name: internal-image-created-at
+    description: The date and time the image was created in UTC format
+  - name: internal-image-buildah-version
+    description: The version of buildah used to build the image
+  - name: internal-image-url
+    description: The url of the image in the internal registry
+  - name: target-registry-url
+    description: The url of the target registry (e.g. quay.io/rhoai-models/ai-model/)
+  - name: target-image-url
+    description: The url of the image in the target registry (e.g. quay.io/rhoai-models/ai-model:1-232)
