@@ -32,4 +32,6 @@ GO=go
 GOFLAGS=""
 
 test:
+	@(./test/shell-pipeline-tests/openvino-bike-rentals/pipelines-test-openvino-bike-rentals.sh)
+	@(./test/shell-pipeline-tests/tensorflow-housing/pipelines-test-tensorflow-housing.sh)
 	@(cd test/e2e-tests/tests && ${GO} test)

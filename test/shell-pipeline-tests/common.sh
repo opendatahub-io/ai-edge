@@ -22,7 +22,6 @@ function waitForOpResult() {
        res=$(eval "$cmd")
     done
     echo "waitForOpResult running command '$cmd' finished with expected result '$res'"
-    #TODO return code
 }
 
 function saveArtifacts() {

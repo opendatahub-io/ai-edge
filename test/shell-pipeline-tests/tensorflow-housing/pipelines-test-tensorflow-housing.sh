@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-REPO_ROOT_DIR=$(dirname ${BASH_SOURCE[0]})/../..
+REPO_ROOT_DIR=$(dirname ${BASH_SOURCE[0]})/../../..
 PIPELINES_DIR="$REPO_ROOT_DIR/pipelines"
 
 source "$REPO_ROOT_DIR"/test/shell-pipeline-tests/common.sh
 
-NAMESPACE="pipeline-test"
+NAMESPACE="pipeline-test-tensorflow-housing"
 oc delete project "$NAMESPACE" --ignore-not-found --timeout=60s
 oc new-project "$NAMESPACE"
 
