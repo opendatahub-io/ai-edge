@@ -32,6 +32,9 @@ spec:
   - name: buildah-cache
     persistentVolumeClaim:
       claimName: buildah-cache-pvc
+  - name: model-workspace
+    persistentVolumeClaim:
+      claimName: basic-pvc
   - name: aws-secret
     secret:
         secretName: aws-env
