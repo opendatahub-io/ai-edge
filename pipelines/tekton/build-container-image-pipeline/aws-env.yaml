@@ -5,4 +5,4 @@ metadata:
 
 stringData:
   aws-storage-config: |+
-    { "type": "s3", "access_key_id": "$", "secret_access_key": "$", "endpoint_url": "https://example.amazonaws.com/", "region": "us-west-1" }
+    { "type": "s3", "access_key_id": "{{ YOUR_AWS_ACCESS_KEY }}", "secret_access_key": "{{ YOUR_AWS_SECRET_KEY }}", "endpoint_url": "{{ S3_ENDPOINT__https://example.amazonaws.com/ }}", "region": "{{ S3_REGION__us-west-1 }}" }

@@ -97,6 +97,7 @@ spec:
     runAfter:
     - kserve-download-model
     - git-clone-model-repo
+    - copy-model-from-pvc
     taskRef:
       kind: ClusterTask
       name: git-clone
