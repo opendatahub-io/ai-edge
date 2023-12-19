@@ -6,7 +6,7 @@ Face detector based on SqueezeNet light (half-channels) as a backbone with a sin
 ### Run OVMS with the model inside
 Execute the following command from the [pipelines](../../) folder:
 ```
-docker run -d -u $(id -u):$(id -g) --rm -v ${PWD}/models:/model:Z -p 9000:9000 openvino/model_server:latest --model_name face-detection --model_path /model/ovms-facedetection --port 9000 --shape auto
+docker run -d -u $(id -u):$(id -g) --rm -v ${PWD}/models:/model:Z -p 9000:9000 openvino/model_server:latest --model_name face-detection --model_path /model/tensorflow-facedetection --port 9000 --shape auto
 ```
 
 ### Test call
