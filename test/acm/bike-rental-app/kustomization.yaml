@@ -4,22 +4,62 @@ kind: Kustomization
 resources:
 - ../../../acm/registration/near-edge/overlays/bike-rental-app/
 
-namespace: my-test-namespace
+namePrefix: custom-prefix-
 
 patches:
 - patch: |-
     - op: replace
-      path: /spec/channel
-      value: my-test-namespace/bike-rental-app-channel
+      path: /spec/template/metadata/name
+      value: '{{name}}-bike-rental-app'
+    - op: replace
+      path: /spec/template/spec/source/targetRevision
+      value: my-git-branch
+    - op: replace
+      path: /spec/template/spec/source/path
+      value: test/gitops/bike-rental-app/
+    - op: replace
+      path: /spec/template/spec/destination/namespace
+      value: custom-app-namespace
   target:
-    kind: Subscription
+    kind: ApplicationSet
 - patch: |-
     - op: replace
-      path: /spec/pathname
-      value: https://github.com/opendatahub-io/ai-edge
+      path: /spec/policy-templates/0/objectDefinition/spec/object-templates/0/objectDefinition/metadata/name
+      value: custom-app-namespace
+    - op: replace
+      path: /spec/policy-templates/0/objectDefinition/metadata/name
+      value: custom-app-namespace-has-argo-label
   target:
-    kind: Channel
+    kind: Policy
 
-commonAnnotations:
-  apps.open-cluster-management.io/git-branch: my-git-branch
-  apps.open-cluster-management.io/git-path: test/gitops/bike-rental-app/
+replacements:
+- source:
+    kind: Placement
+    group: cluster.open-cluster-management.io
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: argoproj.io
+      kind: ApplicationSet
+    fieldPaths:
+      - spec.generators.0.clusterDecisionResource.labelSelector.matchLabels.cluster\.open-cluster-management\.io/placement
+- source:
+    kind: Placement
+    group: cluster.open-cluster-management.io
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: policy.open-cluster-management.io
+      kind: PlacementBinding
+    fieldPaths:
+      - placementRef.name
+- source:
+    kind: Policy
+    group: policy.open-cluster-management.io
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: policy.open-cluster-management.io
+      kind: PlacementBinding
+    fieldPaths:
+      - subjects.0.name
