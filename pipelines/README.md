@@ -3,7 +3,7 @@
 ## Models
 
 This repository contains the following trained examples.
-git pu
+
 - [bike-rentals-auto-ml](models/bike-rentals-auto-ml/) is using MLFlow format and can run in [Seldon MLServer](https://github.com/SeldonIO/MLServer).
 - [tensorflow-housing](models/tensorflow-housing/) is using MLFlow format and wraps a TensorFlow model. It can run in [Seldon MLServer](https://github.com/SeldonIO/MLServer), but can also run in [OVMS](https://github.com/openvinotoolkit/model_server) by loading the [tf2model](models/tensorflow-housing/tf2model) artifacts.
 - [MNIST](models/onnx-mnist) is using ONNX format that can run on [OVMS](https://github.com/openvinotoolkit/model_server).

@@ -14,6 +14,10 @@ docker run -d -u $(id -u):$(id -g) --rm -v ${PWD}/models:/model:Z -p 9000:9000 o
 ```
 git clone https://github.com/openvinotoolkit/model_server.git
 cd model_server/demos/face_detection/python
+# Patch the requirements file, because tensorflow 2.11.0 is not working
+sed -i 's/2.11.0/2.13.0/' client_requirements.txt
+python -m venv .venv
+source .venv/bin/activate
 pip install -r ../../common/python/requirements.txt
 # In case of errors remove the tensorflow-serving-api version from the ../../common/python/requirements.txt
 mkdir results
