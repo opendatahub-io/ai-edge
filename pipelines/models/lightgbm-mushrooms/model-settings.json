@@ -1,0 +1,8 @@
+{
+    "name": "mushroom-lgb",
+    "implementation": "mlserver_lightgbm.LightGBMModel",
+    "parameters": {
+        "uri": "./mushroom-lightgbm.bst",
+        "version": "v0.1.0"
+    }
+}
