@@ -4,4 +4,4 @@ kind: Kustomization
 resources:
 - ../../../acm/odh-edge/apps/bike-rental-app/
 
-namespace: my-test-namespace
+namespace: custom-app-namespace

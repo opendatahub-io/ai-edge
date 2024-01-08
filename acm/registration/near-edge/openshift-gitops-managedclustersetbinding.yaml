@@ -1,0 +1,8 @@
+---
+apiVersion: cluster.open-cluster-management.io/v1beta2
+kind: ManagedClusterSetBinding
+metadata:
+  name: poc-near-edge
+  namespace: openshift-gitops
+spec:
+  clusterSet: poc-near-edge

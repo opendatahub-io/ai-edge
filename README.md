@@ -14,6 +14,7 @@ based on the Open Cluster Management project.
 | Red Hat OpenShift Pipelines                             | 1.11 or higher |
 | Quay Registry account                                   | [quay.io](https://quay.io/) |
 | Advanced Cluster Management for Kubernetes              | 2.8            |
+| OpenShift GitOps                                        | 1.10.1 or higher |
 | Open Data Hub (optional)                                | 1.x or 2.x     |
 
 ## Proof of Concept Edge use case with ACM
@@ -77,38 +78,24 @@ We will describe how to do them using the OpenShift Console but there may be oth
    In the OpenShift Console this can be done in All Clusters menu > Infrastructure > Clusters > Cluster list tab.
    In the Cluster set popup menu, select the cluster set you created for the near edge clusters.
    If you use the Import mode of "Enter your server URL and API token for the existing cluster",
-   obtain the address of the server and the token on the other cluster's OpenShift Console 
+   obtain the address of the server and the token on the other cluster's OpenShift Console
    at the top-right corner user menu > Copy login command, for an admin user.
 
-#### Create namespaces for applications
+#### OpenShift GitOps setup
 
-For each of the deployed models-turned-into-application, we will create a separate namespace/project on the ACM hub cluster.
-The ACM setup in this repository expects namespaces `tensorflow-housing-app` and `bike-rental-app`.
+OpenShift GitOps will be used by ACM as the GitOps engine to manage the application, using the Pull Controller.
+This will require the OpenShift GitOps operator to be installed both on the ACM hub cluster, and all of the managed clusters at the edge.
 
-As a regular user in the OpenShift Console, in the local-cluster > Developer menu, Project popup, use the "Create Project" button;
-alternatively, run
-```bash
-oc new-project tensorflow-housing-app
-oc new-project bike-rental-app
-```
-
-#### Bind namespaces to the cluster set
-
-The newly created namespaces need to be bound to the cluster set that contains the near edge clusters.
-
-On the ACM hub cluster, in the OpenShift Console in the All Clusters menu > Infrastructure > Clusters > Cluster sets tab,
-click the three-dot button at the right of the cluster set, select Edit namespace bindings, and add the namespaces you've created.
-
-This is the last step that needs to be done as an admin user with `cluster-admin` privileges.
+1. On the ACM hub cluster, install the OpenShift GitOps operator.
+   In the OpenShift Console of the cluster, find and install the operator in Menu > Operators > OperatorHub.
+1. On each managed cluster, install the OpenShift GitOps operator.
+   In the OpenShift Console of the cluster, find and install the operator in Menu > Operators > OperatorHub.
 
 #### Deploy the applications to remote clusters
 
-With the remote near edge clusters now in the cluster set and that cluster set bound to the application namespaces,
-it is now possible to deploy the applications to remote clusters through
-ACM [Channels](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html-single/applications/index#channels),
-[Subscriptions](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html-single/applications/index#subscriptions),
-[Placements](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html-single/applications/index#placement-rules),
-and [Applications](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.8/html-single/applications/index#applications).
+With the remote near edge clusters now in the cluster set and that cluster set bound to the `openshift-gitops` namespace,
+it is now possible to deploy the applications to those clusters using the Argo CD Pull model integration in
+[ACM GitOps](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/gitops/index).
 
 We will create the objects in the respective namespaces from the `acm/registration/` directory structure.
 
@@ -121,18 +108,76 @@ and the applications in those remote git repositories will be deployed.
 By default, [github.com/opendatahub-io/ai-edge](https://github.com/opendatahub-io/ai-edge) is configured;
 edit the URLs to match your repositories.
 
-Then run as a regular (non-admin) user
+Then, as a user with permissions to create/update the following resource types in the `openshift-gitops` namespace on the ACM hub cluster:
+
+``` text
+ApplicationSets
+GitOpsClusters
+ManagedClusterSetBindings
+PlacementBindings
+Placements
+Policies
+```
+
+run the following command:
 ```bash
 oc apply -k acm/registration/
 ```
 
-#### View the application deployments
+##### Credentials for private repositories
 
-In the OpenShift Console of the ACM hub cluster in All Clusters > Applications, filter for Subscriptions.
-You should see `tensorflow-housing-app-application` and `bike-rental-app-application` with Git resources.
-Clicking on the Subscription name and then on the Topology tab, you can see what objects were created on the remote cluster(s).
+If the GitOps repository that Argo CD on the edge clusters will deploy resources from requires some form of credentials,
+then these credentials will need to be provided to each cluster via a Secret.
+This can be done by specifying the Secret inside an ACM Policy resource on the ACM hub cluster in such a way that ACM will instruct the edge clusters to create it.
+The following example illustrates how this may be done:
+```sh
+cat << EOF | oc apply -f -
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
+metadata:
+  name: namespace-policy
+  namespace: openshift-gitops
+spec:
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: ensure-namespace-exists
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Secret
+                metadata:
+                  name: first-repo
+                  namespace: openshift-gitops
+                  labels:
+                    argocd.argoproj.io/secret-type: repository
+                stringData:
+                  type: git
+                  url: https://github.com/argoproj/private-repo
+          pruneObjectBehavior: DeleteIfCreated
+          severity: low
+          remediationAction: enforce
+EOF
+
+#### View the application deployments
+##### ACM
+
+In the OpenShift Console of the ACM hub cluster in All Clusters > Applications, search for the application name.
+You should see a few results results: `<app name>-appset`, `<cluster name>-<app name>`, and `<app name>-1`.
+Clicking on the `<cluster name>-<app name>` entry, and then navigating to the Topology tab, you can see what objects were created on the remote cluster.
 
 Everything should be shown green. If it is not, click the icon of the faulty object and check the displayed information for debugging clues.
+
+##### Argo CD
+
+The Argo CD provided by Openshift GitOps has a console on each near edge cluster, showing detailed information on each application that it manages on that cluster.
+On the particular edge cluster, open the console by navigating to the domain specified by the `openshift-gitops-cluster` Route in the `openshift-gitops` namespace on that cluster.
+Once logged-in to the Argo console, search for the application name, and then select the entry named in the format `<cluster name>-<application name>` to see more information.
 
 ### Observability setup
 
@@ -147,7 +192,7 @@ Everything should be shown green. If it is not, click the icon of the faulty obj
 
 ### Using local models in pipelines
 
-In `pipelines/model-upload/` you can upload a local 
+In `pipelines/model-upload/` you can upload a local
 model file to be used in our pipelines. This is done by uploading a model to a PVC
 and copying that model to our pipeline's workspace for use while it is running.
 
@@ -166,8 +211,8 @@ You can set the `SIZE` and `PVC` values aswell
 make MODEL_PATH="PATH_TO_A_FILE" NAME=my-model SIZE=1G PVC=my-new-PVC create
 ```
 
-In `pipelines/tekton/build-container-image-pipeline` you can set the 
-`fetch-model` to `pvc` for the pipeline to copy the file from the 
+In `pipelines/tekton/build-container-image-pipeline` you can set the
+`fetch-model` to `pvc` for the pipeline to copy the file from the
 `model-workspace` which can be set to the PVC created in the last step
 
 ## Contributing

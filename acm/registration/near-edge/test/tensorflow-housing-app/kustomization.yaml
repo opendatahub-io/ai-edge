@@ -1,0 +1,66 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../overlays/tensorflow-housing-app/
+
+patches:
+- patch: |-
+    - op: test
+      path: /metadata/name
+      value: tensorflow-housing-app-appset
+    - op: test
+      path: /spec/template/metadata/name
+      value: '{{name}}-tensorflow-housing-app'
+    - op: test
+      path: /spec/template/spec/source/path
+      value: acm/odh-edge/apps/tensorflow-housing-app
+    - op: test
+      path: /spec/template/spec/destination/namespace
+      value: tensorflow-housing-app
+    - op: test
+      path: /spec/template/metadata/annotations/apps.open-cluster-management.io~1ocm-managed-cluster-app-namespace
+      value: openshift-gitops
+    - op: test
+      path: /spec/generators/0/clusterDecisionResource/labelSelector/matchLabels/cluster.open-cluster-management.io~1placement
+      value: tensorflow-housing-app-placement
+  target:
+    group: argoproj.io
+    kind: ApplicationSet
+
+- patch: |-
+    - op: test
+      path: /metadata/name
+      value: tensorflow-housing-app-namespace-policy
+    - op: test
+      path: /spec/policy-templates/0/objectDefinition/metadata/name
+      value: tensorflow-housing-app-ns-has-argo-label
+    - op: test
+      path: /spec/policy-templates/0/objectDefinition/spec/object-templates/0/objectDefinition/metadata/name
+      value: tensorflow-housing-app
+  target:
+    group: policy.open-cluster-management.io
+    kind: Policy
+
+- patch: |-
+    - op: test
+      path: /metadata/name
+      value: tensorflow-housing-app-placement-binding
+    - op: test
+      path: /placementRef/name
+      value: tensorflow-housing-app-placement
+    - op: test
+      path: /subjects/0/name
+      value: tensorflow-housing-app-namespace-policy
+  target:
+    group: policy.open-cluster-management.io
+    kind: PlacementBinding
+
+- patch: |-
+    - op: test
+      path: /metadata/name
+      value: tensorflow-housing-app-placement
+  target:
+    group: cluster.open-cluster-management.io
+    kind: Placement

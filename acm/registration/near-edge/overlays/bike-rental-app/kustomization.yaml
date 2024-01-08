@@ -4,19 +4,34 @@ kind: Kustomization
 resources:
 - ../../base
 
-namespace: bike-rental-app
 namePrefix: bike-rental-app-
 
-# When authenticated Channel is required, set the user and accessToken,
-# and uncomment this section and the replacements section below
-#secretGenerator:
-#- name: git-credentials
-#  literals:
-#  - user=username
-#  - accessToken=access_token
-
-commonAnnotations:
-  apps.open-cluster-management.io/git-path: acm/odh-edge/apps/bike-rental-app
+patches:
+- patch: |-
+    - op: replace
+      path: /spec/template/metadata/name
+      value: '{{name}}-bike-rental-app'
+    - op: replace
+      path: /spec/template/spec/source/path
+      value: acm/odh-edge/apps/bike-rental-app
+    - op: replace
+      path: /spec/template/spec/destination/namespace
+      value: bike-rental-app
+    - op: replace
+      path: /spec/template/metadata/annotations/apps.open-cluster-management.io~1ocm-managed-cluster-app-namespace
+      value: openshift-gitops
+  target:
+    group: argoproj.io
+    version: v1alpha1
+    kind: ApplicationSet
+- patch: |-
+    - op: replace
+      path: /spec/policy-templates/0/objectDefinition/metadata/name
+      value: bike-rental-app-ns-has-argo-label
+  target:
+    group: policy.open-cluster-management.io
+    version: v1
+    kind: Policy
 
 replacements:
 - source:
@@ -25,34 +40,37 @@ replacements:
     fieldPath: metadata.name
   targets:
   - select:
-      group: apps.open-cluster-management.io
-      kind: Subscription
+      group: argoproj.io
+      kind: ApplicationSet
     fieldPaths:
-      - spec.placement.placementRef.name
-#- source:
-#    kind: Secret
-#    name: git-credentials
-#    fieldPath: metadata.name
-#  targets:
-#  - select:
-#      group: apps.open-cluster-management.io
-#      kind: Channel
-#    fieldPaths:
-#      - spec.secretRef.name
-#    options:
-#      create: true
-
-# Can't do this as a "replacement", as needs to be of form namespace/name
-patches:
-- patch: |-
-    - op: replace
-      path: /spec/channel
-      value: bike-rental-app/bike-rental-app-channel
-  target:
-    kind: Subscription
-- patch: |-
-    - op: replace
-      path: /spec/pathname
-      value: https://github.com/opendatahub-io/ai-edge
-  target:
-    kind: Channel
+      - spec.generators.0.clusterDecisionResource.labelSelector.matchLabels.cluster\.open-cluster-management\.io/placement
+- source:
+    kind: Placement
+    group: cluster.open-cluster-management.io
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: policy.open-cluster-management.io
+      kind: PlacementBinding
+    fieldPaths:
+      - placementRef.name
+- source:
+    kind: Policy
+    group: policy.open-cluster-management.io
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: policy.open-cluster-management.io
+      kind: PlacementBinding
+    fieldPaths:
+      - subjects.0.name
+- source:
+    group: argoproj.io
+    kind: ApplicationSet
+    fieldPath: spec.template.spec.destination.namespace
+  targets:
+  - select:
+      group: policy.open-cluster-management.io
+      kind: Policy
+    fieldPaths:
+    - spec.policy-templates.0.objectDefinition.spec.object-templates.0.objectDefinition.metadata.name
