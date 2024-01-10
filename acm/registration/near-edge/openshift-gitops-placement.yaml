@@ -1,0 +1,17 @@
+---
+apiVersion: cluster.open-cluster-management.io/v1beta1
+kind: Placement
+metadata:
+  name: near-edge-clusters
+  namespace: openshift-gitops
+spec:
+  clusterSets:
+    - poc-near-edge
+  predicates:
+    - requiredClusterSelector:
+        labelSelector: {}
+  tolerations:
+    - key: cluster.open-cluster-management.io/unreachable
+      operator: Exists
+    - key: cluster.open-cluster-management.io/unavailable
+      operator: Exists

@@ -14,8 +14,8 @@ install/observability-edge: acm/odh-edge/acm-observability/kustomization.yaml
 
 # Generate app manifests using ACM GitOps flow, from custom GitHub org/branch, to custom namespace
 # Example invocations:
-# make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" -e GIT_BRANCH=my-git-branch -e TEST_NAMESPACE=my-test-namespace test-acm-bike-rental-app-generate
-# make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" -e GIT_BRANCH=my-git-branch -e TEST_NAMESPACE=my-test-namespace test-acm-tensorflow-housing-app-generate
+# make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" GIT_BRANCH=my-git-branch CUSTOM_PREFIX=custom- CUSTOM_APP_NAMESPACE=custom-bike-rental-app test-acm-bike-rental-app-generate
+# make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" GIT_BRANCH=my-git-branch CUSTOM_PREFIX=custom- CUSTOM_APP_NAMESPACE=custom-tensorflow-housing test-acm-tensorflow-housing-app-generate
 test-acm-%-generate: test/acm/%/kustomization.yaml
 ifndef GIT_REPO_URL
 	$(error GIT_REPO_URL is undefined)
@@ -23,10 +23,13 @@ endif
 ifndef GIT_BRANCH
 	$(error GIT_BRANCH is undefined)
 endif
-ifndef TEST_NAMESPACE
-	$(error TEST_NAMESPACE is undefined)
+ifndef CUSTOM_PREFIX
+	$(error CUSTOM_PREFIX is undefined)
 endif
-	kustomize build test/acm/$(subst -generate,,$(subst test-acm-,,$@))/ | sed -e "s|https://github.com/opendatahub-io/ai-edge|$(GIT_REPO_URL)|g" -e "s|my-git-branch|$(GIT_BRANCH)|g" -e "s|my-test-namespace|$(TEST_NAMESPACE)|g"
+ifndef CUSTOM_APP_NAMESPACE
+	$(error CUSTOM_APP_NAMESPACE is undefined)
+endif
+	kustomize build test/acm/$(subst -generate,,$(subst test-acm-,,$@))/ | sed -e "s|https://github.com/opendatahub-io/ai-edge|$(GIT_REPO_URL)|g" -e "s|my-git-branch|$(GIT_BRANCH)|g" -e "s|custom-prefix-|$(CUSTOM_PREFIX)|g" -e "s|custom-app-namespace|$(CUSTOM_APP_NAMESPACE)|g"
 
 GO=go
 GOFLAGS=""

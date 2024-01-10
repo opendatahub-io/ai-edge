@@ -1,0 +1,66 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../overlays/bike-rental-app/
+
+patches:
+- patch: |-
+    - op: test
+      path: /metadata/name
+      value: bike-rental-app-appset
+    - op: test
+      path: /spec/template/metadata/name
+      value: '{{name}}-bike-rental-app'
+    - op: test
+      path: /spec/template/spec/source/path
+      value: acm/odh-edge/apps/bike-rental-app
+    - op: test
+      path: /spec/template/spec/destination/namespace
+      value: bike-rental-app
+    - op: test
+      path: /spec/template/metadata/annotations/apps.open-cluster-management.io~1ocm-managed-cluster-app-namespace
+      value: openshift-gitops
+    - op: test
+      path: /spec/generators/0/clusterDecisionResource/labelSelector/matchLabels/cluster.open-cluster-management.io~1placement
+      value: bike-rental-app-placement
+  target:
+    group: argoproj.io
+    kind: ApplicationSet
+
+- patch: |-
+    - op: test
+      path: /metadata/name
+      value: bike-rental-app-namespace-policy
+    - op: test
+      path: /spec/policy-templates/0/objectDefinition/metadata/name
+      value: bike-rental-app-ns-has-argo-label
+    - op: test
+      path: /spec/policy-templates/0/objectDefinition/spec/object-templates/0/objectDefinition/metadata/name
+      value: bike-rental-app
+  target:
+    group: policy.open-cluster-management.io
+    kind: Policy
+
+- patch: |-
+    - op: test
+      path: /metadata/name
+      value: bike-rental-app-placement-binding
+    - op: test
+      path: /placementRef/name
+      value: bike-rental-app-placement
+    - op: test
+      path: /subjects/0/name
+      value: bike-rental-app-namespace-policy
+  target:
+    group: policy.open-cluster-management.io
+    kind: PlacementBinding
+
+- patch: |-
+    - op: test
+      path: /metadata/name
+      value: bike-rental-app-placement
+  target:
+    group: cluster.open-cluster-management.io
+    kind: Placement

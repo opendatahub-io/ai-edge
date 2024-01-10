@@ -1,39 +1,36 @@
 ---
-apiVersion: app.k8s.io/v1beta1
-kind: Application
+apiVersion: policy.open-cluster-management.io/v1
+kind: Policy
 metadata:
-  name: application
-  namespace: near-edge-acm-template
+  name: namespace-policy
+  namespace: openshift-gitops
 spec:
-  componentKinds:
-  - group: apps.open-cluster-management.io
-    kind: Subscription
-  descriptor: {}
-  selector:
-    matchExpressions:
-      - key: app
-        operator: In
-        values:
-          - near-edge-acm-template
----
-apiVersion: apps.open-cluster-management.io/v1
-kind: Channel
-metadata:
-  annotations:
-    apps.open-cluster-management.io/reconcile-rate: medium
-  name: channel
-  namespace: near-edge-acm-template
-spec:
-  type: Git
-  pathname: 'https://github.com/opendatahub-io/ai-edge'
+  disabled: false
+  policy-templates:
+    - objectDefinition:
+        apiVersion: policy.open-cluster-management.io/v1
+        kind: ConfigurationPolicy
+        metadata:
+          name: ns-has-argo-label
+        spec:
+          object-templates:
+            - complianceType: musthave
+              objectDefinition:
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  labels:
+                    argocd.argoproj.io/managed-by: openshift-gitops
+                  name: near-edge-acm-template
+          pruneObjectBehavior: DeleteIfCreated
+          severity: low
+          remediationAction: enforce
 ---
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
-  labels:
-    app: near-edge-acm-template
   name: placement
-  namespace: near-edge-acm-template
+  namespace: openshift-gitops
 spec:
   clusterSets:
     - poc-near-edge
@@ -46,20 +43,53 @@ spec:
     - key: cluster.open-cluster-management.io/unavailable
       operator: Exists
 ---
-apiVersion: apps.open-cluster-management.io/v1
-kind: Subscription
+apiVersion: policy.open-cluster-management.io/v1
+kind: PlacementBinding
 metadata:
-  annotations:
-    apps.open-cluster-management.io/git-branch: main
-    apps.open-cluster-management.io/git-path: acm/odh-edge/apps/app
-    apps.open-cluster-management.io/reconcile-option: merge
-  labels:
-    app: near-edge-acm-template
-  name: subscription
-  namespace: bike-rental-app
+  name: placement-binding
+  namespace: openshift-gitops
+placementRef:
+  apiGroup: cluster.open-cluster-management.io
+  kind: Placement
+  name: near-edge-clusters
+subjects:
+  - apiGroup: policy.open-cluster-management.io
+    kind: Policy
+    name: ensure-namespace-exists
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: appset
+  namespace: openshift-gitops
 spec:
-  channel: channel
-  placement:
-    placementRef:
-      kind: Placement
-      name: placement
+  generators:
+    - clusterDecisionResource:
+        configMapRef: ocm-placement-generator
+        labelSelector:
+          matchLabels:
+            cluster.open-cluster-management.io/placement: placement
+        requeueAfterSeconds: 30
+  template:
+    metadata:
+      name: '{{name}}-application'
+      labels:
+        apps.open-cluster-management.io/pull-to-ocm-managed-cluster: 'true'
+      annotations:
+        argocd.argoproj.io/skip-reconcile: 'true'
+        apps.open-cluster-management.io/ocm-managed-cluster: '{{name}}'
+        apps.open-cluster-management.io/ocm-managed-cluster-app-namespace: near-edge-acm-template
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/opendatahub-io/ai-edge.git'
+        targetRevision: main
+        path: acm/odh-edge/apps/app
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: near-edge-acm-template
+      syncPolicy:
+        automated:
+          prune: true
+        syncOptions:
+          - CreateNamespace=true
