@@ -2,6 +2,8 @@ apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
   name: aiedge-e2e
+  annotations:
+    opendatahub.io/supported-model-formats: '[{"model-format":"tensorflow","model-server":"ovms"},{"model-format":"tensorflow-lite","model-server":"ovms"},{"model-format":"onnx","model-server":"ovms"},{"model-format":"pytorch","model-server":"ovms"},{"model-format":"openvino-ir","model-server":"ovms"},{"model-format":"scikit-learn","runtime":"seldon"},{"model-format":"mlflow","runtime":"seldon"}]'
 spec:
   params:
     - name: model-name

@@ -1,0 +1,30 @@
+[
+    {
+        "model-format": "tensorflow",
+        "model-server": "ovms"
+    },
+    {
+        "model-format": "tensorflow-lite",
+        "model-server": "ovms"
+    },
+    {
+        "model-format": "onnx",
+        "model-server": "ovms"
+    },
+    {
+        "model-format": "pytorch",
+        "model-server": "ovms"
+    },
+    {
+        "model-format": "openvino-ir",
+        "model-server": "ovms"
+    },
+    {
+        "model-format": "scikit-learn",
+        "runtime": "seldon"
+    },
+    {
+        "model-format": "mlflow",
+        "runtime": "seldon"
+    }
+]
