@@ -56,3 +56,17 @@ function createS3Secret() {
     sed -i "s|{{ S3_ENDPOINT__https://example.amazonaws.com/ }}|https://s3.us-west-1.amazonaws.com|" "$AWS_SECRET_PATH"
     sed -i "s|{{ S3_REGION__us-west-1 }}|us-west-1|" "$AWS_SECRET_PATH"
 }
+
+function createImageRegistrySecret() {
+    local -r IMAGE_REGISTRY_SECRET_PATH_TEMPLATE=$1
+    local -r IMAGE_REGISTRY_SECRET_PATH=$2
+
+    local -r AI_EDGE_IMAGE_REGISTRY_OPENSHIFT_CI_SECRET_PATH="${CUSTOM_IMAGE_REGISTRY_SECRET_PATH:-/secrets/ai-edge-quay}"
+    local -r USERNAME=$(cat "$AI_EDGE_IMAGE_REGISTRY_OPENSHIFT_CI_SECRET_PATH"/username)
+    local -r PASSWORD=$(cat "$AI_EDGE_IMAGE_REGISTRY_OPENSHIFT_CI_SECRET_PATH"/password)
+
+    cp "$IMAGE_REGISTRY_SECRET_PATH_TEMPLATE" "$IMAGE_REGISTRY_SECRET_PATH"
+
+    sed -i "s|{{ IMAGE_REGISTRY_USERNAME }}|${USERNAME}|" "$IMAGE_REGISTRY_SECRET_PATH"
+    sed -i "s|{{ IMAGE_REGISTRY_PASSWORD }}|${PASSWORD}|" "$IMAGE_REGISTRY_SECRET_PATH"
+}

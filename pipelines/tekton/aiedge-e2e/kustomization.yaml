@@ -5,4 +5,5 @@ commonLabels:
   app.kubernetes.io/part-of: rhoai-edge-pipelines
 resources:
 - tasks/
+- test-data/
 - aiedge-e2e.pipeline.yaml

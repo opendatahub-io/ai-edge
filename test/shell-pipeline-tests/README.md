@@ -19,17 +19,18 @@ For local execution, these environment variables need to be set:
 * **CUSTOM_AWS_SECRET_PATH** - Directory where credentials for the AWS S3 bucket are stored. S3 bucket is used as a source of the AI model. The directory should have 2 files:
   * accessKey - containing the access key, sometimes also called access key ID
   * secretAccessKey - containing the secret access key
-* **CUSTOM_QUAY_SECRET_PATH** - Directory where credentials for the Quay repository are stored. The repository is used to publish the image after it is tested. The directory should contain the file:
-  * dockerconfigjson - without the '.' (dot), containing the full docker config.json with authentication to Quay.io or another registry
+* **CUSTOM_IMAGE_REGISTRY_SECRET_PATH** - Directory where credentials for the image repository (e.g. Quay) are stored. This repository is used to publish the image after it is tested. The pipeline uses [basic-auth](https://tekton.dev/docs/pipelines/auth/#configuring-basic-auth-authentication-for-docker) for authentication. The directory should contain the files:
+  * username - containing the username of the account used to access the image registry
+  * password - containing the password used to access the image registry
 
 After the credentials are configured, you can run the pipeline tests using:
 
 ```shell
-ARTIFACT_DIR=./artifacts CUSTOM_AWS_SECRET_PATH=./secrets CUSTOM_QUAY_SECRET_PATH=./secrets ./openvino-bike-rentals/pipelines-test-openvino-bike-rentals.sh
+ARTIFACT_DIR=./artifacts CUSTOM_AWS_SECRET_PATH=./secrets CUSTOM_IMAGE_REGISTRY_SECRET_PATH=./secrets ./openvino-bike-rentals/pipelines-test-openvino-bike-rentals.sh
 ```
 and
 ```shell
-ARTIFACT_DIR=./artifacts CUSTOM_AWS_SECRET_PATH=./secrets CUSTOM_QUAY_SECRET_PATH=./secrets ./tensorflow-housing/pipelines-test-tensorflow-housing.sh
+ARTIFACT_DIR=./artifacts CUSTOM_AWS_SECRET_PATH=./secrets CUSTOM_IMAGE_REGISTRY_SECRET_PATH=./secrets ./tensorflow-housing/pipelines-test-tensorflow-housing.sh
 ```
 
 This would put all the logs into the `$PWD/artifacts` directory and it also expects all the credential files to be stored under the `$PWD/secrets` directory.
