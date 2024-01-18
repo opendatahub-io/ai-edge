@@ -5,3 +5,4 @@ resources:
 - kserve-download-model.yaml
 - test-model-rest-svc-task.yaml
 - retrieve-build-image-info.task.yaml
+- skopeo-copy.yaml

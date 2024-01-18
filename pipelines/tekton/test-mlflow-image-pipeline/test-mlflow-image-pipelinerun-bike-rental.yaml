@@ -19,6 +19,9 @@ spec:
   serviceAccountName: pipeline
   timeout: 1h0m0s
   workspaces:
+  - secret: 
+      secretName: rhoai-edge-secret
+    name: dockerconfig
   - emptyDir: {}
     name: workspace
   - configMap:
