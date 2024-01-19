@@ -1,3 +1,5 @@
+
+
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
@@ -22,6 +24,12 @@ spec:
 
   workspaces:
     - name: images-url
+    - name: dockerconfig
+      description: >-
+        An optional workspace that allows providing a .docker/config.json file
+        for Skopeo to access the container registry.
+        The file should be placed at the root of the Workspace with name config.json.
+      optional: true
   params:
     - name: srcImageURL
       description: URL of the image to be copied to the destination registry
@@ -64,6 +72,25 @@ spec:
             echo "$cmd"
           done < "$filename"
         }
+
+        if [[ "$(workspaces.dockerconfig.bound)" == "true" ]]; then
+
+          # if config.json exists at workspace root, we use that
+          if test -f "$(workspaces.dockerconfig.path)/config.json"; then
+            export REGISTRY_AUTH_FILE="$(workspaces.dockerconfig.path)/config.json"
+
+          # else we look for .dockerconfigjson at the root
+          elif test -f "$(workspaces.dockerconfig.path)/.dockerconfigjson"; then
+            echo "here"
+            cp "$(workspaces.dockerconfig.path)/.dockerconfigjson" "$HOME/.docker/config.json"
+            export REGISTRY_AUTH_FILE="$HOME/.docker/config.json"
+
+          # need to error out if neither files are present
+          else
+            echo "neither 'config.json' nor '.dockerconfigjson' found at workspace root"
+            exit 1
+          fi
+        fi
         #
         # If single image is to be copied then, it can be passed through
         # params in the taskrun.
