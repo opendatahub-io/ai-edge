@@ -1,4 +1,4 @@
-FROM docker.io/openvino/model_server:2023.0
+FROM quay.io/opendatahub/openvino_model_server:stable
 
 ARG MODEL_NAME
 ARG MODEL_DIR=tf2model
@@ -6,7 +6,7 @@ ARG GRPC_PORT=9090
 ARG REST_PORT=8080
 # OVMS metrics currently only served on REST port https://docs.openvino.ai/2023.0/ovms_docs_metrics.html#enable-metrics
 ARG METRICS_PORT
-# onlu approach I could get to work https://stackoverflow.com/a/69301530/19020549
+
 ENV MODEL_NAME_ENV=$MODEL_NAME
 ENV GRPC_PORT_ENV=$GRPC_PORT
 ENV REST_PORT_ENV=$REST_PORT
@@ -17,12 +17,16 @@ RUN mkdir /models && chown ovms:ovms /models
 
 # CHANGE THIS LINE TO MATCH YOUR MODEL
 COPY --chown=ovms:ovms $MODEL_DIR /models/1
-# Not deleting this file causes a bug
-RUN if echo "${MODEL_DIR}" | grep -q "tf2model"; then rm -f /models/1/fingerprint.pb; fi
 
-RUN chmod o+rwX /models/1
-# https://docs.openshift.com/container-platform/4.13/openshift_images/create-images.html#use-uid_create-images
-RUN chgrp -R 0 /models/1 && chmod -R g=u /models/1
+RUN <<EOF
+    # Not deleting this file causes a bug
+    if echo "${MODEL_DIR}" | grep -q "tf2model"; then rm -f /models/1/fingerprint.pb; fi
+
+    chmod o+rwX /models/1
+
+    # https://docs.openshift.com/container-platform/4.13/openshift_images/create-images.html#use-uid_create-images
+    chgrp -R 0 /models/1 && chmod -R g=u /models/1
+EOF
 
 EXPOSE $REST_PORT $GRPC_PORT
 
