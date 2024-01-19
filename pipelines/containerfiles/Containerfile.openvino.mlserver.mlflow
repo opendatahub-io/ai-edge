@@ -1,7 +1,7 @@
 FROM quay.io/opendatahub/openvino_model_server:stable
 
 ARG MODEL_NAME
-ARG MODEL_DIR=tf2model
+ARG MODEL_DIR="."
 ARG GRPC_PORT=9090
 ARG REST_PORT=8080
 # OVMS metrics currently only served on REST port https://docs.openvino.ai/2023.0/ovms_docs_metrics.html#enable-metrics
