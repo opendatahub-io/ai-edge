@@ -6,11 +6,11 @@ This model classifies Iris flowers in order to distinguish between the three Iri
 
 This model was trained using the well known [Iris](https://archive.ics.uci.edu/dataset/53/iris) dataset.
 
-## Test 
+## Test
 ### Run Seldon MLServer with IRIS model
 Execute the following command from the [pipelines](../../) folder:
 ```
-docker run -d -u $(id -u) --rm -v ${PWD}/models:/opt/models:Z -p 8080:8080 -p 8081:8081 -p 8082:8082 -ti seldonio/mlserver:1.3.5-lightgbm mlserver start /opt/models/lightgbm-iris
+podman run -d --rm -v ${PWD}/models:/opt/models:Z -p 8080:8080 -p 8081:8081 -p 8082:8082 -ti seldonio/mlserver:1.3.5-lightgbm mlserver start /opt/models/lightgbm-iris
 ```
 
 ### Test call
