@@ -24,11 +24,10 @@ End to end pipeline that supports a workflow to Fetch -> Build -> Test -> Push a
   - Add a robot account to push images and set write Permissions for the robot account on the repositories. ([Quay](https://access.redhat.com/documentation/en-us/red_hat_quay/3.10/html/use_red_hat_quay/use-quay-manage-repo))
   - Download the Kubernetes Secret of the robot account and store it in a YAML file.
 - Inspect the file with the pull secret and note the name of the secret, or edit it.
-- Create the secret and link it to the `pipeline` Service Account that was created by the Red Hat OpenShift Pipelines operator using a Tekton Config. E.g.:
+- Create the secret and apply it. This will allow you to use the Quay Robot kubernetes secret directly as the dockerconfig workspace. E.g.:
 
 ```bash
 oc apply -f <downloaddir>/rhoai-edge-build-secret.yml
-oc secret link pipeline rhoai-edge-build-pull-secret
 ```
 
 #### Data for testing the model inferencing endpoint
