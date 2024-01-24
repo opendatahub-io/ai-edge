@@ -1,4 +1,4 @@
-.PHONY: install install/observability-core install/observability-edge test-acm-%-generate test
+.PHONY: install install/observability-core install/observability-edge test-acm-%-generate test go-test go-test-setup
 
 install: install/observability-core install/observability-edge
 
@@ -34,7 +34,56 @@ endif
 GO=go
 GOFLAGS=""
 
+# requires:
+#	AWS_SECRET_ACCESS_KEY		- Secret from AWS
+#	AWS_ACCESS_KEY_ID		- Access key from AWS
+#	S3_REGION			- Region of the bucket used to store the model
+#	S3_ENDPOINT			- Endpint of the bucket
+#	IMAGE_REGISTRY_USERNAME		- quay.io username
+#	IMAGE_REGISTRY_PASSWORD		- quay.io password
+#	IMAGE_REGISTRY_CREDENTIALS	- quay.io robot secret file
+go-test-setup:
+ifndef AWS_SECRET_ACCESS_KEY
+	$(error AWS_SECRET_ACCESS_KEY is undefined)
+endif
+ifndef AWS_ACCESS_KEY_ID
+	$(error AWS_ACCESS_KEY_ID is undefined)
+endif
+ifndef S3_REGION
+	$(error S3_REGION is undefined)
+endif
+ifndef S3_ENDPOINT
+	$(error S3_ENDPOINT is undefined)
+endif
+ifndef IMAGE_REGISTRY_USERNAME
+	$(error IMAGE_REGISTRY_USERNAME is undefined)
+endif
+ifndef IMAGE_REGISTRY_PASSWORD
+	$(error IMAGE_REGISTRY_PASSWORD is undefined)
+endif
+ifndef IMAGE_REGISTRY_CREDENTIALS
+	$(error IMAGE_REGISTRY_CREDENTIALS is undefined)
+endif
+	oc new-project test-namespace
+	@sed -e "s#{{ AWS_SECRET_ACCESS_KEY }}#${AWS_SECRET_ACCESS_KEY}#g" -e "s#{{ AWS_ACCESS_KEY_ID }}#${AWS_ACCESS_KEY_ID}#g" -e "s#{{ S3_REGION }}#${S3_REGION}#g" -e "s#{{ S3_ENDPOINT }}#${S3_ENDPOINT}#g" pipelines/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template | oc create -f -
+	@sed -e "s#{{ IMAGE_REGISTRY_USERNAME }}#${IMAGE_REGISTRY_USERNAME}#g" -e "s#{{ IMAGE_REGISTRY_PASSWORD }}#${IMAGE_REGISTRY_PASSWORD}#g" pipelines/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template | oc create -f -
+	oc create -f ${IMAGE_REGISTRY_CREDENTIALS}
+	oc secret link pipeline $(shell yq '.metadata.name' ${IMAGE_REGISTRY_CREDENTIALS})
+
+# requires:
+#	S3_BUCKET		- Name of S3 bucket that has the model
+#	TARGET_IMAGE_REPO	- Image repository that built model will be pushed to
+go-test: go-test-setup
+ifndef S3_BUCKET
+	$(error S3_BUCKET is undefined)
+endif
+ifndef TARGET_IMAGE_REPO
+	$(error TARGET_IMAGE_REPO is undefined)
+endif
+	oc project test-namespace
+	(cd test/e2e-tests/tests && S3_BUCKET=${S3_BUCKET} TARGET_IMAGE_REPO=${TARGET_IMAGE_REPO} ${GO} test -timeout 30m)
+	oc delete project test-namespace
+
 test:
 	@(./test/shell-pipeline-tests/openvino-bike-rentals/pipelines-test-openvino-bike-rentals.sh)
-	@(./test/shell-pipeline-tests/tensorflow-housing/pipelines-test-tensorflow-housing.sh)
-	@(cd test/e2e-tests/tests && ${GO} test)
+	@(./test/shell-pipeline-tests/tensorflow-housing/pipelines-test-tensorflow-housing.sh)	
