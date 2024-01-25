@@ -163,6 +163,7 @@ spec:
           severity: low
           remediationAction: enforce
 EOF
+```
 
 #### View the application deployments
 ##### ACM
