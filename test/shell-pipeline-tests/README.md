@@ -4,9 +4,8 @@ This directory contains 2 shell pipeline tests:
 * openvino-bike-rentals - OpenVINO version using the bike rentals model
 * tensorflow-housing - TensorFlow version using the housing model
 
-Both tests currently run [build-container-image-pipeline](../../pipelines/tekton/build-container-image-pipeline)
-and the [test-mlflow-image-pipeline](../../pipelines/tekton/test-mlflow-image-pipeline). The tests will be switched in the near future to the full [aiedge-e2e](../../pipelines/tekton/aiedge-e2e) version of the pipeline.
-After that, [GitOps pipeline](../../pipelines/tekton/gitops-update-pipeline) tests will be added as well.
+Both tests currently run the full [aiedge-e2e](../../pipelines/tekton/aiedge-e2e) pipeline which includes fetch, build,
+test and push of the image. [GitOps pipeline](../../pipelines/tekton/gitops-update-pipeline) tests will be added as well in the future.
 
 Scripts are primarily run in the OpenShift CI environment, so they make use of
 OpenShift CI secrets. You need to configure these if you want to run it locally, see the next section.

@@ -22,8 +22,8 @@ createS3Secret "$AWS_SECRET_PATH_TEMPLATE" "$AWS_SECRET_PATH"
 
 oc create -f "$AWS_SECRET_PATH"
 
-IMAGE_REGISTRY_SECRET_PATH_TEMPLATE="$AIEDGE_E2E_PIPELINE_DIR_PATH"/templates/credentials-image-registry.yaml.template
-IMAGE_REGISTRY_SECRET_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/templates/credentials-image-registry.yaml
+IMAGE_REGISTRY_SECRET_PATH_TEMPLATE="$AIEDGE_E2E_PIPELINE_DIR_PATH"/templates/credentials-image-registry.secret.yaml.template
+IMAGE_REGISTRY_SECRET_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/templates/credentials-image-registry.secret.yaml
 
 createImageRegistrySecret "$IMAGE_REGISTRY_SECRET_PATH_TEMPLATE" "$IMAGE_REGISTRY_SECRET_PATH"
 
