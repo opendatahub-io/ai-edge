@@ -28,7 +28,7 @@ tensorflow-housing/
 └── tf2model/
     ├── saved_model.pb
     └── ...
-    
+
 onnx-mnist/
 ├── 1
 │   ├── mnist.onnx
@@ -105,7 +105,7 @@ If you don't have or know your access key, generate one in AWS account's Securit
 Create a copy of the file(s) below to include the required credentials for accessing any models and image registries required for the Pipeline to run successfully:
 * S3 Storage - [credentials-s3.secret.yaml.template](tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template) to include your credentials required to access any model stored in S3 then apply it to the server
 * Image Registry - [credentials-image-registry.secret.yaml.template](tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template) to include the username and password with write access to the image repository.
-  This is needed only in case you noted username and password of the robot account. In case you directly downloaded and applied a Kubernetes Secret, this file can be skipped. 
+  This is needed only in case you noted username and password of the robot account. In case you directly downloaded and applied a Kubernetes Secret, this file can be skipped.
     ```bash
     $ cp tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template credentials-s3.secret.yaml
     $ cp tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template credentials-image-registry.secret.yaml
@@ -113,13 +113,14 @@ Create a copy of the file(s) below to include the required credentials for acces
     # Edit the credentials files with S3 and Robot credentials
     # Login to the OpenShift cluster and add the credentials to the server
     $ oc apply -f credentials-s3.secret.yaml -f credentials-image-registry.secret.yaml
-  
+
     # Linking secret is needed only if the secret from the Robot account hasn't been already applied and linked in the previous step
     $ oc secret link pipeline credentials-image-registry
     ```
 
 ### Data for testing the model inferencing endpoint
-To verify that that model container is working successfully, we include a test-model-rest-svc task, that will send data to the model inferencing endpoint and verify that expected output is returned.  You will need to create a ConfigMap with two files `data.json`, the jsondata payload for your model and `output.json`, the expected json output of your model
+To verify that that model container is working successfully, we include a test-model-rest-svc task, that will send data to the model inferencing endpoint and verify that expected output is returned.
+You will need to create a ConfigMap with two files `data.json`, the jsondata payload for your model and `output.json`, the expected json output of your model
 
 ```yaml
 # Example ConfigMap
@@ -135,7 +136,7 @@ data:
   output.json: '{"predictions": [331]}'
 ```
 
-Once the test data configmap is created, it can be included as the `test-data` workspace in the [PipelineRun](tekton/aiedge-e2e/aiedge-e2e.pipelinerun.yaml).
+Once the test data configmap is created, it can be included as the `test-data` workspace in your PipelineRun file ([OpenVino example](tekton/aiedge-e2e/aiedge-e2e.tensorflow-housing.pipelinerun.yaml), [Seldon example](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml)).
 ```yaml
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
@@ -156,17 +157,19 @@ From the user's Data Science Projects namespace where the Pipeline will be runni
 
 1. Deploy the Tekton Tasks and Pipeline to the namespace
 ```bash
-# From the root folder where this README is located
+# From the folder where this README is located
 oc apply -k tekton/aiedge-e2e/
 ```
 
 ### Run the Pipeline
 
-Update the `s3-bucket-name` parameter value from its default `rhoai-edge-models` in
-[`aiedge-e2e.pipelinerun.yaml`](tekton/aiedge-e2e/aiedge-e2e.pipelinerun.yaml) to match your S3 bucket name.
+Update the `s3-bucket-name` parameter value in your PipelineRun file to match your S3 bucket name.
+In [this example PipelineRun file](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml) it's set to a default of `rhoai-edge-models`.
 
 #### For Git fetch
-Update the `git-model-repo` parameter with the repository url, the `modelRelativePath` parameter to the model files path and the `git-revision` parameter for the version/branch of the repository in [`aiedge-e2e.pipelinerun.yaml`](tekton/aiedge-e2e/aiedge-e2e.pipelinerun.yaml).
+
+Update the `git-model-repo` parameter with the repository url, the `modelRelativePath` parameter to the model files path and the `git-revision` parameter for the version/branch of the repository in your PipelineRun file.
+[This example PipelineRun file](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml) can be used as an example.
 
 #### Other parameters
 You may also want to change other parameters like:
