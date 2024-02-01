@@ -1,8 +1,0 @@
-kind: Kustomization
-apiVersion: kustomize.config.k8s.io/v1beta1
-resources:
-- build-container-image-buildah-cache-pvc.yaml
-- kserve-download-model.yaml
-- check-model-and-containerfile-exists.yaml
-- build-container-image-pipeline.yaml
-- copy-model-from-pvc.yaml

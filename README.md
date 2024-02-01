@@ -212,10 +212,6 @@ You can set the `SIZE` and `PVC` values aswell
 make MODEL_PATH="PATH_TO_A_FILE" NAME=my-model SIZE=1G PVC=my-new-PVC create
 ```
 
-In `pipelines/tekton/obsolete/build-container-image-pipeline` you can set the
-`fetch-model` to `pvc` for the pipeline to copy the file from the
-`model-workspace` which can be set to the PVC created in the last step.
-
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
