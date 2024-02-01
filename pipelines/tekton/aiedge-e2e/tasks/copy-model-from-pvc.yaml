@@ -11,14 +11,14 @@ spec:
   - name: copy-model-from-pvc
     image: quay.io/opendatahub/kserve-storage-initializer:v0.11
     script: |
-      SOURCE_PATH="$(workspaces.source-workspace.path)/model_dir/$(params.model-name)"
+      SOURCE_PATH="$(workspaces.source-workspace.path)/model_dir-$(params.model-name)/$(params.model-name)"
 
-      DEST_PATH="$(workspaces.destination-workspace.path)/model_dir/$(params.model-name)"
+      DEST_PATH="$(workspaces.destination-workspace.path)/model_dir-$(params.model-name)/$(params.model-name)"
 
       echo "Copying model file $SOURCE_PATH"
       echo "to $DEST_PATH"
 
-      DIR_PATH="$(dirname $(workspaces.destination-workspace.path)/model_dir/$(params.model-name))"
+      DIR_PATH="$(dirname $(workspaces.destination-workspace.path)/model_dir-$(params.model-name)/$(params.model-name))"
 
       mkdir -p $DIR_PATH
 

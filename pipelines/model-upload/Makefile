@@ -20,11 +20,11 @@ create:
 
 # upload model to the pod to the PVC
 	@oc exec local-model-to-pvc-pod -- mkdir workspace/${PVC}/model_dir/ -p
-	@oc cp ${MODEL_PATH} local-model-to-pvc-pod:/workspace/${PVC}/model_dir/${NAME}
+	@oc cp ${MODEL_PATH} local-model-to-pvc-pod:/workspace/${PVC}/model_dir-${NAME}/${NAME}
 
 # delete pod
 	@oc delete pod local-model-to-pvc-pod
 
 	@echo "PVC name: ${PVC}" 
 	@echo "Size: ${SIZE}" 
-	@echo "Model path in pod: /workspace/${PVC}/model_dir/${NAME}" 
+	@echo "Model path in pod: /workspace/${PVC}/model_dir-${NAME}/${NAME}" 
