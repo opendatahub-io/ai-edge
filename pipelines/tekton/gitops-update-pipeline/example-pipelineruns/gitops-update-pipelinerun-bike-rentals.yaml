@@ -1,6 +1,6 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
-metadata:
+metadata: #comment
   generateName: gitops-update-pipeline-bike-rentals-
   labels:
     tekton.dev/pipeline: gitops-update-pipeline
