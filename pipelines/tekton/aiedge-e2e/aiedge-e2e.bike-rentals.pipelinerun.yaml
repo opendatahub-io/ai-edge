@@ -25,7 +25,7 @@ spec:
   - name: git-model-repo
     value: https://github.com/opendatahub-io/ai-edge.git
   - name: modelRelativePath
-    value: pipelines/models/
+    value: ""
   - name: git-revision
     value: "main"
   - name: test-endpoint
