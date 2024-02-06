@@ -1,4 +1,5 @@
 # Open Data Hub / AI Edge Use Cases
+This should skip the PR check.
 
 This repository contains artifacts to show and support Open Data Hub and Red Hat OpenShift Data Science Edge use cases.
 
