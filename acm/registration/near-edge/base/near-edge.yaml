@@ -65,7 +65,7 @@ metadata:
 spec:
   generators:
     - clusterDecisionResource:
-        configMapRef: ocm-placement-generator
+        configMapRef: acm-placement
         labelSelector:
           matchLabels:
             cluster.open-cluster-management.io/placement: placement
