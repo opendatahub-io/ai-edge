@@ -19,14 +19,14 @@ spec:
   - name: download-model-s3
     image: quay.io/opendatahub/kserve-storage-initializer:v0.11
     script: |
-      mkdir -p $(workspaces.workspace.path)/model_dir/
+      mkdir -p $(workspaces.workspace.path)/model_dir-$(params.model-name)/
 
       export S3_URL="s3://$(params.s3-bucket-name)/$(params.model-name)"
       echo -n $S3_URL | tee $(results.s3-url.path) ;
 
       STORAGE_CONFIG="$(cat $(workspaces.s3-secret.path)/s3-storage-config)" /storage-initializer/scripts/initializer-entrypoint \
       $S3_URL \
-      $(workspaces.workspace.path)/model_dir/$(params.model-name)
+      $(workspaces.workspace.path)/model_dir-$(params.model-name)/$(params.model-name)
   workspaces:
   - description: The workspace for the downloaded model.
     name: workspace

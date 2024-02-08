@@ -183,6 +183,12 @@ Be sure to also use the correct config map with the test data.
 oc create -f tekton/aiedge-e2e/aiedge-e2e.pipelinerun.yaml
 ```
 
+> [!IMPORTANT]
+> Since the `buildah-cache` workspace is used to share data between TaskRuns in a PipelineRun, a PersistentVolumeClaim type VolumeSource is required to fulfill it properly.
+> We strongly recommend that this is fulfilled using the `volumeClaimTemplate` approach, rather than the `persistentVolumeClaim` approach.
+> If you must use the `persistentVolumeClaim` approach to re-use an existing PersistentVolumeClaim, then you will likely hit issues if two PipelineRuns for the same model name are executed concurrently (and possibly other corner cases).
+> See the Tekton documentation around [Using PersistentVolumeClaims as VolumeSource](https://tekton.dev/docs/pipelines/workspaces/#using-persistentvolumeclaims-as-volumesource).
+
 Check what objects were created and what pipelines executed either in OpenShift Console
 in Pipelines > Pipelines, Storage > PersistentVolumeClaims,
 and Builds > ImageStreams,

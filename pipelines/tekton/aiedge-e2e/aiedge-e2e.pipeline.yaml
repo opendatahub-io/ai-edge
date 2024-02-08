@@ -123,7 +123,7 @@ spec:
     - name: revision
       value: $(params.git-revision)
     - name: subdirectory
-      value: /model_dir/
+      value: /model_dir-$(params.model-name)/
     workspaces:
     - name: output
       workspace: buildah-cache
@@ -210,7 +210,7 @@ spec:
     - name: DOCKERFILE
       value: containerfile_repo/$(params.containerfileRelativePath)
     - name: CONTEXT
-      value: model_dir/$(params.modelRelativePath)/$(params.model-name)
+      value: model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)
     - name: TLSVERIFY
       value: "true"
     - name: FORMAT
