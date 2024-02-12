@@ -41,7 +41,6 @@ GOFLAGS=""
 #	S3_ENDPOINT			- Endpint of the bucket
 #	IMAGE_REGISTRY_USERNAME		- quay.io username
 #	IMAGE_REGISTRY_PASSWORD		- quay.io password
-#	IMAGE_REGISTRY_CREDENTIALS	- quay.io robot secret file
 go-test-setup:
 ifndef AWS_SECRET_ACCESS_KEY
 	$(error AWS_SECRET_ACCESS_KEY is undefined)
@@ -61,13 +60,9 @@ endif
 ifndef IMAGE_REGISTRY_PASSWORD
 	$(error IMAGE_REGISTRY_PASSWORD is undefined)
 endif
-ifndef IMAGE_REGISTRY_CREDENTIALS
-	$(error IMAGE_REGISTRY_CREDENTIALS is undefined)
-endif
 	@sed -e "s#{{ AWS_SECRET_ACCESS_KEY }}#${AWS_SECRET_ACCESS_KEY}#g" -e "s#{{ AWS_ACCESS_KEY_ID }}#${AWS_ACCESS_KEY_ID}#g" -e "s#{{ S3_REGION }}#${S3_REGION}#g" -e "s#{{ S3_ENDPOINT }}#${S3_ENDPOINT}#g" pipelines/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template | oc create -f -
 	@sed -e "s#{{ IMAGE_REGISTRY_USERNAME }}#${IMAGE_REGISTRY_USERNAME}#g" -e "s#{{ IMAGE_REGISTRY_PASSWORD }}#${IMAGE_REGISTRY_PASSWORD}#g" pipelines/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template | oc create -f -
-	oc create -f ${IMAGE_REGISTRY_CREDENTIALS}
-	oc secret link pipeline $(shell yq '.metadata.name' ${IMAGE_REGISTRY_CREDENTIALS})
+	oc secret link pipeline credentials-image-registry
 
 # requires:
 #	S3_BUCKET		- Name of S3 bucket that has the model
