@@ -43,15 +43,20 @@ func KustomizeBuild(path string) (resmap.ResMap, error) {
 }
 
 func CreateObjectsFromResourceMap(ctx context.Context, clients *Clients, resourceMap resmap.ResMap) error {
-	for _, resrc := range resourceMap.Resources() {
-		kind := resrc.GetKind()
+	for _, rsc := range resourceMap.Resources() {
+		kind := rsc.GetKind()
 		switch kind {
 		case "ConfigMap":
 			{
 				var configMap corev1.ConfigMap
-				err := ResourceToType(resrc, &configMap)
+				err := ResourceToType(rsc, &configMap)
 				if err != nil {
 					return err
+				}
+
+				_, err = clients.Kubernetes.CoreV1().ConfigMaps("test-namespace").Get(ctx, configMap.Namespace, metav1.GetOptions{})
+				if err == nil {
+					return nil
 				}
 
 				_, err = clients.Kubernetes.CoreV1().ConfigMaps("test-namespace").Create(ctx, &configMap, metav1.CreateOptions{})
@@ -62,9 +67,14 @@ func CreateObjectsFromResourceMap(ctx context.Context, clients *Clients, resourc
 		case "Task":
 			{
 				var task pipepinev1.Task
-				err := ResourceToType(resrc, &task)
+				err := ResourceToType(rsc, &task)
 				if err != nil {
 					return err
+				}
+
+				_, err = clients.Task.Get(ctx, task.Name, metav1.GetOptions{})
+				if err == nil {
+					return nil
 				}
 
 				_, err = clients.Task.Create(ctx, &task, metav1.CreateOptions{})
@@ -75,25 +85,17 @@ func CreateObjectsFromResourceMap(ctx context.Context, clients *Clients, resourc
 		case "Pipeline":
 			{
 				var pipeline pipepinev1.Pipeline
-				err := ResourceToType(resrc, &pipeline)
+				err := ResourceToType(rsc, &pipeline)
 				if err != nil {
 					return err
+				}
+
+				_, err = clients.Pipeline.Get(ctx, pipeline.Name, metav1.GetOptions{})
+				if err == nil {
+					return nil
 				}
 
 				_, err = clients.Pipeline.Create(ctx, &pipeline, metav1.CreateOptions{})
-				if err != nil {
-					return err
-				}
-			}
-		case "PipelineRun":
-			{
-				var pipelineRun pipepinev1.PipelineRun
-				err := ResourceToType(resrc, &pipelineRun)
-				if err != nil {
-					return err
-				}
-
-				_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 				if err != nil {
 					return err
 				}

@@ -64,7 +64,6 @@ endif
 ifndef IMAGE_REGISTRY_CREDENTIALS
 	$(error IMAGE_REGISTRY_CREDENTIALS is undefined)
 endif
-	oc new-project test-namespace
 	@sed -e "s#{{ AWS_SECRET_ACCESS_KEY }}#${AWS_SECRET_ACCESS_KEY}#g" -e "s#{{ AWS_ACCESS_KEY_ID }}#${AWS_ACCESS_KEY_ID}#g" -e "s#{{ S3_REGION }}#${S3_REGION}#g" -e "s#{{ S3_ENDPOINT }}#${S3_ENDPOINT}#g" pipelines/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template | oc create -f -
 	@sed -e "s#{{ IMAGE_REGISTRY_USERNAME }}#${IMAGE_REGISTRY_USERNAME}#g" -e "s#{{ IMAGE_REGISTRY_PASSWORD }}#${IMAGE_REGISTRY_PASSWORD}#g" pipelines/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template | oc create -f -
 	oc create -f ${IMAGE_REGISTRY_CREDENTIALS}
@@ -73,7 +72,7 @@ endif
 # requires:
 #	S3_BUCKET		- Name of S3 bucket that has the model
 #	TARGET_IMAGE_REPO	- Image repository that built model will be pushed to
-go-test: go-test-setup
+go-test:
 ifndef S3_BUCKET
 	$(error S3_BUCKET is undefined)
 endif
@@ -82,7 +81,6 @@ ifndef TARGET_IMAGE_REPO
 endif
 	oc project test-namespace
 	(cd test/e2e-tests/tests && S3_BUCKET=${S3_BUCKET} TARGET_IMAGE_REPO=${TARGET_IMAGE_REPO} ${GO} test -timeout 30m)
-	oc delete project test-namespace
 
 test:
 	@(./test/shell-pipeline-tests/openvino-bike-rentals/pipelines-test-openvino-bike-rentals.sh)
