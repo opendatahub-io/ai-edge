@@ -42,7 +42,7 @@ func KustomizeBuild(path string) (resmap.ResMap, error) {
 	return resourceMap, nil
 }
 
-func CreateObjectsFromResourceMap(ctx context.Context, clients *Clients, resourceMap resmap.ResMap) error {
+func CreateObjectsFromResourceMap(ctx context.Context, clients *Clients, resourceMap resmap.ResMap, namespace string) error {
 	for _, rsc := range resourceMap.Resources() {
 		kind := rsc.GetKind()
 		switch kind {
@@ -54,12 +54,12 @@ func CreateObjectsFromResourceMap(ctx context.Context, clients *Clients, resourc
 					return err
 				}
 
-				_, err = clients.Kubernetes.CoreV1().ConfigMaps("test-namespace").Get(ctx, configMap.Namespace, metav1.GetOptions{})
+				_, err = clients.Kubernetes.CoreV1().ConfigMaps(namespace).Get(ctx, configMap.Namespace, metav1.GetOptions{})
 				if err == nil {
 					return nil
 				}
 
-				_, err = clients.Kubernetes.CoreV1().ConfigMaps("test-namespace").Create(ctx, &configMap, metav1.CreateOptions{})
+				_, err = clients.Kubernetes.CoreV1().ConfigMaps(namespace).Create(ctx, &configMap, metav1.CreateOptions{})
 				if err != nil {
 					return err
 				}

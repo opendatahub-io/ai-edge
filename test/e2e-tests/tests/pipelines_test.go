@@ -53,8 +53,8 @@ func WaitForAllPipelineRunsToComplete(ctx context.Context, clients *support.Clie
 	return support.WaitFor(18*time.Minute, 10*time.Second, callback)
 }
 
-// init is called before any test. This is used to build
-// then apply the kustomize config for the main pipeline
+// init is called before any test is run, and it is called once.
+// This is used to build then apply the kustomize config for the main pipeline
 func init() {
 	resourceMap, err := support.KustomizeBuild(AIEdgeE2EPipelineDirectoryRelativePath)
 	if err != nil {
@@ -63,12 +63,17 @@ func init() {
 
 	ctx := CreateContext()
 
-	clients, err := support.CreateClients("test-namespace")
+	options, err := support.GetOptions()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	clients, err := support.CreateClients(options.ClusterNamespace)
 	if err != nil {
 		panic(fmt.Sprintf("error while creating client : %v", err.Error()))
 	}
 
-	err = support.CreateObjectsFromResourceMap(ctx, &clients, resourceMap)
+	err = support.CreateObjectsFromResourceMap(ctx, &clients, resourceMap, options.ClusterNamespace)
 	if err != nil {
 		panic(fmt.Errorf("error while creating objects from kustomize resources : %v", err.Error()))
 	}
@@ -77,17 +82,17 @@ func init() {
 func Test_DefaultPipelineRun(t *testing.T) {
 	ctx := CreateContext()
 
-	clients, err := support.CreateClients("test-namespace")
+	options, err := support.GetOptions()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	clients, err := support.CreateClients(options.ClusterNamespace)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	pipelineRun, err := support.ReadFileAsPipelineRun(PipelineRunFileRelativePath)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	options, err := support.GetOptions()
 	if err != nil {
 		t.Fatal(err.Error())
 	}

@@ -8,6 +8,7 @@ import (
 const (
 	S3BucketNameEnvKey         = "S3_BUCKET"
 	TargetImageNamespaceEnvKey = "TARGET_IMAGE_NAMESPACE"
+	CLusterNamespaceEnvKey     = "NAMESPACE"
 )
 
 var (
@@ -17,6 +18,7 @@ var (
 type Options struct {
 	S3BucketName     string // required
 	RegistryRepoName string // required
+	ClusterNamespace string // required
 }
 
 func GetOptions() (*Options, error) {
@@ -39,12 +41,16 @@ func setOptions() (*Options, error) {
 
 	var options = &Options{}
 
-	if options.S3BucketName = os.Getenv(S3BucketNameEnvKey); os.Getenv(S3BucketNameEnvKey) == "" {
+	if options.S3BucketName = os.Getenv(S3BucketNameEnvKey); options.S3BucketName == "" {
 		return options, fmt.Errorf("env variable %v not set, but is required to run tests", S3BucketNameEnvKey)
 	}
 
-	if options.RegistryRepoName = os.Getenv(TargetImageNamespaceEnvKey); os.Getenv(TargetImageNamespaceEnvKey) == "" {
+	if options.RegistryRepoName = os.Getenv(TargetImageNamespaceEnvKey); options.RegistryRepoName == "" {
 		return options, fmt.Errorf("env variable %v not set, but is required to run tests", TargetImageNamespaceEnvKey)
+	}
+
+	if options.ClusterNamespace = os.Getenv(CLusterNamespaceEnvKey); options.ClusterNamespace == "" {
+		return options, fmt.Errorf("env variable %v not set, but is required to run tests", CLusterNamespaceEnvKey)
 	}
 
 	return options, nil
