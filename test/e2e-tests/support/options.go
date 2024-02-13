@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	S3BucketNameEnvKey    = "S3_BUCKET"
-	TargetImageRepoEnvKey = "TARGET_IMAGE_REPO"
+	S3BucketNameEnvKey         = "S3_BUCKET"
+	TargetImageNamespaceEnvKey = "TARGET_IMAGE_NAMESPACE"
 )
 
 var (
@@ -43,8 +43,8 @@ func setOptions() (*Options, error) {
 		return options, fmt.Errorf("env variable %v not set, but is required to run tests", S3BucketNameEnvKey)
 	}
 
-	if options.RegistryRepoName = os.Getenv(TargetImageRepoEnvKey); os.Getenv(TargetImageRepoEnvKey) == "" {
-		return options, fmt.Errorf("env variable %v not set, but is required to run tests", TargetImageRepoEnvKey)
+	if options.RegistryRepoName = os.Getenv(TargetImageNamespaceEnvKey); os.Getenv(TargetImageNamespaceEnvKey) == "" {
+		return options, fmt.Errorf("env variable %v not set, but is required to run tests", TargetImageNamespaceEnvKey)
 	}
 
 	return options, nil

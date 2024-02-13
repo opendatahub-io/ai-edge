@@ -7,7 +7,6 @@ A local install of the Go compiler is needed to run the tests. Go version `1.21`
 ## Setup
 - Log into the target cluster using `oc login`. This will update your default `kubeconfig` for the tests to use
 - Create a S3 bucket with the models in the root directory
-- Create a quay.io robot
 
 The following enviroment varaibles are required to run the test setup and the tests themselves. If any of these are not set then the tests will not run. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
 
@@ -17,9 +16,8 @@ The following enviroment varaibles are required to run the test setup and the te
 - `S3_ENDPOINT` - Endpint of the bucket
 - `IMAGE_REGISTRY_USERNAME` - quay.io username
 - `IMAGE_REGISTRY_PASSWORD` - quay.io password
-- `IMAGE_REGISTRY_CREDENTIALS` - quay.io robot secret file
 - `S3_BUCKET` - Name of S3 bucket that has the model
-- `TARGET_IMAGE_REPO` - Image repository that built model will be pushed to
+- `TARGET_IMAGE_NAMESPACE` - Image registry namespace that the built model will be pushed to a repository in (the repository name will be the same as the model name).
 
 ## Run tests locally
 ```bash
