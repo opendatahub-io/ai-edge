@@ -51,10 +51,10 @@ function createS3Secret() {
 
     cp "$AWS_SECRET_PATH_TEMPLATE" "$AWS_SECRET_PATH"
 
-    sed -i "s|{{ YOUR_AWS_ACCESS_KEY }}|${AWS_ACCESS_KEY}|" "$AWS_SECRET_PATH"
-    sed -i "s|{{ YOUR_AWS_SECRET_KEY }}|${AWS_SECRET_KEY}|" "$AWS_SECRET_PATH"
-    sed -i "s|{{ S3_ENDPOINT__https://example.amazonaws.com/ }}|https://s3.us-west-1.amazonaws.com|" "$AWS_SECRET_PATH"
-    sed -i "s|{{ S3_REGION__us-west-1 }}|us-west-1|" "$AWS_SECRET_PATH"
+    sed -i "s|{{ AWS_ACCESS_KEY_ID }}|${AWS_ACCESS_KEY}|" "$AWS_SECRET_PATH"
+    sed -i "s|{{ AWS_SECRET_ACCESS_KEY }}|${AWS_SECRET_KEY}|" "$AWS_SECRET_PATH"
+    sed -i "s|{{ S3_ENDPOINT }}|https://s3.us-west-1.amazonaws.com|" "$AWS_SECRET_PATH"
+    sed -i "s|{{ S3_REGION }}|us-west-1|" "$AWS_SECRET_PATH"
 }
 
 function createImageRegistrySecret() {
