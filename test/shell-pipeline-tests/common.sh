@@ -34,7 +34,10 @@ function saveArtifacts() {
     oc get pipelinerun $PIPELINE_RUN_NAME -o yaml > "${LOGS_DIR}"/pipelineRuns.txt
     oc get task -o yaml > "${LOGS_DIR}"/tasks.txt
     oc get taskrun -l "tekton.dev/pipelineRun=$PIPELINE_RUN_NAME" -o yaml > "${LOGS_DIR}"/taskRuns.txt
-    oc logs -l "tekton.dev/pipelineRun=$PIPELINE_RUN_NAME" --all-containers --prefix --tail=-1 > "${LOGS_DIR}"/logs.txt
+    oc logs -l "tekton.dev/pipelineRun=$PIPELINE_RUN_NAME" --all-containers --prefix --tail=-1 > "${LOGS_DIR}"/pipelineLogs.txt
+    oc get deployment -o yaml > "${LOGS_DIR}"/deployments.txt
+    oc logs -l '!tekton.dev/pipelineRun' --all-containers --prefix --tail=-1 > "${LOGS_DIR}"/deploymentLogs.txt
+    oc events > "${LOGS_DIR}"/events.txt
 }
 
 function createS3Secret() {
