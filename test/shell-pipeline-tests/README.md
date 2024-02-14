@@ -1,8 +1,8 @@
 # Shell Pipeline Tests
 
 This directory contains 2 shell pipeline tests:
-* openvino-bike-rentals - OpenVINO version using the bike rentals model
-* tensorflow-housing - TensorFlow version using the housing model
+* seldon-bike-rentals - Seldon.io image using the bike rentals model
+* openvino-tensorflow-housing - OpenVino image using the Tensorflow housing model
 
 Both tests currently run the full [aiedge-e2e](../../pipelines/tekton/aiedge-e2e) pipeline which includes fetch, build,
 test and push of the image. [GitOps pipeline](../../pipelines/tekton/gitops-update-pipeline) tests will be added as well in the future.
@@ -25,11 +25,11 @@ For local execution, these environment variables need to be set:
 After the credentials are configured, you can run the pipeline tests using:
 
 ```shell
-ARTIFACT_DIR=./artifacts CUSTOM_AWS_SECRET_PATH=./secrets CUSTOM_IMAGE_REGISTRY_SECRET_PATH=./secrets ./openvino-bike-rentals/pipelines-test-openvino-bike-rentals.sh
+ARTIFACT_DIR=./artifacts CUSTOM_AWS_SECRET_PATH=./secrets CUSTOM_IMAGE_REGISTRY_SECRET_PATH=./secrets ./seldon-bike-rentals/pipelines-test-seldon-bike-rentals.sh
 ```
 and
 ```shell
-ARTIFACT_DIR=./artifacts CUSTOM_AWS_SECRET_PATH=./secrets CUSTOM_IMAGE_REGISTRY_SECRET_PATH=./secrets ./tensorflow-housing/pipelines-test-tensorflow-housing.sh
+ARTIFACT_DIR=./artifacts CUSTOM_AWS_SECRET_PATH=./secrets CUSTOM_IMAGE_REGISTRY_SECRET_PATH=./secrets ./openvion-tensorflow-housing/pipelines-test-openvino-tensorflow-housing.sh
 ```
 
 This would put all the logs into the `$PWD/artifacts` directory and it also expects all the credential files to be stored under the `$PWD/secrets` directory.

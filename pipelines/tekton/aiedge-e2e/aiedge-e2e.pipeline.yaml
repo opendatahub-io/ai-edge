@@ -30,6 +30,10 @@ spec:
   - name: modelRelativePath
     type: string
     description: "Location of the model within the context of the source location.  Leave blank if the model files are at the root of the source location."
+  - name: model-dir
+    type: string
+    description: Directory below <modelRelativePath>/<model-name>/ to be used as MODEL_DIR in image build.
+    default: "."
   - name: fetch-model
     type: string
     description: "Fetch the model from Git or S3. Valid values in [s3, git]"
@@ -216,7 +220,7 @@ spec:
     - name: FORMAT
       value: oci
     - name: BUILD_EXTRA_ARGS
-      value: "--build-arg MODEL_NAME=$(params.model-name)"
+      value: "--build-arg MODEL_NAME=$(params.model-name) --build-arg MODEL_DIR=$(params.model-dir)"
     - name: SKIP_PUSH
       value: "false"
     runAfter:

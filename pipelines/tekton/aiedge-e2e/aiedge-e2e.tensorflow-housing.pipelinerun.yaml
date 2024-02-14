@@ -7,7 +7,7 @@ metadata:
 spec:
   params:
   - name: model-name
-    value: bike-rentals-auto-ml
+    value: tensorflow-housing
   - name: model-version
     value: "1"
   - name: s3-bucket-name
@@ -19,17 +19,19 @@ spec:
   - name: gitRepoName
     value: ai-edge
   - name: containerfileRelativePath
-    value: pipelines/containerfiles/Containerfile.seldonio.mlserver.mlflow
+    value: pipelines/containerfiles/Containerfile.openvino.mlserver.mlflow
   - name: fetch-model
-    value: "s3"
+    value: "git"
   - name: git-model-repo
     value: https://github.com/opendatahub-io/ai-edge.git
   - name: modelRelativePath
-    value: pipelines/models/
+    value: pipelines/models
+  - name: model-dir
+    value: "tf2model"
   - name: git-revision
     value: "main"
   - name: test-endpoint
-    value: "invocations"
+    value: "v1/models/tensorflow-housing/versions/1:predict"
   - name: target-imagerepo
     value: rhoai-edge
   pipelineRef:
@@ -53,5 +55,5 @@ spec:
   - emptyDir: {}
     name: workspace
   - configMap:
-      name: bike-rentals-test-data
+      name: tensorflow-housing-test-data
     name: test-data

@@ -6,7 +6,7 @@ Face detector based on SqueezeNet light (half-channels) as a backbone with a sin
 ### Run OVMS with the model inside
 Execute the following command from the [pipelines](../../) folder:
 ```
-docker run -d -u $(id -u):$(id -g) --rm -v ${PWD}/models:/model:Z -p 9000:9000 openvino/model_server:latest --model_name face-detection --model_path /model/tensorflow-facedetection --port 9000 --shape auto
+podman run -d --rm -v ${PWD}/models:/model:Z -p 9000:9000 quay.io/opendatahub/openvino_model_server:stable --model_name face-detection --model_path /model/tensorflow-facedetection --port 9000 --shape auto
 ```
 
 ### Test call
@@ -15,7 +15,7 @@ docker run -d -u $(id -u):$(id -g) --rm -v ${PWD}/models:/model:Z -p 9000:9000 o
 git clone https://github.com/openvinotoolkit/model_server.git
 cd model_server/demos/face_detection/python
 # Patch the requirements file, because tensorflow 2.11.0 is not working
-sed -i 's/2.11.0/2.13.0/' client_requirements.txt
+sed -i 's/tensorflow-serving-api==2.11.0/tensorflow-serving-api==2.13.0/' ../../common/python/requirements.txt
 python -m venv .venv
 source .venv/bin/activate
 pip install -r ../../common/python/requirements.txt

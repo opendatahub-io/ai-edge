@@ -67,7 +67,7 @@ endif
 # requires:
 #	S3_BUCKET		- Name of S3 bucket that has the model
 #	TARGET_IMAGE_NAMESPACE	- Image registry namespace that the built model will be pushed to a repository in
-#	NAMESPACE		- Cluster namespace that tests are run in 
+#	NAMESPACE		- Cluster namespace that tests are run in
 go-test:
 ifndef S3_BUCKET
 	$(error S3_BUCKET is undefined)
@@ -81,5 +81,5 @@ endif
 	(cd test/e2e-tests/tests && S3_BUCKET=${S3_BUCKET} TARGET_IMAGE_NAMESPACE=${TARGET_IMAGE_NAMESPACE} NAMESPACE=${NAMESPACE} ${GO} test -timeout 30m)
 
 test:
-	@(./test/shell-pipeline-tests/openvino-bike-rentals/pipelines-test-openvino-bike-rentals.sh)
-	@(./test/shell-pipeline-tests/tensorflow-housing/pipelines-test-tensorflow-housing.sh)	
+	@(./test/shell-pipeline-tests/seldon-bike-rentals/pipelines-test-seldon-bike-rentals.sh)
+	@(./test/shell-pipeline-tests/openvino-tensorflow-housing/pipelines-test-openvino-tensorflow-housing.sh)
