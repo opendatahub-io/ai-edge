@@ -260,7 +260,7 @@ spec:
               - image: $(params.model-name):$(params.model-version)
                 name: $(params.model-name)-$(params.model-version)
                 livenessProbe:
-                  failureThreshold: 8
+                  failureThreshold: 10
                   httpGet:
                     path: /v2/health/live
                     port: 8080
@@ -268,7 +268,7 @@ spec:
                   periodSeconds: 5
                   successThreshold: 1
                 readinessProbe:
-                  failureThreshold: 8
+                  failureThreshold: 10
                   httpGet:
                     path: /v2/models/$(params.model-name)/ready
                     port: 8080
