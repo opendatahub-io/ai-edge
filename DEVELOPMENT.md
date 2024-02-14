@@ -84,3 +84,33 @@ make -s -e GIT_REPO_URL="https\://github.com/opendatahub-io/ai-edge" \
      CUSTOM_APP_NAMESPACE=my-test-namespace \
      test-acm-bike-rental-app-generate  | oc apply -f -
 ```
+
+## Using a local.vars.mk file to override Makefile variables for your development environment
+To support the ability for a developer to customize the Makefile execution for their development environment, you can create a `local.vars.mk` file in the root of this repo to specify custom values matching your environment.  
+
+```
+$ cat local.vars.mk
+AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEYAWS
+AWS_ACCESS_KEY_ID=a1b2c3d4e5f6g7h8i9j0abcdefghijklmnopqrstuv
+S3_REGION=us-east-9
+S3_ENDPOINT=https://s3.amazonaws.com
+IMAGE_REGISTRY_USERNAME=my+robot+username
+IMAGE_REGISTRY_PASSWORD=<IMAGE-REGISTRY-PASSWORD>
+
+$ make 
+```
+
+If you need to use a different variable file for multiple environments, you can specify a different file that will be used as the local vars file
+
+```
+$ cat foo-storage.local.vars.mk
+AWS_SECRET_ACCESS_KEY=MYSECRETACCESSKEYFOO
+AWS_ACCESS_KEY_ID=a1b2c3d4e5f6g7h8i9j0abcdefghijklmnopqrstuv
+S3_REGION=us-west-4
+S3_ENDPOINT=https://s3.foo-object-storage.com
+IMAGE_REGISTRY_USERNAME=my+robot+username+foo
+IMAGE_REGISTRY_PASSWORD=<IMAGE-REGISTRY-PASSWORD>
+
+$ make MAKE_ENV_FILE=foo-storage.local.vars.mk
+```
+

@@ -1,3 +1,10 @@
+# Read any custom variables overrides from a local.vars.mk file.  This will only be read if it exists in the 
+# same directory as this Makefile.  Variables can be specified in the standard format supported by 
+# GNU Make since include process Makefiles
+# Standard variables override would include anything you would pass at runtime that is different from the defaults specified in this file
+MAKE_ENV_FILE = local.vars.mk
+-include $(MAKE_ENV_FILE)
+
 .PHONY: install install/observability-core install/observability-edge test-acm-%-generate test go-test go-test-setup
 
 install: install/observability-core install/observability-edge
