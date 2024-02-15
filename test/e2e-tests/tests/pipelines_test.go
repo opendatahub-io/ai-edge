@@ -12,7 +12,7 @@ import (
 
 const (
 	AIEdgeE2EPipelineDirectoryRelativePath = "../../../pipelines/tekton/aiedge-e2e"
-	PipelineRunFileRelativePath            = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.pipelinerun.yaml"
+	PipelineRunFileRelativePath            = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.bike-rentals.pipelinerun.yaml"
 )
 
 func CreateContext() context.Context {
