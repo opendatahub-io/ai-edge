@@ -15,17 +15,19 @@ spec:
     type: string
   - name: pipeline-run-uid
     type: string
-  - name: target-registry-url
+  - name: target-image-tag-reference
     type: string
   steps:
   - name: get-image-sha
     image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
     script: |
+      #!/usr/bin/env bash
+
+      set -Eeuo pipefail
+
       echo -n "$(params.model-name)" | tee $(results.model-name.path) ;
       echo ;
       echo -n "$(params.model-version)" | tee $(results.model-version.path) ;
-      echo ;
-      echo -n "$(params.target-registry-url)" | tee $(results.target-registry-url.path) ;
       echo ;
       export DOCKER_IMAGE_REF=$(oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageReference}' imagestreamtag/$(params.model-name):$(params.model-version)) ;
       if [[ $DOCKER_IMAGE_REF != *"$(params.buildah-sha)"* ]]; then
@@ -40,7 +42,7 @@ spec:
       echo ;
       oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageMetadata.Config.Labels.io\.buildah\.version}' imagestreamtag/$(params.model-name):$(params.model-version) | tee $(results.internal-image-buildah-version.path) ;
       echo ;
-      echo -n "$(params.target-registry-url):$(params.model-version)-$(params.pipeline-run-uid)" | tee $(results.target-image-url.path) ;
+      echo -n "$(params.target-image-tag-reference)" | tee $(results.target-image-tag-reference.path) ;
   results:
   - name: model-name
     description: The name of the model
@@ -54,7 +56,5 @@ spec:
     description: The version of buildah used to build the image
   - name: internal-image-url
     description: The url of the image in the internal registry
-  - name: target-registry-url
-    description: The url of the target registry (e.g. quay.io/rhoai-models/ai-model/)
-  - name: target-image-url
-    description: The url of the image in the target registry (e.g. quay.io/rhoai-models/ai-model:1-232)
+  - name: target-image-tag-reference
+    description: The fully qualified image reference that the image was pushed to (e.g. registry.example.com/my-org/ai-model:1.0-1)

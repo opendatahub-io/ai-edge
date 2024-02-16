@@ -32,8 +32,8 @@ spec:
     value: "main"
   - name: test-endpoint
     value: "v1/models/tensorflow-housing/versions/1:predict"
-  - name: target-imagerepo
-    value: rhoai-edge
+  - name: target-image-tag-reference
+    value: quay.io/rhoai-edge/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
   - name: upon-end
     value: "delete"
   pipelineRef:
