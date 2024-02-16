@@ -34,6 +34,8 @@ spec:
     value: "v1/models/tensorflow-housing/versions/1:predict"
   - name: target-imagerepo
     value: rhoai-edge
+  - name: upon-end
+    value: "delete"
   pipelineRef:
     name: aiedge-e2e
   serviceAccountName: pipeline

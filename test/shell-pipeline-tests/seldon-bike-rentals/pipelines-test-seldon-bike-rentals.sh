@@ -37,6 +37,7 @@ oc apply -k "$AIEDGE_E2E_PIPELINE_DIR_PATH"/
 AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/aiedge-e2e.pipelinerun-overridden.yaml
 cp "$AIEDGE_E2E_PIPELINE_DIR_PATH"/aiedge-e2e.bike-rentals.pipelinerun.yaml "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 sed -i "s|value: rhoai-edge-models|value: rhoai-edge-models-ci|" "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
+sed -i "s|value: \"delete\"|value: \"keep\"|" "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 
 ## oc create pipeline run
 oc create -f "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
