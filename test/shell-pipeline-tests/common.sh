@@ -37,7 +37,8 @@ function saveArtifacts() {
     oc logs -l "tekton.dev/pipelineRun=$PIPELINE_RUN_NAME" --all-containers --prefix --tail=-1 > "${LOGS_DIR}"/pipelineLogs.txt
     oc get deployment -o yaml > "${LOGS_DIR}"/deployments.txt
     oc logs -l '!tekton.dev/pipelineRun' --all-containers --prefix --tail=-1 > "${LOGS_DIR}"/deploymentLogs.txt
-    oc events > "${LOGS_DIR}"/events.txt
+    # https://access.redhat.com/solutions/4725511
+    oc get events -o custom-columns="LAST SEEN:{lastTimestamp},FIRST SEEN:{firstTimestamp},COUNT:{count},TYPE:{type},REASON:{reason},KIND:{involvedObject.kind},NAME:{involvedObject.name},SOURCE:{source.component},MESSAGE:{message}" --sort-by={lastTimestamp} > "${LOGS_DIR}"/events.txt
 }
 
 function createS3Secret() {
