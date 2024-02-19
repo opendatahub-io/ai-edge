@@ -51,9 +51,9 @@ spec:
   - default: $(context.pipelineRun.namespace)
     name: target-namespace
     type: string
-  - name: target-image-tag-reference
-    type: string
-    description: "The fully qualified image tag reference to be used for the final image push. E.g. registry.example.com/my-org/ai-model:1.0-1"
+  - name: target-image-tag-references
+    type: array
+    description: "An array of fully qualified image tag references to be used for the final image push. E.g. registry.example.com/my-org/ai-model:1.0-1"
   - name: upon-end
     type: string
     description: "Action to perform on the k8s deployment created to test the model container image. Valid values in [delete, keep, stop]"
@@ -89,9 +89,9 @@ spec:
   - name: internal-registry-url
     description: The tag where the model container image was pushed to in the internal registry (e.g. image-reg...svc:5000/rhoai-models/ai-model:1-232)
     value: $(tasks.build-container.results.IMAGE_URL)
-  - name: target-image-tag-reference
+  - name: target-image-tag-references
     description: The fully qualified image reference that the image was pushed to (e.g. registry.example.com/my-org/ai-model:1.0-1)
-    value: $(tasks.retrieve-build-image-info.results.target-image-tag-reference)
+    value: $(tasks.retrieve-build-image-info.results.target-image-tag-references)
   - name: internal-image-url
     description: The url of the image in the internal registry
     value: $(tasks.retrieve-build-image-info.results.internal-image-url)
@@ -349,17 +349,16 @@ spec:
       value: $(tasks.build-container.results.IMAGE_DIGEST)
     - name: pipeline-run-uid
       value: $(context.pipelineRun.uid)
-    - name: target-image-tag-reference
-      value: $(params.target-image-tag-reference)
+    - name: target-image-tag-references
+      value: ["$(params.target-image-tag-references[*])"]
     runAfter:
     - test-model-rest-svc
     - stop-deployment
+    workspaces:
+    - name: images-url
+      workspace: buildah-cache
   - name: skopeo-copy
     params:
-    - name: srcImageURL
-      value: docker://$(tasks.retrieve-build-image-info.results.internal-image-url)
-    - name: destImageURL
-      value: docker://$(params.target-image-tag-reference)
     - name: srcTLSverify
       value: "true"
     - name: destTLSverify
@@ -371,11 +370,10 @@ spec:
       name: skopeo-copy
     workspaces:
     - name: images-url
-      workspace: workspace
+      workspace: buildah-cache
   workspaces:
   - name: buildah-cache
   - name: s3-secret
   - name: git-basic-auth
     optional: true
-  - name: workspace
   - name: test-data

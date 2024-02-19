@@ -32,8 +32,11 @@ spec:
     value: "main"
   - name: test-endpoint
     value: "v1/models/tensorflow-housing/versions/1:predict"
-  - name: target-image-tag-reference
-    value: quay.io/rhoai-edge/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
+  - name: target-image-tag-references
+    value:
+    - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
+    - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)
+    - quay.io/rhoai-edge/$(params.model-name):latest
   - name: upon-end
     value: "delete"
   pipelineRef:
@@ -54,8 +57,6 @@ spec:
   - name: s3-secret
     secret:
         secretName: credentials-s3
-  - emptyDir: {}
-    name: workspace
   - configMap:
       name: tensorflow-housing-test-data
     name: test-data

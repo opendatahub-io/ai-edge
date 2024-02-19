@@ -15,11 +15,15 @@ spec:
     type: string
   - name: pipeline-run-uid
     type: string
-  - name: target-image-tag-reference
-    type: string
+  - name: target-image-tag-references
+    type: array
+  workspaces:
+  - name: images-url
   steps:
   - name: get-image-sha
     image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+    args:
+      - "$(params.target-image-tag-references[*])"
     script: |
       #!/usr/bin/env bash
 
@@ -42,7 +46,28 @@ spec:
       echo ;
       oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageMetadata.Config.Labels.io\.buildah\.version}' imagestreamtag/$(params.model-name):$(params.model-version) | tee $(results.internal-image-buildah-version.path) ;
       echo ;
-      echo -n "$(params.target-image-tag-reference)" | tee $(results.target-image-tag-reference.path) ;
+      echo -n "$@" | tee $(results.target-image-tag-references.path) ;
+  - name: build-urls-txt
+    image: registry.access.redhat.com/ubi9/ubi-micro
+    args:
+      - "$(params.target-image-tag-references[*])"
+    script: |
+      #!/usr/bin/env bash
+
+      set -Eeuo pipefail
+
+      # The skopeo-copy task looks for this file in its workspace if the source and destination parameters are
+      # empty. This is what allows pushing to more than one tag from the single taskrun.
+      export URLTXT=$(workspaces.images-url.path)/url.txt
+      export SOURCE_IMAGE_REF=$(cat $(results.internal-image-url.path))
+
+      rm -f ${URLTXT}
+      for target in "$@"; do
+        echo "docker://${SOURCE_IMAGE_REF} docker://${target}" >> "${URLTXT}"
+      done
+
+      echo "Contents of ${URLTXT}:"
+      cat ${URLTXT}
   results:
   - name: model-name
     description: The name of the model
@@ -56,5 +81,5 @@ spec:
     description: The version of buildah used to build the image
   - name: internal-image-url
     description: The url of the image in the internal registry
-  - name: target-image-tag-reference
+  - name: target-image-tag-references
     description: The fully qualified image reference that the image was pushed to (e.g. registry.example.com/my-org/ai-model:1.0-1)

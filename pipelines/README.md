@@ -177,6 +177,7 @@ You may also want to change other parameters like:
 * `containerfileRelativePath` - to try a different Containerfile
 * `fetch-model` - to switch between S3 and Git
 * `test-endpoint` - endpoint of the running model server used for testing the inference
+* `target-image-tag-references` - a list of image tag references in image repositories in image registries, that the image should be pushed to
 
 Be sure to also use the correct config map with the test data.
 
