@@ -208,7 +208,7 @@ spec:
     - name: IMAGE
       value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)
     - name: BUILDER_IMAGE
-      value: registry.redhat.io/rhel8/buildah@sha256:f5521de9445a04054c386707b774d7d534556c03b29ba4c91cfddfa979cf761c
+      value: registry.redhat.io/ubi9/buildah:latest
     - name: STORAGE_DRIVER
       value: vfs
     - name: DOCKERFILE
