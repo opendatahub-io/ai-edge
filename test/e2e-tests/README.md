@@ -17,7 +17,7 @@ The following enviroment varaibles are required to run the test setup and the te
 - `IMAGE_REGISTRY_USERNAME` - quay.io username
 - `IMAGE_REGISTRY_PASSWORD` - quay.io password
 - `S3_BUCKET` - Name of S3 bucket that has the model
-- `TARGET_IMAGE_NAMESPACE` - Image registry namespace that the built model will be pushed to a repository in (the repository name will be the same as the model name).
+- `TARGET_IMAGE_TAGS_JSON` - JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
 - `NAMESPACE` - Cluster namespace used for testing
 
 ## Run tests locally

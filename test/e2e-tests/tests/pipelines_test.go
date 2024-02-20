@@ -103,7 +103,7 @@ func Test_PipelineRunsComplete(t *testing.T) {
 
 		// setting these values to the options passed in as env vars
 		support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(options.S3BucketName), &pipelineRun)
-		support.SetPipelineRunParam("target-imagerepo", support.NewStringParamValue(options.RegistryRepoName), &pipelineRun)
+		support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(options.TargetImageTagReferences), &pipelineRun)
 
 		_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 		if err != nil {

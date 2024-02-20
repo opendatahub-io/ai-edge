@@ -1,14 +1,15 @@
 package support
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 )
 
 const (
-	S3BucketNameEnvKey         = "S3_BUCKET"
-	TargetImageNamespaceEnvKey = "TARGET_IMAGE_NAMESPACE"
-	ClusterNamespaceEnvKey     = "NAMESPACE"
+	S3BucketNameEnvKey     = "S3_BUCKET"
+	TargetImageTagsEnvKey  = "TARGET_IMAGE_TAGS_JSON"
+	ClusterNamespaceEnvKey = "NAMESPACE"
 )
 
 var (
@@ -16,9 +17,9 @@ var (
 )
 
 type Options struct {
-	S3BucketName     string // required
-	RegistryRepoName string // required
-	ClusterNamespace string // required
+	S3BucketName             string   // required
+	ClusterNamespace         string   // required
+	TargetImageTagReferences []string // required
 }
 
 func GetOptions() (*Options, error) {
@@ -45,8 +46,9 @@ func setOptions() (*Options, error) {
 		return options, fmt.Errorf("env variable %v not set, but is required to run tests", S3BucketNameEnvKey)
 	}
 
-	if options.RegistryRepoName = os.Getenv(TargetImageNamespaceEnvKey); options.RegistryRepoName == "" {
-		return options, fmt.Errorf("env variable %v not set, but is required to run tests", TargetImageNamespaceEnvKey)
+	var err error
+	if options.TargetImageTagReferences, err = parseImageTagsJSON(os.Getenv(TargetImageTagsEnvKey)); err != nil {
+		return options, fmt.Errorf("env variable %v not set, but is required to run tests: %w", TargetImageTagsEnvKey, err)
 	}
 
 	if options.ClusterNamespace = os.Getenv(ClusterNamespaceEnvKey); options.ClusterNamespace == "" {
@@ -54,4 +56,15 @@ func setOptions() (*Options, error) {
 	}
 
 	return options, nil
+}
+
+func parseImageTagsJSON(imageTagsJSON string) ([]string, error) {
+	var imageTags []string
+
+	err := json.Unmarshal([]byte(imageTagsJSON), &imageTags)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshall image tags JSON string (%v) into []string: %w", imageTagsJSON, err)
+	}
+
+	return imageTags, nil
 }
