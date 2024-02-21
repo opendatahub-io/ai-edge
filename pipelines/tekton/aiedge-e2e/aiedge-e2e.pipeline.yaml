@@ -15,15 +15,19 @@ spec:
     type: string
     description: "[S3 ONLY] S3 bucket name where the model is stored"
     default: ""
-  - name: gitServer
+  - name: containerfileGitServer
     type: string
-    description: Root domain of the Git server
-  - name: gitOrgName
+    description: Root domain of the Git server where the Containerfile repository is located
+  - name: containerfileGitOrgName
     type: string
-    description: Organization or Group name where the repo is located
-  - name: gitRepoName
+    description: Organization or Group name where the Containerfile repository is located
+  - name: containerfileGitRepoName
     type: string
-    description: Git repository name
+    description: Name of the Git repository with the Containerfile
+  - name: containerfileGitRevision
+    type: string
+    description: Git revision to checkout when cloning the repository with the Containerfile
+    default: "main"
   - name: containerfileRelativePath
     type: string
     description: Path to the Containerfile in the git repository for model server imagebuild
@@ -41,7 +45,7 @@ spec:
     type: string
     description: The git repo url where the model files are stored
     default: ""
-  - name: git-revision
+  - name: git-model-revision
     type: string
     description: The Git ref to use when cloning the git repo with the saved model
     default: "main"
@@ -125,7 +129,7 @@ spec:
     - name: url
       value: $(params.git-model-repo)
     - name: revision
-      value: $(params.git-revision)
+      value: $(params.git-model-revision)
     - name: subdirectory
       value: /model_dir-$(params.model-name)/
     workspaces:
@@ -159,7 +163,9 @@ spec:
   - name: git-clone-containerfile-repo
     params:
     - name: url
-      value: $(params.gitServer)/$(params.gitOrgName)/$(params.gitRepoName)
+      value: $(params.containerfileGitServer)/$(params.containerfileGitOrgName)/$(params.containerfileGitRepoName)
+    - name: revision
+      value: $(params.containerfileGitRevision)
     - name: subdirectory
       value: /containerfile_repo/
     runAfter:
