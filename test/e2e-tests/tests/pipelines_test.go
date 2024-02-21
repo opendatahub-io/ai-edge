@@ -11,8 +11,9 @@ import (
 )
 
 const (
-	AIEdgeE2EPipelineDirectoryRelativePath = "../../../pipelines/tekton/aiedge-e2e"
-	PipelineRunFileRelativePath            = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.pipelinerun.yaml"
+	AIEdgeE2EPipelineDirectoryRelativePath       = "../../../pipelines/tekton/aiedge-e2e"
+	BikeRentalsPipelineRunFileRelativePath       = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.bike-rentals.pipelinerun.yaml"
+	TensorflowHousingPipelineRunFileRelativePath = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
 )
 
 func CreateContext() context.Context {
@@ -79,7 +80,7 @@ func init() {
 	}
 }
 
-func Test_DefaultPipelineRun(t *testing.T) {
+func Test_PipelineRunsComplete(t *testing.T) {
 	ctx := CreateContext()
 
 	options, err := support.GetOptions()
@@ -92,18 +93,22 @@ func Test_DefaultPipelineRun(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	pipelineRun, err := support.ReadFileAsPipelineRun(PipelineRunFileRelativePath)
-	if err != nil {
-		t.Fatal(err.Error())
-	}
+	pipelineRunPaths := []string{TensorflowHousingPipelineRunFileRelativePath, BikeRentalsPipelineRunFileRelativePath}
 
-	// setting these values to the options passed in as env vars
-	support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(options.S3BucketName), &pipelineRun)
-	support.SetPipelineRunParam("target-imagerepo", support.NewStringParamValue(options.RegistryRepoName), &pipelineRun)
+	for _, path := range pipelineRunPaths {
+		pipelineRun, err := support.ReadFileAsPipelineRun(path)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
 
-	_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
-	if err != nil {
-		t.Fatal(err.Error())
+		// setting these values to the options passed in as env vars
+		support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(options.S3BucketName), &pipelineRun)
+		support.SetPipelineRunParam("target-imagerepo", support.NewStringParamValue(options.RegistryRepoName), &pipelineRun)
+
+		_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+		if err != nil {
+			t.Fatal(err.Error())
+		}
 	}
 
 	err = WaitForAllPipelineRunsToComplete(ctx, &clients)
