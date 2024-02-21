@@ -15,16 +15,10 @@ spec:
     type: string
     description: "[S3 ONLY] S3 bucket name where the model is stored"
     default: ""
-  - name: containerfileGitServer
+  - name: git-containerfile-repo
     type: string
-    description: Root domain of the Git server where the Containerfile repository is located
-  - name: containerfileGitOrgName
-    type: string
-    description: Organization or Group name where the Containerfile repository is located
-  - name: containerfileGitRepoName
-    type: string
-    description: Name of the Git repository with the Containerfile
-  - name: containerfileGitRevision
+    description: Git repository where the Containerfile is stored
+  - name: git-containerfile-revision
     type: string
     description: Git revision to checkout when cloning the repository with the Containerfile
     default: "main"
@@ -163,9 +157,9 @@ spec:
   - name: git-clone-containerfile-repo
     params:
     - name: url
-      value: $(params.containerfileGitServer)/$(params.containerfileGitOrgName)/$(params.containerfileGitRepoName)
+      value: $(params.git-containerfile-repo)
     - name: revision
-      value: $(params.containerfileGitRevision)
+      value: $(params.git-containerfile-revision)
     - name: subdirectory
       value: /containerfile_repo/
     runAfter:

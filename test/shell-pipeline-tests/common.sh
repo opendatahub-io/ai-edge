@@ -74,3 +74,11 @@ function createImageRegistrySecret() {
     sed -i "s|{{ IMAGE_REGISTRY_USERNAME }}|${USERNAME}|" "$IMAGE_REGISTRY_SECRET_PATH"
     sed -i "s|{{ IMAGE_REGISTRY_PASSWORD }}|${PASSWORD}|" "$IMAGE_REGISTRY_SECRET_PATH"
 }
+
+function usePRBranchInPipelineRunIfPRCheck() {
+  local -r PIPELINE_RUN_FILE_PATH=$1
+
+  if [ -n $PULL_NUMBER ]; then
+    sed -i "s|value: \"main\"|value: \"pull/$PULL_NUMBER/head\"|" "$PIPELINE_RUN_FILE_PATH"
+  fi
+}

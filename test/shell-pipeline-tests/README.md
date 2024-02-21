@@ -33,3 +33,7 @@ ARTIFACT_DIR=./artifacts CUSTOM_AWS_SECRET_PATH=./secrets CUSTOM_IMAGE_REGISTRY_
 ```
 
 This would put all the logs into the `$PWD/artifacts` directory and it also expects all the credential files to be stored under the `$PWD/secrets` directory.
+
+> [!NOTE]
+> If you have made changes to Containerfiles or models used in the tests, change the Pipeline Run parameters accordingly, i.e. to fetch these files from your branch.
+> This is done automatically if running in the OpenShift CI environment.
