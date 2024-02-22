@@ -127,7 +127,7 @@ spec:
       value: /model_dir-$(params.model-name)/
     workspaces:
     - name: output
-      workspace: buildah-cache
+      workspace: build-workspace-pv
     when:
     - input: "$(params.fetch-model)"
       operator: in
@@ -146,7 +146,7 @@ spec:
       name: kserve-download-model
     workspaces:
     - name: workspace
-      workspace: buildah-cache
+      workspace: build-workspace-pv
     - name: s3-secret
       workspace: s3-secret
     when:
@@ -167,7 +167,7 @@ spec:
       name: git-clone
     workspaces:
     - name: output
-      workspace: buildah-cache
+      workspace: build-workspace-pv
     - name: basic-auth
       workspace: git-basic-auth
   - name: check-model-and-containerfile-exists
@@ -187,7 +187,7 @@ spec:
       name: check-model-and-containerfile-exists
     workspaces:
     - name: workspace
-      workspace: buildah-cache
+      workspace: build-workspace-pv
   - name: create-imagestream
     params:
     - name: SCRIPT
@@ -227,7 +227,7 @@ spec:
       name: buildah
     workspaces:
     - name: source
-      workspace: buildah-cache
+      workspace: build-workspace-pv
   - name: test-container-deploy
     params:
     - name: SCRIPT
@@ -356,7 +356,7 @@ spec:
     - stop-deployment
     workspaces:
     - name: images-url
-      workspace: buildah-cache
+      workspace: build-workspace-pv
   - name: skopeo-copy
     params:
     - name: srcTLSverify
@@ -370,9 +370,9 @@ spec:
       name: skopeo-copy
     workspaces:
     - name: images-url
-      workspace: buildah-cache
+      workspace: build-workspace-pv
   workspaces:
-  - name: buildah-cache
+  - name: build-workspace-pv
   - name: s3-secret
   - name: git-basic-auth
     optional: true

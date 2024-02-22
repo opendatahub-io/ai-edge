@@ -42,7 +42,7 @@ spec:
   serviceAccountName: pipeline
   timeout: 1h0m0s
   workspaces:
-  - name: buildah-cache
+  - name: build-workspace-pv
     # Have the tekton controller allocate a PVC for each pipeline run that persists for the life of each PipelineRun object.
     # NOTE: This PVC will be deleted by the Tekton controller when the PipelineRun is deleted
     volumeClaimTemplate:
