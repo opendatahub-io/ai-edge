@@ -213,9 +213,9 @@ make MODEL_PATH="PATH_TO_A_FILE" NAME=my-model SIZE=1G PVC=my-new-PVC create
 ```
 
 You can then use the [copy-model-from-pvc](pipelines/tekton/aiedge-e2e/tasks/copy-model-from-pvc.yaml) task to
-copy the model from the `model-workspace`, which can be set to the PVC created in the last step, to the `buildah-cache` workspace,
+copy the model from the `model-workspace`, which can be set to the PVC created in the last step, to the `build-workspace-pv` workspace,
 which is then used by the `buildah` task in the pipeline. [copy-model-from-pvc](pipelines/tekton/aiedge-e2e/tasks/copy-model-from-pvc.yaml) task
-is not included in the pipeline by default, you have to add it yourself. 
+is not included in the pipeline by default, you have to add it yourself.
 
 ## Contributing
 

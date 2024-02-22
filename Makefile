@@ -1,5 +1,5 @@
-# Read any custom variables overrides from a local.vars.mk file.  This will only be read if it exists in the 
-# same directory as this Makefile.  Variables can be specified in the standard format supported by 
+# Read any custom variables overrides from a local.vars.mk file.  This will only be read if it exists in the
+# same directory as this Makefile.  Variables can be specified in the standard format supported by
 # GNU Make since include process Makefiles
 # Standard variables override would include anything you would pass at runtime that is different from the defaults specified in this file
 MAKE_ENV_FILE = local.vars.mk
@@ -73,19 +73,19 @@ endif
 
 # requires:
 #	S3_BUCKET		- Name of S3 bucket that has the model
-#	TARGET_IMAGE_NAMESPACE	- Image registry namespace that the built model will be pushed to a repository in
 #	NAMESPACE		- Cluster namespace that tests are run in
+#	TARGET_IMAGE_TAGS_JSON	- JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
 go-test:
 ifndef S3_BUCKET
 	$(error S3_BUCKET is undefined)
 endif
-ifndef TARGET_IMAGE_NAMESPACE
-	$(error TARGET_IMAGE_NAMESPACE is undefined)
-endif
 ifndef NAMESPACE
 	$(error NAMESPACE is undefined)
 endif
-	(cd test/e2e-tests/tests && S3_BUCKET=${S3_BUCKET} TARGET_IMAGE_NAMESPACE=${TARGET_IMAGE_NAMESPACE} NAMESPACE=${NAMESPACE} ${GO} test -timeout 30m)
+ifndef TARGET_IMAGE_TAGS_JSON
+	$(error TARGET_IMAGE_TAGS_JSON is undefined)
+endif
+	(cd test/e2e-tests/tests && S3_BUCKET=${S3_BUCKET} TARGET_IMAGE_TAGS_JSON=${TARGET_IMAGE_TAGS_JSON} NAMESPACE=${NAMESPACE} ${GO} test -timeout 30m)
 
 test:
 	@(./test/shell-pipeline-tests/seldon-bike-rentals/pipelines-test-seldon-bike-rentals.sh)

@@ -30,8 +30,11 @@ spec:
     value: "main"
   - name: test-endpoint
     value: "invocations"
-  - name: target-imagerepo
-    value: rhoai-edge
+  - name: target-image-tag-references
+    value:
+    - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
+    - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)
+    - quay.io/rhoai-edge/$(params.model-name):latest
   - name: upon-end
     value: "delete"
   pipelineRef:
@@ -39,7 +42,7 @@ spec:
   serviceAccountName: pipeline
   timeout: 1h0m0s
   workspaces:
-  - name: buildah-cache
+  - name: build-workspace-pv
     # Have the tekton controller allocate a PVC for each pipeline run that persists for the life of each PipelineRun object.
     # NOTE: This PVC will be deleted by the Tekton controller when the PipelineRun is deleted
     volumeClaimTemplate:

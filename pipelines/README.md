@@ -177,6 +177,7 @@ You may also want to change other parameters like:
 * `containerfileRelativePath` - to try a different Containerfile
 * `fetch-model` - to switch between S3 and Git
 * `test-endpoint` - endpoint of the running model server used for testing the inference
+* `target-image-tag-references` - a list of image tag references in image repositories in image registries, that the image should be pushed to
 
 Be sure to also use the correct config map with the test data.
 
@@ -187,7 +188,7 @@ oc create -f tekton/aiedge-e2e/aiedge-e2e.pipelinerun.yaml
 ```
 
 > [!IMPORTANT]
-> Since the `buildah-cache` workspace is used to share data between TaskRuns in a PipelineRun, a PersistentVolumeClaim type VolumeSource is required to fulfill it properly.
+> Since the `build-workspace-pv` workspace is used to share data between TaskRuns in a PipelineRun, a PersistentVolumeClaim type VolumeSource is required to fulfill it properly.
 > We strongly recommend that this is fulfilled using the `volumeClaimTemplate` approach, rather than the `persistentVolumeClaim` approach.
 > If you must use the `persistentVolumeClaim` approach to re-use an existing PersistentVolumeClaim, then you will likely hit issues if two PipelineRuns for the same model name are executed concurrently (and possibly other corner cases).
 > See the Tekton documentation around [Using PersistentVolumeClaims as VolumeSource](https://tekton.dev/docs/pipelines/workspaces/#using-persistentvolumeclaims-as-volumesource).
