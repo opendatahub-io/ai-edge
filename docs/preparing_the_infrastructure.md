@@ -9,7 +9,8 @@ The following accounts are required to run the proof of concept
 
 ## Components
 
-The following table lists the components used in the proof of concept, their versions, and whether they are used in the core or near edge clusters.
+The following table lists the components used in the proof of concept, their versions, and whether they are used in the
+core or near edge clusters.
 
 | Components                                      | Version          | Core Cluster | Near Edge Cluster(s) |
 |-------------------------------------------------|:-----------------|:------------:|:--------------------:|
@@ -22,11 +23,15 @@ The following table lists the components used in the proof of concept, their ver
 
 ## Installation of OpenShift Clusters
 
-The installation of OpenShift clusters is out of scope of this repository. At least one OpenShift cluster is required to act as the core cluster and at least one OpenShift cluster is required to act as the near edge cluster.
+The installation of OpenShift clusters is out of scope of this repository. At least one OpenShift cluster is required to
+act as the core cluster and at least one OpenShift cluster is required to act as the near edge cluster.
 
 ### Edge Development Environment Using Red Hat OpenShift Local
 
-For development purposes, you can use [Red Hat OpenShift Local](https://access.redhat.com/documentation/en-us/red_hat_openshift_local/2.32/html/getting_started_guide/index) to create a local OpenShift cluster and use it as the edge cluster. This way you can test that the management and deployment of AI/ML inference workloads from the core cluster to the edge cluster works as expected.
+For development purposes, you can use [Red Hat OpenShift
+Local](https://access.redhat.com/documentation/en-us/red_hat_openshift_local/2.32/html/getting_started_guide/index) to
+create a local OpenShift cluster and use it as the edge cluster. This way you can test that the management and
+deployment of AI/ML inference workloads from the core cluster to the edge cluster works as expected.
 
 To use Red Hat OpenShift Local you need:
 - A local machine with at least 18GB of RAM and 6 CPU cores available only for the OpenShift Local cluster.
@@ -35,14 +40,19 @@ To use Red Hat OpenShift Local you need:
   Follow the instructions in the [Getting Started Guide](https://access.redhat.com/documentation/en-us/red_hat_openshift_local/2.32/html/getting_started_guide/index) to install Red Hat OpenShift Local.
 
 > [!IMPORTANT]
-> 1. OpenShift local comes with three presets that represent managed container runtimes: `openshift`, `microshift`, and `podman`. We will use the `openshift` preset to create the local OpenShift cluster.
-> 1. Make sure you start the OpenShift Local cluster with at least 18GB of RAM and 6 CPU cores via `crc start --memory 18432 --cpus 6`
+> 1. OpenShift Local comes with three presets that represent managed container runtimes: `openshift`, `microshift`, and
+>    `podman`. We will use the `openshift` preset to create the local OpenShift cluster.
+> 1. Make sure you start the OpenShift Local cluster with at least 18GB of RAM and 6 CPU cores via
+>    `crc start --memory 18432 --cpus 6`
 
-Once the OpenShift Local cluster is up and running, you can use it as the edge cluster in the proof of concept and continue with the installation of the components in the next sections.
+Once the OpenShift Local cluster is up and running, you can use it as the edge cluster in the proof of concept and
+continue with the installation of the components in the next sections.
 
 ## Installation of Red Hat OpenShift Pipelines
 
-Building an inference service container with a trained model can be done using Red Hat OpenShift Pipelines. Follow the instructions in [pipelines/README.md](../pipelines/README.md) to install Red Hat OpenShift Pipelines and configure the core cluster to use it to build the inference service containers.
+Building an inference service container image with a trained model can be done using Red Hat OpenShift Pipelines. Follow
+the instructions in [pipelines/README.md](../pipelines/README.md) to install Red Hat OpenShift Pipelines and configure
+the core cluster to use it to build the inference service container images.
 
 ## Installation of Red Hat Advanced Cluster Management for Kubernetes (ACM)
 
@@ -74,8 +84,11 @@ We will describe how to do them using the OpenShift Console but there may be oth
 
 ## Installation of Red Hat OpenShift GitOps
 
-OpenShift GitOps will be used by ACM as the GitOps engine to manage the application, using the Pull Controller.
-This will require the OpenShift GitOps operator to be installed both on the ACM hub cluster, and all of the managed clusters at the edge. After the Red Hat OpenShift GitOps Operator is installed, it automatically sets up a ready-to-use Argo CD instance that is available in the `openshift-gitops` namespace, and an Argo CD icon is displayed in the console toolbar. To install the OpenShift GitOps operator, follow the steps below.
+OpenShift GitOps will be used by ACM as the GitOps engine to manage the application, using the Pull Controller. This
+will require the OpenShift GitOps operator to be installed both on the ACM hub cluster, and all of the managed clusters
+at the edge. After the Red Hat OpenShift GitOps Operator is installed, it automatically sets up a ready-to-use Argo CD
+instance that is available in the `openshift-gitops` namespace, and an Argo CD icon is displayed in the console toolbar.
+To install the OpenShift GitOps operator, follow the steps below.
 
 1. On the ACM hub cluster, install the OpenShift GitOps operator.
    In the OpenShift Console of the cluster, find and install the operator in Menu > Operators > OperatorHub.

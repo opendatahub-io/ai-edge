@@ -25,7 +25,7 @@ The term edge is a highly overloaded term in the industry. For the purpose of th
   - This is an edge environment to run and serve AI/ML inference workloads. 
   - For the purpose of this repository, the near edge environment is represented by separate OpenShift cluster(s) managed from the core OpenShift cluster. 
   - The near edge environment is expected to have moderate yet constrained compute resources and network. 
-  - Protected by a firewall to have an outbound only connectivity (i.e. no inbound connections are allowed).
+  - Doesn't necessarily have any open ports for inbound connections.
 
 ### Use Case
 
@@ -37,10 +37,10 @@ The main objective currently is to showcase that a user can:
    environments from the core OpenShift cluster.
 1. Monitor and observe the deployed AI/ML inference workloads in the near edge environments from the core OpenShift cluster.
 
-<!--TODO: Fix the ancor link-->
-> [!WARNING]
+> [!NOTE]
 > Developing and training a model is currently out of scope of this repository as this repository already
-contains trained models in the [pipelines/models/](pipelines/models/) directory. You can read more about developing and training a model in the [Developing and training a model](#developing-and-training-a-model) section.
+contains example models in the [pipelines/models/](pipelines/models/) directory. You can read more about developing
+> and training a model in the [Developing and training a model](#developing-and-training-a-model) section.
 
 
 ### Architecture: A Bird's Eye View
