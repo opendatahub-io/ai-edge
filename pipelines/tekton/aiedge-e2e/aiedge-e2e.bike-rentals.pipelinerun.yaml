@@ -12,12 +12,10 @@ spec:
     value: "1"
   - name: s3-bucket-name
     value: rhoai-edge-models
-  - name: gitServer
-    value: https://github.com
-  - name: gitOrgName
-    value: opendatahub-io
-  - name: gitRepoName
-    value: ai-edge
+  - name: git-containerfile-repo
+    value: https://github.com/opendatahub-io/ai-edge.git
+  - name: git-containerfile-revision
+    value: "main"
   - name: containerfileRelativePath
     value: pipelines/containerfiles/Containerfile.seldonio.mlserver.mlflow
   - name: fetch-model
@@ -26,7 +24,7 @@ spec:
     value: https://github.com/opendatahub-io/ai-edge.git
   - name: modelRelativePath
     value: ""
-  - name: git-revision
+  - name: git-model-revision
     value: "main"
   - name: test-endpoint
     value: "invocations"
