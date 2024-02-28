@@ -188,18 +188,6 @@ spec:
     workspaces:
     - name: workspace
       workspace: build-workspace-pv
-  - name: create-imagestream
-    params:
-    - name: SCRIPT
-      value: oc create imagestream $(params.model-name)  --lookup-local=true --dry-run=client
-        -o yaml | oc apply -f -
-    - name: VERSION
-      value: latest
-    runAfter:
-    - check-model-and-containerfile-exists
-    taskRef:
-      kind: ClusterTask
-      name: openshift-client
   - name: build-container
     params:
     - name: IMAGE
@@ -221,7 +209,7 @@ spec:
     - name: SKIP_PUSH
       value: "false"
     runAfter:
-    - create-imagestream
+    - check-model-and-containerfile-exists
     taskRef:
       kind: ClusterTask
       name: buildah
@@ -254,7 +242,7 @@ spec:
                 app: $(params.model-name)-$(params.model-version)
             spec:
               containers:
-              - image: $(params.model-name):$(params.model-version)
+              - image: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)
                 name: $(params.model-name)-$(params.model-version)
                 livenessProbe:
                   failureThreshold: 10
