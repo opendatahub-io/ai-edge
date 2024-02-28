@@ -90,18 +90,18 @@ spec:
   - name: model-files-list
     description: The list of model files
     value: $(tasks.check-model-and-containerfile-exists.results.model-files-list)
-  - name: internal-registry-url
-    description: The tag where the model container image was pushed to in the internal registry (e.g. image-reg...svc:5000/rhoai-models/ai-model:1-232)
+  - name: candidate-image-tag-reference
+    description: The tag where the candidate model container image was pushed to
     value: $(tasks.build-container.results.IMAGE_URL)
   - name: target-image-tag-references
     description: The fully qualified image reference that the image was pushed to (e.g. registry.example.com/my-org/ai-model:1.0-1)
     value: $(tasks.retrieve-build-image-info.results.target-image-tag-references)
-  - name: internal-image-url
-    description: The url of the image in the internal registry
-    value: $(tasks.retrieve-build-image-info.results.internal-image-url)
-  - name: internal-image-size
-    description: The size of the model container image in the internal registry in bytes
-    value: $(tasks.retrieve-build-image-info.results.internal-image-size)
+  - name: image-digest-reference
+    description: The fully qualified image digest reference of the image
+    value: $(tasks.retrieve-build-image-info.results.image-digest-reference)
+  - name: image-size-bytes
+    description: The size of the model container image in bytes
+    value: $(tasks.retrieve-build-image-info.results.image-size-bytes)
   - name: buildah-sha
     description: The SHA digest of the model container image
     value: $(tasks.build-container.results.IMAGE_DIGEST)
@@ -111,12 +111,12 @@ spec:
   - name: model-version
     description: The model version
     value: $(tasks.retrieve-build-image-info.results.model-version)
-  - name: internal-image-created-at
-    description: Timestamp of when the model container image was created in UTC format
-    value: $(tasks.retrieve-build-image-info.results.internal-image-created-at)
-  - name: internal-image-buildah-version
+  - name: image-creation-time
+    description: The date and time the image was created at
+    value: $(tasks.retrieve-build-image-info.results.image-creation-time)
+  - name: buildah-version
     description: The buildah version used to build the model container image
-    value: $(tasks.retrieve-build-image-info.results.internal-image-buildah-version)
+    value: $(tasks.retrieve-build-image-info.results.buildah-version)
   tasks:
   - name: fetch-model-git
     taskRef:
