@@ -16,8 +16,8 @@ core or near edge clusters.
 |-------------------------------------------------|:-----------------|:------------:|:--------------------:|
 | Red Hat OpenShift clusters                      | 4.12 or higher   |     Yes      |         Yes          |
 | Red Hat OpenShift Pipelines                     | 1.11 or higher   |     Yes      |          No          |
-| Advanced Cluster Management for Kubernetes      | 2.8              |     Yes      |          No          |
-| OpenShift GitOps                                | 1.10.1 or higher |     Yes      |          No          |
+| Advanced Cluster Management for Kubernetes      | 2.9              |     Yes      |          No          |
+| OpenShift GitOps                                | 1.10.1 or higher |     Yes      |         Yes          |
 | Open Data Hub (optional)                        | 1.x or 2.x       |     Yes      |          No          |
 
 
