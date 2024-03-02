@@ -1,43 +1,91 @@
-# Open Data Hub / AI Edge Use Cases
+# Open Data Hub / AI Edge 
 
-This repository contains artifacts to show and support Open Data Hub and Red Hat OpenShift Data Science Edge use cases.
+As the adoption of AI and ML continues to surge, there's an increasing demand to deploy these workloads in edge
+environments such as factories, farms, and remote locations where traditional computing infrastructure is limited,
+connectivity is unreliable or constrained, and reliability is paramount.
 
-For the purpose of a "near edge" Proof of Concept, the edge environment is represented by separate OpenShift cluster(s),
-managed from a core OpenShift cluster using Red Hat Advanced Cluster Management (ACM),
-based on the Open Cluster Management project.
+This repository contains tools and artifacts comprising a proof of concept to bring the power of Open Data Hub and 
+OpenShift AI to such edge environments.
 
-| Components                                              | Version        |
-|---------------------------------------------------------|----------------|
-| OpenShift clusters (at least two) with admin access     | 4.12 or higher |
-| GitHub account or [Gitea installation](gitea/README.md) | [github.com](https://github.com/) |
-| AWS account with access to S3                           | [s3.console.aws.amazon.com](https://s3.console.aws.amazon.com/) |
-| Red Hat OpenShift Pipelines                             | 1.11 or higher |
-| Quay Registry account                                   | [quay.io](https://quay.io/) |
-| Advanced Cluster Management for Kubernetes              | 2.8            |
-| OpenShift GitOps                                        | 1.10.1 or higher |
-| Open Data Hub (optional)                                | 1.x or 2.x     |
+> [!WARNING]
+> This is a proof of concept repository and is not intended for production use. The edge features are experimental and 
+> the repository is under active development.
 
-## Proof of Concept Edge use case with ACM
+## Overview
 
-The main objective is to showcase that a user can take a trained model,
-use pipelines to package it with all the dependencies into a container image,
-and deploy it at the near edge location(s) (represented by ACM-managed clusters) in a centralized way.
+The term edge is a highly overloaded term in the industry. For the purpose of this repository, the following diagram 
+illustrates the concept of core and near edge environments.
 
-### Developing and training a model
+![](docs/images/edge-architecture.png)
 
-This step is out of scope of this Proof of Concept repository,
-as this repository already contains trained models in the [pipelines/models/](pipelines/models/) directory.
+### Terminology
 
-If you wish to develop and train different models,
-Jupyter notebooks provided by [Open Data Hub](https://opendatahub.io/) (ODH)
-or [Red Hat OpenShift Data Science](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-data-science) (RHODS) can be used.
-To install ODH or RHODS operators, admin privileges in the OpenShift cluster are needed.
+- **Core**
+  - The central OpenShift cluster that is used to manage the edge clusters.
+  - Can be an on-premise or cloud-based cluster.
+  - There are no resources or network constraints expected in the core cluster.
+- **Near Edge** 
+  - This is an edge environment to run and serve AI/ML inference workloads. 
+  - For the purpose of this repository, the near edge environment is represented by separate OpenShift cluster(s)
+    managed from the core OpenShift cluster. 
+  - The near edge environment is expected to have moderate yet constrained compute resources and network. 
+  - Doesn't necessarily have any open ports for inbound connections.
 
-Working and deploying your own models might require bigger changes
-to the definition and configuration of the pipelines and ACM setup below,
-so you might want to start with the pre-built models first.
+### Use Case
 
-### Building container image(s) with a model and serving runtime
+The main objective currently is to showcase that a user can: 
+
+1. Package an inference service by integrating a trained model with all required dependencies into a container image,
+   ensuring it's ready for utilization at the near edge location(s) in a streamlined manner.
+1. Centrally control and manage the set of target near edge environments from the core OpenShift cluster, and configure
+   the initialization of a GitOps workflow on each of those targets.
+1. Utilize GitOps tooling at each near edge environment to reconcile the manifests specified in the GitOps repository
+   (managed centrally), and deploy the inference service.
+1. Monitor and observe the deployed AI/ML inference workloads in the near edge environments from the core OpenShift
+   cluster.
+
+> [!NOTE]
+> Developing and training a model is currently out of scope of this repository as this repository already
+contains example models in the [pipelines/models/](pipelines/models/) directory. You can read more about developing
+> and training a model in the [Developing and training a model](#developing-and-training-a-model) section.
+
+
+### Architecture: A Bird's Eye View
+
+The diagram above illustrates the architecture of the proof of concept. The two main categories of clusters are the core
+and near edge clusters.
+
+#### Core Cluster
+- Packages different types of AI/ML models and serving runtimes into container images using
+  `Red Hat OpenShift Pipelines`[^1].
+- Manages the near edge clusters and the AI/ML inference deployed on them in a GitOps manner using
+  `Red Hat Advanced Cluster Management for Kubernetes (ACM)`[^2] and `Red Hat OpenShift GitOps`. 
+- Monitors and observes the deployed AI/ML inference workloads in the near edge environments using `ACM` and
+  `Red Hat OpenShift Observability`[^3].
+- Hosts the Open Data Hub and OpenShift AI components.
+
+#### Near Edge Cluster(s)
+- Run the AI/ML workloads as defined by the core cluster in a GitOps manner using `ACM`and `Red Hat OpenShift GitOps`.
+- Continuously reconcile the state of the AI/ML workloads with the core cluster using
+  [ACM's pull model with ArgoCD](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/gitops/gitops-overview#gitops-push-pull). 
+- Collect metrics of the AI/ML workloads and send them to the core cluster using `Red Hat OpenShift Observability` and
+  `ACM`.
+
+## Preparing the Infrastructure
+
+Before you can start using the proof of concept, you need to prepare the infrastructure. This includes setting up the
+OpenShift clusters and installing the required components.
+
+Follow the steps in [Preparing the Infrastructure](./docs/preparing_the_infrastructure.md) to set up the infrastructure.
+
+
+## Proof of Concept Walkthrough
+
+![](docs/images/poc-interaction-diagram.png)
+
+The proof of concept is built to provide two main workflows as shown in the diagram above
+
+### Workflow 1: Building an Inference Application Container Image
 
 In [pipelines/README.md](pipelines/README.md) we show how to take the trained models,
 store them in a S3 bucket,
@@ -50,52 +98,10 @@ You can skip this step if you do not wish to rebuild the container images.
 If you use the default configuration as shown in this git repository,
 you will use already built container images from the https://quay.io/organization/rhoai-edge repositories.
 
-### Serving to near edge remote clusters
+### Workflow 2: Deploying and Updating an Inference Application on Near Edge Clusters
 
-We assume that you have admin access to an OpenShift cluster where you can install and configure
-the Red Hat Advanced Cluster Management operator and which will serve as the central ACM hub.
-We also assume you have admin access to other OpenShift cluster(s) that you will import to the ACM hub cluster,
-these will play the role of near edge location(s) managed from the central ACM hub.
-
-#### ACM setup
-
-The following setup steps need to be done as an admin user with `cluster-admin` privileges.
-We will describe how to do them using the OpenShift Console but there may be other ways to achieve the same results.
-
-1. On the ACM hub cluster, install the Advanced Cluster Management for Kubernetes operator.
-   In the OpenShift Console of the cluster, find and install the operator
-   in Menu > Operators > OperatorHub.
-1. Create the MultiClusterHub.
-   In the OpenShift Console in Menu > Operators > Installed Operators > Advanced Cluster Management for Kubernetes >
-   the MultiClusterHub tab, use the "Create MultiClusterHub" button to create its configuration.
-1. Refresh the OpenShift Console page.
-1. Create a cluster set for your near edge clusters.
-   In the OpenShift Console this can be done in All Clusters menu > Infrastructure > Clusters > Cluster sets tab.
-   This repository assumes the name `poc-near-edge` in `clusterSets`
-   in [`acm/registration/near-edge/base/near-edge.yaml`](acm/registration/near-edge/base/near-edge.yaml)
-   so update that YAML file if you use a different name.
-1. Import the near edge cluster(s).
-   In the OpenShift Console this can be done in All Clusters menu > Infrastructure > Clusters > Cluster list tab.
-   In the Cluster set popup menu, select the cluster set you created for the near edge clusters.
-   If you use the Import mode of "Enter your server URL and API token for the existing cluster",
-   obtain the address of the server and the token on the other cluster's OpenShift Console
-   at the top-right corner user menu > Copy login command, for an admin user.
-
-#### OpenShift GitOps setup
-
-OpenShift GitOps will be used by ACM as the GitOps engine to manage the application, using the Pull Controller.
-This will require the OpenShift GitOps operator to be installed both on the ACM hub cluster, and all of the managed clusters at the edge.
-
-1. On the ACM hub cluster, install the OpenShift GitOps operator.
-   In the OpenShift Console of the cluster, find and install the operator in Menu > Operators > OperatorHub.
-1. On each managed cluster, install the OpenShift GitOps operator.
-   In the OpenShift Console of the cluster, find and install the operator in Menu > Operators > OperatorHub.
-
-#### Deploy the applications to remote clusters
-
-With the remote near edge clusters now in the cluster set and that cluster set bound to the `openshift-gitops` namespace,
-it is now possible to deploy the applications to those clusters using the Argo CD Pull model integration in
-[ACM GitOps](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/gitops/index).
+With the remote near edge clusters now available in the cluster set and the argocd, it is now possible to deploy the
+applications to those clusters using the Argo CD Pull model integration in [ACM GitOps](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/gitops/index).
 
 We will create the objects in the respective namespaces from the `acm/registration/` directory structure.
 
@@ -108,7 +114,8 @@ and the applications in those remote git repositories will be deployed.
 By default, [github.com/opendatahub-io/ai-edge](https://github.com/opendatahub-io/ai-edge) is configured;
 edit the URLs to match your repositories.
 
-Then, as a user with permissions to create/update the following resource types in the `openshift-gitops` namespace on the ACM hub cluster:
+Then, as a user with permissions to create/update the following resource types in the `openshift-gitops` namespace on
+the ACM hub cluster:
 
 ``` text
 ApplicationSets
@@ -128,7 +135,8 @@ oc apply -k acm/registration/
 
 If the GitOps repository that Argo CD on the edge clusters will deploy resources from requires some form of credentials,
 then these credentials will need to be provided to each cluster via a Secret.
-This can be done by specifying the Secret inside an ACM Policy resource on the ACM hub cluster in such a way that ACM will instruct the edge clusters to create it.
+This can be done by specifying the Secret inside an ACM Policy resource on the ACM hub cluster in such a way that ACM
+will instruct the edge clusters to create it.
 The following example illustrates how this may be done:
 ```sh
 cat << EOF | oc apply -f -
@@ -165,20 +173,25 @@ spec:
 EOF
 ```
 
-#### View the application deployments
-##### ACM
+
+### View the application deployments
+#### ACM
 
 In the OpenShift Console of the ACM hub cluster in All Clusters > Applications, search for the application name.
 You should see a few results results: `<app name>-appset`, `<cluster name>-<app name>`, and `<app name>-1`.
-Clicking on the `<cluster name>-<app name>` entry, and then navigating to the Topology tab, you can see what objects were created on the remote cluster.
+Clicking on the `<cluster name>-<app name>` entry, and then navigating to the Topology tab, you can see what objects
+were created on the remote cluster.
 
-Everything should be shown green. If it is not, click the icon of the faulty object and check the displayed information for debugging clues.
+Everything should be shown green. If it is not, click the icon of the faulty object and check the displayed information
+for debugging clues.
 
-##### Argo CD
+#### Argo CD
 
-The Argo CD provided by Openshift GitOps has a console on each near edge cluster, showing detailed information on each application that it manages on that cluster.
-On the particular edge cluster, open the console by navigating to the domain specified by the `openshift-gitops-cluster` Route in the `openshift-gitops` namespace on that cluster.
-Once logged-in to the Argo console, search for the application name, and then select the entry named in the format `<cluster name>-<application name>` to see more information.
+The Argo CD provided by Openshift GitOps has a console on each near edge cluster, showing detailed information on each
+application that it manages on that cluster. On the particular edge cluster, open the console by navigating to the
+domain specified by the `openshift-gitops-cluster` Route in the `openshift-gitops` namespace on that cluster. Once
+logged-in to the Argo console, search for the application name, and then select the entry named in the format `<cluster
+name>-<application name>` to see more information.
 
 ### Observability setup
 
@@ -190,6 +203,20 @@ Once logged-in to the Argo console, search for the application name, and then se
 * Core/Hub cluster
   * Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.
   * Install the ACM observability stack by running `make install`
+
+### Developing and training a model
+
+This step is out of scope of this Proof of Concept repository,
+as this repository already contains trained models in the [pipelines/models/](pipelines/models/) directory.
+
+If you wish to develop and train different models,
+Jupyter notebooks provided by [Open Data Hub](https://opendatahub.io/) (ODH)
+or [Red Hat OpenShift AI](https://www.redhat.com/en/technologies/cloud-computing/openshift/openshift-ai) can be used.
+To install ODH or OpenShift AI operators, admin privileges in the OpenShift cluster are needed.
+
+Working and deploying your own models might require bigger changes
+to the definition and configuration of the pipelines and ACM setup below,
+so you might want to start with the pre-built models first.
 
 ### Using local models in pipelines
 
@@ -212,10 +239,11 @@ You can set the `SIZE` and `PVC` values aswell
 make MODEL_PATH="PATH_TO_A_FILE" NAME=my-model SIZE=1G PVC=my-new-PVC create
 ```
 
-You can then use the [copy-model-from-pvc](pipelines/tekton/aiedge-e2e/tasks/copy-model-from-pvc.yaml) task to
-copy the model from the `model-workspace`, which can be set to the PVC created in the last step, to the `build-workspace-pv` workspace,
-which is then used by the `buildah` task in the pipeline. [copy-model-from-pvc](pipelines/tekton/aiedge-e2e/tasks/copy-model-from-pvc.yaml) task
-is not included in the pipeline by default, you have to add it yourself.
+You can then use the [copy-model-from-pvc](pipelines/tekton/aiedge-e2e/tasks/copy-model-from-pvc.yaml) task to copy the
+model from the `model-workspace`, which can be set to the PVC created in the last step, to the `build-workspace-pv`
+workspace, which is then used by the `buildah` task in the pipeline.
+[copy-model-from-pvc](pipelines/tekton/aiedge-e2e/tasks/copy-model-from-pvc.yaml) task is not included in the pipeline
+by default, you have to add it yourself.
 
 ## Contributing
 
@@ -224,3 +252,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Development
 
 See [DEVELOPMENT.md](DEVELOPMENT.md).
+
+[^1]: https://www.redhat.com/en/technologies/cloud-computing/openshift/pipelines
+[^2]: https://www.redhat.com/en/technologies/management/advanced-cluster-management
+[^3]: https://www.redhat.com/en/technologies/cloud-computing/openshift/observability
