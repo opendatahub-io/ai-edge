@@ -28,6 +28,8 @@ spec:
     value: "main"
   - name: test-endpoint
     value: "invocations"
+  - name: candidate-image-tag-reference
+    value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)-candidate
   - name: target-image-tag-references
     value:
     - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
