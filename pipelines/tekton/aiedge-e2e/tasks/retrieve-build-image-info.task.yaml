@@ -21,7 +21,7 @@ spec:
   - name: images-url
   steps:
   - name: get-image-sha
-    image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+    image: registry.access.redhat.com/ubi9/skopeo
     args:
       - "$(params.target-image-tag-references[*])"
     script: |
@@ -33,18 +33,18 @@ spec:
       echo ;
       echo -n "$(params.model-version)" | tee $(results.model-version.path) ;
       echo ;
-      export DOCKER_IMAGE_REF=$(oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageReference}' imagestreamtag/$(params.model-name):$(params.model-version)) ;
+      export DOCKER_IMAGE_REF=$(skopeo inspect --format '{{.Name}}@{{.Digest}}' docker://image-registry.openshift-image-registry.svc:5000/$(params.namespace)/$(params.model-name):$(params.model-version)) ;
       if [[ $DOCKER_IMAGE_REF != *"$(params.buildah-sha)"* ]]; then
-        echo "ImageStreamTag doesn't contain the correct image SHA"
+        echo "Candidate image tag does not contain the correct manifest digest after push"
         exit 1 ;
       fi
       echo -n $DOCKER_IMAGE_REF | tee $(results.internal-image-url.path) ;
       echo ;
-      oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageMetadata.Size}' imagestreamtag/$(params.model-name):$(params.model-version) | tee $(results.internal-image-size.path) ;
+      echo $(($(skopeo inspect --format '{{range .LayersData}}+{{.Size}}{{end}}' docker://$DOCKER_IMAGE_REF))) | tee $(results.internal-image-size.path) ;
       echo ;
-      oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageMetadata.Created}' imagestreamtag/$(params.model-name):$(params.model-version) | tee $(results.internal-image-created-at.path) ;
+      skopeo inspect --format '{{.Created}}' docker://$DOCKER_IMAGE_REF | tee $(results.internal-image-created-at.path) ;
       echo ;
-      oc get -n $(params.namespace) -o jsonpath='{.image.dockerImageMetadata.Config.Labels.io\.buildah\.version}' imagestreamtag/$(params.model-name):$(params.model-version) | tee $(results.internal-image-buildah-version.path) ;
+      skopeo inspect --format '{{index .Labels "io.buildah.version"}}' docker://$DOCKER_IMAGE_REF | tee $(results.internal-image-buildah-version.path) ;
       echo ;
       echo -n "$@" | tee $(results.target-image-tag-references.path) ;
   - name: build-urls-txt
