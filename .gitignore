@@ -171,3 +171,6 @@ oc-debug-pod.yaml
 
 # Local Makefile variable override file name.
 *local.vars.mk
+
+# Any JARs
+*.jar

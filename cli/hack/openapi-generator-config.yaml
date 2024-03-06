@@ -1,0 +1,6 @@
+structPrefix: true
+isGoSubmodule: true
+packageName: "model_registry_client"
+enumClassPrefix: true
+gitUserId: "opendatahub-io"
+gitRepoId: "ai-edge/cli/pkg/generated"
