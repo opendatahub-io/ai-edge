@@ -169,7 +169,7 @@ In [this example PipelineRun file](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pip
 #### For Git fetch
 
 Update the `git-model-repo` parameter with the repository url, the `modelRelativePath` parameter to the model files path and the `git-revision` parameter for the version/branch of the repository in your PipelineRun file.
-[This example PipelineRun file](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml) can be used as an example.
+[This example PipelineRun file](tekton/aiedge-e2e/aiedge-e2e.tensorflow-housing.pipelinerun.yaml) can be used as an example.
 
 #### Other parameters
 You may also want to change other parameters like:
