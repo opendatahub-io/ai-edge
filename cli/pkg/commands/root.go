@@ -30,6 +30,7 @@ import (
 // clientSet is a kubernetes clientset that can be used to interact with the kubernetes API
 var clientSet kubernetes.Interface
 var kubeconfig string
+var modelRegistryURL string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -72,6 +73,10 @@ func initConfig() {
 
 	if kubeconfig = viper.GetString("KUBECONFIG"); kubeconfig == "" {
 		kubeconfig = fmt.Sprintf("%s/.kube/config", os.Getenv("HOME"))
+	}
+
+	if modelRegistryURL = viper.GetString("MODEL_REGISTRY_URL"); modelRegistryURL == "" {
+		modelRegistryURL = "http://localhost:8080"
 	}
 
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
