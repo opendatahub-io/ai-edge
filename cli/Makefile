@@ -9,7 +9,16 @@ GENERATOR_OUTPUT_DIR=./pkg/generated/model_registry_client
 
 
 cli-test:
-	${GO} test -v ${GENERATOR_OUTPUT_DIR}/...
+	${GO} test -v ./cmd/... ./... ${GENERATOR_OUTPUT_DIR}/...
+
+cli-build:
+	${GO} build -o odh ./cmd/main.go
+
+cli-run:
+	${GO} run ./cmd/main.go
+
+cli-clean:
+	rm -f odh
 
 cli-generate-clients:
 	@which mvn > /dev/null 2>&1 || (echo "mvn (Maven) is not installed, please install it to proceed" && exit 1)

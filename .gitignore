@@ -174,3 +174,6 @@ oc-debug-pod.yaml
 
 # Any JARs
 *.jar
+
+# The odh binary
+cli/odh
