@@ -119,38 +119,15 @@ Create a copy of the file(s) below to include the required credentials for acces
     ```
 
 ### Data for testing the model inferencing endpoint
-To verify that that model container is working successfully, we include a test-model-rest-svc task, that will send data to the model inferencing endpoint and verify that expected output is returned.
-You will need to create a ConfigMap with two files `data.json`, the jsondata payload for your model and `output.json`, the expected json output of your model
+To verify that that model container is working successfully, the pipeline invokes a Task `test-model-rest-svc` which will send data to a testing container with the model inferencing endpoint and verify that expected output is returned.
+The Task expects a workspace `test-data` with files `data.json`, the jsondata payload for your model, and `output.json`, the expected json output for that input payload.
 
-```yaml
-# Example ConfigMap
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: my-model-test-data
+The example PipelineRun files ([OpenVino example](tekton/aiedge-e2e/aiedge-e2e.tensorflow-housing.pipelinerun.yaml),
+[Seldon example](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml)) demonstrate that approach, referencing the ConfigMap defined in
+[tensorflow-housing-test-data-cm.yaml](tekton/aiedge-e2e/test-data/tensorflow-housing-test-data-cm.yaml) and
+[bike-rentals-test-data-cm.yaml](tekton/aiedge-e2e/test-data/bike-rentals-test-data-cm.yaml), respectively.
 
-data:
-  data.json: |+
-    {"dataframe_split": {"columns":[ "day", "mnth", "year", "season","holiday", "weekday", "workingday", "weathersit", "temp", "hum", "windspeed" ], "data":[[ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ]]}}
-
-  output.json: '{"predictions": [331]}'
-```
-
-Once the test data configmap is created, it can be included as the `test-data` workspace in your PipelineRun file ([OpenVino example](tekton/aiedge-e2e/aiedge-e2e.tensorflow-housing.pipelinerun.yaml), [Seldon example](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml)).
-```yaml
-apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
-spec:
-  ...
-  workspaces:
-  - configMap:
-      name: my-model-test-data
-    name: test-data
-```
-
-There are 2 prepared test data configmaps, which you can use:
-* [bike-rentals-test-data-cm.yaml](tekton/aiedge-e2e/test-data/bike-rentals-test-data-cm.yaml)
-* [tensorflow-housing-test-data-cm.yaml](tekton/aiedge-e2e/test-data/tensorflow-housing-test-data-cm.yaml)
+If using your models, you will want to adjust these accordingly.
 
 ### Deploy the Pipeline
 From the user's Data Science Projects namespace where the Pipeline will be running
