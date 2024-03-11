@@ -123,7 +123,7 @@ To verify that that model container is working successfully, the pipeline invoke
 The Task expects a workspace `test-data` with files `data.json`, the jsondata payload for your model, and `output.json`, the expected json output for that input payload.
 
 The example PipelineRun files ([OpenVino example](tekton/aiedge-e2e/aiedge-e2e.tensorflow-housing.pipelinerun.yaml),
-[Seldon example](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml) demonstrate that approach, referencing the ConfigMap defined in
+[Seldon example](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml)) demonstrate that approach, referencing the ConfigMap defined in
 [tensorflow-housing-test-data-cm.yaml](tekton/aiedge-e2e/test-data/tensorflow-housing-test-data-cm.yaml) and
 [bike-rentals-test-data-cm.yaml](tekton/aiedge-e2e/test-data/bike-rentals-test-data-cm.yaml), respectively.
 
