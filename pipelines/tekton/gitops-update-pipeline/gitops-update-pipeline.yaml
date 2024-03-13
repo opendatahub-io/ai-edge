@@ -29,7 +29,7 @@ spec:
       type: string
     - name: useMergedBuildTestPipeline
       type: string
-      default: "false"
+      default: "true"
   results:
     - name: target-registry-url
       description: The url of the target registry (e.g. quay.io/rhoai-models/ai-model/)
