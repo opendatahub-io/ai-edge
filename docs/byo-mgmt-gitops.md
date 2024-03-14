@@ -60,7 +60,8 @@ On each of the edge clusters, you can enable [monitoring for user-defined projec
 
 If you forward metrics from each edge cluster to a central location, you can find a list of example metrics from the
 OpenVINO and Seldon model servers from our examples in
-[metrics_list](../acm/odh-core/acm-observability/files/metrics_list.yaml) that you may wish to forward.
+[metrics_list](../acm/odh-core/acm-observability/files/uwl_metrics_list.yaml) that you may wish to forward.
+
 
 
 [OpenShift GitOps docs: Deploying resources to a different namespace]: https://docs.openshift.com/gitops/1.11/argocd_instance/setting-up-argocd-instance.html#gitops-deploy-resources-different-namespaces_setting-up-argocd-instance

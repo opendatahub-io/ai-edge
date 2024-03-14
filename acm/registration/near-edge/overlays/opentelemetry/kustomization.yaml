@@ -1,0 +1,38 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+
+namePrefix: otel-edge-collector-
+
+patches:
+- patch: |-
+    - op: replace
+      path: /spec/template/metadata/name
+      value: '{{name}}-openshift-opentelemetry-operator'
+    - op: replace
+      path: /spec/template/spec/source/path
+      value: acm/odh-edge/apps/telemetry
+    - op: replace
+      path: /spec/template/spec/destination/namespace
+      value: opendatahub-edge-collector
+    - op: replace
+      path: /spec/template/metadata/annotations/apps.open-cluster-management.io~1ocm-managed-cluster-app-namespace
+      value: openshift-gitops
+  target:
+    group: argoproj.io
+    version: v1alpha1
+    kind: ApplicationSet
+
+replacements:
+- source:
+    kind: Placement
+    group: cluster.open-cluster-management.io
+    fieldPath: metadata.name
+  targets:
+  - select:
+      group: argoproj.io
+      kind: ApplicationSet
+    fieldPaths:
+      - spec.generators.0.clusterDecisionResource.labelSelector.matchLabels.cluster\.open-cluster-management\.io/placement

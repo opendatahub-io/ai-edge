@@ -5,19 +5,11 @@
 MAKE_ENV_FILE = local.vars.mk
 -include $(MAKE_ENV_FILE)
 
-.PHONY: install install/observability-core install/observability-edge test-acm-%-generate test go-test go-test-setup
-
-install: install/observability-core install/observability-edge
+.PHONY: setup-observability test-acm-%-generate test go-test go-test-setup
 
 # Setup the secret required for observability then generate and apply the files
-install/observability-core: acm/odh-core/acm-observability/kustomization.yaml
-	DOCKER_CONFIG_JSON=`oc extract secret/pull-secret -n openshift-config --to=-`
-	oc create secret generic multiclusterhub-operator-pull-secret -n open-cluster-management-observability --from-literal=.dockerconfigjson="$$DOCKER_CONFIG_JSON" --type=kubernetes.io/dockerconfigjson
+setup-observability: acm/odh-core/acm-observability/kustomization.yaml
 	kustomize build acm/odh-core/acm-observability | kubectl apply -f -
-
-# Create the whitelist for model metrics
-install/observability-edge: acm/odh-edge/acm-observability/kustomization.yaml
-	kustomize build acm/odh-edge/acm-observability | kubectl apply -f -
 
 # Generate app manifests using ACM GitOps flow, from custom GitHub org/branch, to custom namespace
 # Example invocations:

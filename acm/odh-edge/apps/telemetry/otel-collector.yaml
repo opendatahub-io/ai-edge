@@ -1,0 +1,33 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: cluster-collector
+  namespace: opendatahub-edge-collector
+  labels:
+    app.kubernetes.io/managed-by: opentelemetry-operator
+spec:
+  mode: deployment
+  observability:
+    metrics:
+      enableMetrics: true
+  config: |
+    receivers:
+      prometheus:
+        config:
+          scrape_configs:
+            - job_name: 'otel-collector'
+              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              scrape_interval: 5s
+              metrics_path: "/metrics"
+              static_configs:
+                - targets: ['tensorflow-housing-app-model-1.tensorflow-housing-app.svc.cluster.local:8080', 'bike-rental-app-model-1.bike-rental-app.svc.cluster.local:8082']
+    processors:
+    exporters:
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+    service:
+      pipelines:
+        metrics:
+          receivers: [prometheus]
+          processors: []
+          exporters: [prometheus]
