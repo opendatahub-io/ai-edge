@@ -27,9 +27,6 @@ spec:
     - name: gitTokenSecretKey
       default: token
       type: string
-    - name: useMergedBuildTestPipeline
-      type: string
-      default: "true"
   results:
     - name: target-registry-url
       description: The url of the target registry (e.g. quay.io/rhoai-models/ai-model/)
@@ -50,8 +47,6 @@ spec:
         value: $(context.pipelineRun.namespace)
       - name: model-name
         value: $(params.model-name)
-      - name: useMergedBuildTestPipeline
-        value: $(params.useMergedBuildTestPipeline)
     - name: git-clone
       params:
         - name: url
