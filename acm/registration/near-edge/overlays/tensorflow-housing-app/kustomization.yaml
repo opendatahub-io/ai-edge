@@ -24,14 +24,6 @@ patches:
     group: argoproj.io
     version: v1alpha1
     kind: ApplicationSet
-- patch: |-
-    - op: replace
-      path: /spec/policy-templates/0/objectDefinition/metadata/name
-      value: tensorflow-housing-app-ns-has-argo-label
-  target:
-    group: policy.open-cluster-management.io
-    version: v1
-    kind: Policy
 
 replacements:
 - source:
@@ -54,23 +46,3 @@ replacements:
       kind: PlacementBinding
     fieldPaths:
       - placementRef.name
-- source:
-    kind: Policy
-    group: policy.open-cluster-management.io
-    fieldPath: metadata.name
-  targets:
-  - select:
-      group: policy.open-cluster-management.io
-      kind: PlacementBinding
-    fieldPaths:
-      - subjects.0.name
-- source:
-    group: argoproj.io
-    kind: ApplicationSet
-    fieldPath: spec.template.spec.destination.namespace
-  targets:
-  - select:
-      group: policy.open-cluster-management.io
-      kind: Policy
-    fieldPaths:
-    - spec.policy-templates.0.objectDefinition.spec.object-templates.0.objectDefinition.metadata.name

@@ -1,31 +1,4 @@
 ---
-apiVersion: policy.open-cluster-management.io/v1
-kind: Policy
-metadata:
-  name: namespace-policy
-  namespace: openshift-gitops
-spec:
-  disabled: false
-  policy-templates:
-    - objectDefinition:
-        apiVersion: policy.open-cluster-management.io/v1
-        kind: ConfigurationPolicy
-        metadata:
-          name: ns-has-argo-label
-        spec:
-          object-templates:
-            - complianceType: musthave
-              objectDefinition:
-                apiVersion: v1
-                kind: Namespace
-                metadata:
-                  labels:
-                    argocd.argoproj.io/managed-by: openshift-gitops
-                  name: near-edge-acm-template
-          pruneObjectBehavior: DeleteIfCreated
-          severity: low
-          remediationAction: enforce
----
 apiVersion: cluster.open-cluster-management.io/v1beta1
 kind: Placement
 metadata:
@@ -42,20 +15,6 @@ spec:
       operator: Exists
     - key: cluster.open-cluster-management.io/unavailable
       operator: Exists
----
-apiVersion: policy.open-cluster-management.io/v1
-kind: PlacementBinding
-metadata:
-  name: placement-binding
-  namespace: openshift-gitops
-placementRef:
-  apiGroup: cluster.open-cluster-management.io
-  kind: Placement
-  name: near-edge-clusters
-subjects:
-  - apiGroup: policy.open-cluster-management.io
-    kind: Policy
-    name: ensure-namespace-exists
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
