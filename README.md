@@ -1,19 +1,19 @@
-# Open Data Hub / AI Edge 
+# Open Data Hub / AI Edge
 
 As the adoption of AI and ML continues to surge, there's an increasing demand to deploy these workloads in edge
 environments such as factories, farms, and remote locations where traditional computing infrastructure is limited,
 connectivity is unreliable or constrained, and reliability is paramount.
 
-This repository contains tools and artifacts comprising a proof of concept to bring the power of Open Data Hub and 
+This repository contains tools and artifacts comprising a proof of concept to bring the power of Open Data Hub and
 OpenShift AI to such edge environments.
 
 > [!WARNING]
-> This is a proof of concept repository and is not intended for production use. The edge features are experimental and 
+> This is a proof of concept repository and is not intended for production use. The edge features are experimental and
 > the repository is under active development.
 
 ## Overview
 
-The term edge is a highly overloaded term in the industry. For the purpose of this repository, the following diagram 
+The term edge is a highly overloaded term in the industry. For the purpose of this repository, the following diagram
 illustrates the concept of core and near edge environments.
 
 ![](docs/images/edge-architecture.png)
@@ -24,16 +24,16 @@ illustrates the concept of core and near edge environments.
   - The central OpenShift cluster that is used to manage the edge clusters.
   - Can be an on-premise or cloud-based cluster.
   - There are no resources or network constraints expected in the core cluster.
-- **Near Edge** 
-  - This is an edge environment to run and serve AI/ML inference workloads. 
+- **Near Edge**
+  - This is an edge environment to run and serve AI/ML inference workloads.
   - For the purpose of this repository, the near edge environment is represented by separate OpenShift cluster(s)
-    managed from the core OpenShift cluster. 
-  - The near edge environment is expected to have moderate yet constrained compute resources and network. 
+    managed from the core OpenShift cluster.
+  - The near edge environment is expected to have moderate yet constrained compute resources and network.
   - Doesn't necessarily have any open ports for inbound connections.
 
 ### Use Case
 
-The main objective currently is to showcase that a user can: 
+The main objective currently is to showcase that a user can:
 
 1. Package an inference service by integrating a trained model with all required dependencies into a container image,
    ensuring it's ready for utilization at the near edge location(s) in a streamlined manner.
@@ -59,7 +59,7 @@ and near edge clusters.
 - Packages different types of AI/ML models and serving runtimes into container images using
   `Red Hat OpenShift Pipelines`[^1].
 - Manages the near edge clusters and the AI/ML inference deployed on them in a GitOps manner using
-  `Red Hat Advanced Cluster Management for Kubernetes (ACM)`[^2] and `Red Hat OpenShift GitOps`. 
+  `Red Hat Advanced Cluster Management for Kubernetes (ACM)`[^2] and `Red Hat OpenShift GitOps`.
 - Monitors and observes the deployed AI/ML inference workloads in the near edge environments using `ACM` and
   `Red Hat OpenShift Observability`[^3].
 - Hosts the Open Data Hub and OpenShift AI components.
@@ -67,7 +67,7 @@ and near edge clusters.
 #### Near Edge Cluster(s)
 - Run the AI/ML workloads as defined by the core cluster in a GitOps manner using `ACM`and `Red Hat OpenShift GitOps`.
 - Continuously reconcile the state of the AI/ML workloads with the core cluster using
-  [ACM's pull model with ArgoCD](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/gitops/gitops-overview#gitops-push-pull). 
+  [ACM's pull model with ArgoCD](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/gitops/gitops-overview#gitops-push-pull).
 - Collect metrics of the AI/ML workloads and send them to the core cluster using `Red Hat OpenShift Observability` and
   `ACM`.
 
