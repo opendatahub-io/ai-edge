@@ -55,6 +55,13 @@ contains example models in the [pipelines/models/](pipelines/models/) directory.
 The diagram above illustrates the architecture of the proof of concept. The two main categories of clusters are the core
 and near edge clusters.
 
+> [!NOTE]
+> The rest of this documentation assumes usage of ACM[^2] for cluster and application management, and we highly recommend
+> this approach.
+> If you choose to use a different approach, you'll find some information on how to deploy the inference container
+> application using standalone ArgoCD instances on the edge clusters, in the dedicated
+> [Bring Your Own Cluster Management document](docs/byo-mgmt-gitops.md).
+
 #### Core Cluster
 - Packages different types of AI/ML models and serving runtimes into container images using
   `Red Hat OpenShift Pipelines`[^1].

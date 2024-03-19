@@ -7,6 +7,13 @@ The following accounts are required to run the proof of concept
 - An AWS account with access to [Amazon S3](https://s3.console.aws.amazon.com/).
 - A [Quay](https://www.quay.io) Registry account.
 
+> [!NOTE]
+> The rest of this documentation assumes usage of ACM for cluster and application management, and we highly recommend
+> this approach.
+> If you choose to use a different approach, you'll find some information on how to deploy the inference container
+> application using standalone ArgoCD instances on the edge clusters, in the dedicated
+> [Bring Your Own Cluster Management document](./byo-mgmt-gitops.md).
+
 ## Components
 
 The following table lists the components used in the proof of concept, their versions, and whether they are used in the
@@ -16,7 +23,7 @@ core or near edge clusters.
 |-------------------------------------------------|:-----------------|:------------:|:--------------------:|
 | Red Hat OpenShift clusters                      | 4.12 or higher   |     Yes      |         Yes          |
 | Red Hat OpenShift Pipelines                     | 1.11 or higher   |     Yes      |          No          |
-| Advanced Cluster Management for Kubernetes      | 2.9              |     Yes      |          No          |
+| Advanced Cluster Management for Kubernetes      | 2.9 or higher    |     Yes      |          No          |
 | OpenShift GitOps                                | 1.10.1 or higher |     Yes      |         Yes          |
 | Open Data Hub (optional)                        | 1.x or 2.x       |     Yes      |          No          |
 
