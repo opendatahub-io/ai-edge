@@ -2,9 +2,19 @@ package support
 
 import (
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
+	v1 "k8s.io/api/core/v1"
 	"os"
 	"sigs.k8s.io/yaml"
 )
+
+func MountConfigMapAsWorkspaceToPipelineRun(configMapName string, workspaceName string, pipelineRun *pipelinev1.PipelineRun) {
+	pipelineRun.Spec.Workspaces = append(pipelineRun.Spec.Workspaces, pipelinev1.WorkspaceBinding{
+		Name: workspaceName,
+		ConfigMap: &v1.ConfigMapVolumeSource{
+			LocalObjectReference: v1.LocalObjectReference{Name: configMapName},
+		},
+	})
+}
 
 func SetPipelineRunParam(name string, value pipelinev1.ParamValue, pipelineRun *pipelinev1.PipelineRun) {
 	for index := range pipelineRun.Spec.Params {

@@ -130,6 +130,8 @@ spec:
     workspaces:
     - name: output
       workspace: build-workspace-pv
+    - name: ssl-ca-directory
+      workspace: ssl-certs
     when:
     - input: "$(params.fetch-model)"
       operator: in
@@ -371,3 +373,5 @@ spec:
   - name: git-basic-auth
     optional: true
   - name: test-data
+  - name: ssl-certs
+    optional: true

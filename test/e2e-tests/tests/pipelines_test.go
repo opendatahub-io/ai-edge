@@ -101,6 +101,12 @@ func Test_PipelineRunsComplete(t *testing.T) {
 			t.Fatal(err.Error())
 		}
 
+		// the value of self signed cert here is the path to the cert
+		// we just need to know if it is set to anything to add the config map
+		if options.SelfSignedCert != "" {
+			support.MountConfigMapAsWorkspaceToPipelineRun("self-signed-cert", "ssl-certs", &pipelineRun)
+		}
+
 		// setting these values to the options passed in as env vars
 		support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(options.S3BucketName), &pipelineRun)
 		support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(options.TargetImageTagReferences), &pipelineRun)
