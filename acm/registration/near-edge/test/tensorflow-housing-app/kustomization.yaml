@@ -32,34 +32,6 @@ patches:
 - patch: |-
     - op: test
       path: /metadata/name
-      value: tensorflow-housing-app-namespace-policy
-    - op: test
-      path: /spec/policy-templates/0/objectDefinition/metadata/name
-      value: tensorflow-housing-app-ns-has-argo-label
-    - op: test
-      path: /spec/policy-templates/0/objectDefinition/spec/object-templates/0/objectDefinition/metadata/name
-      value: tensorflow-housing-app
-  target:
-    group: policy.open-cluster-management.io
-    kind: Policy
-
-- patch: |-
-    - op: test
-      path: /metadata/name
-      value: tensorflow-housing-app-placement-binding
-    - op: test
-      path: /placementRef/name
-      value: tensorflow-housing-app-placement
-    - op: test
-      path: /subjects/0/name
-      value: tensorflow-housing-app-namespace-policy
-  target:
-    group: policy.open-cluster-management.io
-    kind: PlacementBinding
-
-- patch: |-
-    - op: test
-      path: /metadata/name
       value: tensorflow-housing-app-placement
   target:
     group: cluster.open-cluster-management.io
