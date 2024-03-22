@@ -36,6 +36,8 @@ const (
 	SubCommandUpdate
 	// SubCommandBuild is a subcommand to build items
 	SubCommandBuild
+	// SubCommandDescribe is a subcommand to view details
+	SubCommandDescribe
 )
 
 // NewCmd creates a new cobra command.
@@ -44,17 +46,18 @@ const (
 // The modelFactory will be called with the args, flags and subCommand.
 //
 // Example:
-// 	cmd := NewCmd(
-// 		"images",
-// 		"List images",
-// 		`List images`,
-// 		cobra.ExactArgs(3),
-// 		[]flags.Flag{flags.FlagModelRegistryUrl},
-// 		SubCommandList,
-// 		func(args []string, flags map[string]string, subCommand SubCommand) tea.Model {
-// 			return NewImagesModel(args, flags, subCommand)
-// 		},
-// 	)
+//
+//	cmd := NewCmd(
+//		"images",
+//		"List images",
+//		`List images`,
+//		cobra.ExactArgs(3),
+//		[]flags.Flag{flags.FlagModelRegistryUrl},
+//		SubCommandList,
+//		func(args []string, flags map[string]string, subCommand SubCommand) tea.Model {
+//			return NewImagesModel(args, flags, subCommand)
+//		},
+//	)
 func NewCmd(
 	use, short, long string,
 	args cobra.PositionalArgs,

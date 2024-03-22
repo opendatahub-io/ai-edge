@@ -130,7 +130,7 @@ After you have created the pipeline parameters file, you can add the model to th
 following command:
 
 ```bash
-odh models add -i model-name -d model-description [-v model-version] [-m model-registry-url] [-p parameters-file]
+odh models add -m model-name -d model-description [-v model-version] [-m model-registry-url] [-p parameters-file]
 ```
 
 This should print out the message `Model added successfully` if the model was added successfully.
@@ -175,4 +175,12 @@ using the pipeline parameters that are stored in the Model Registry. To build a 
 
 ```bash
 odh images build -i model-id -v version [-m model-registry-url] [-n namespace] [-k kubeconfig]
+```
+
+### Viewing a Model Image details
+
+To view a model image's details, you can run describe command which will show you image details along with a list of parameters. The command is as follows:
+
+```bash
+odh images describe -i model-id -v version [-m model-registry-url] [-p params-file]
 ```

@@ -38,3 +38,8 @@ var ErrorStyle = lipgloss.NewStyle().
 	Bold(true).
 	Height(4).
 	Width(120)
+
+var KeyStyle = lipgloss.NewStyle().Bold(true).Width(20)
+var ParamKeyStyle = lipgloss.NewStyle().Width(40).MarginLeft(10)
+
+var TitleStyle = lipgloss.NewStyle().Bold(true).Underline(true).PaddingTop(1)
