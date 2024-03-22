@@ -32,3 +32,5 @@ params:
     value: "bike-rentals-test-data"
   - name: addDirWorkspace
     value: "true"
+#  - s3SecretName := "credentials-s3"
+#    testDataConfigMapName := "bike-rentals-test-data"

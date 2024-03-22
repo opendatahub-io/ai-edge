@@ -18,6 +18,15 @@ package edgeclient
 
 type ModelImageStatus int
 
+const (
+	ModelImageStatusUnknown ModelImageStatus = iota
+	ModelImageNeedsSync
+	ModelImageStatusSynced
+	ModelImageStatusBuilding
+	ModelImageStatusLive
+	ModelImageStatusFailed
+)
+
 func (s ModelImageStatus) String() string {
 	return [...]string{"Unknown", "Needs Sync", "Synced", "Building", "Live", "Failed"}[s]
 }
@@ -39,4 +48,9 @@ type ModelImage struct {
 	NeedsSync   bool
 	BuildParams map[string]interface{}
 	Status      ModelImageStatus
+}
+
+type PipelineRun struct {
+	Name      string
+	Namespace string
 }

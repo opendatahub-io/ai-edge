@@ -99,3 +99,53 @@ func (m *MockServer) Close() {
 func (m *MockServer) URL() string {
 	return m.server.URL
 }
+
+// func (m *MockServer)
+
+// 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		// Check for the correct path
+// 		if r.URL.Path != "/api/model_registry/v1alpha2/registered_models" {
+// 			http.NotFound(w, r)
+// 			return
+// 		}
+//
+// 		// Define the response
+// 		response := map[string][]map[string]interface{}{
+// 			"items": {
+// 				{
+// 					"customProperties": map[string]map[string]string{
+// 						"additionalProp1": {"int_value": "string"},
+// 						"additionalProp2": {"int_value": "string"},
+// 						"additionalProp3": {"int_value": "string"},
+// 					},
+// 					"description":               "string",
+// 					"externalID":                "string",
+// 					"name":                      "string",
+// 					"id":                        "string",
+// 					"createTimeSinceEpoch":      "string",
+// 					"lastUpdateTimeSinceEpoch": "string",
+// 					"state":                     "LIVE",
+// 				},
+// 			},
+// 		}
+//
+// 		// Set content type
+// 		w.Header().Set("Content-Type", "application/json")
+//
+// 		// Write the response
+// 		if err := json.NewEncoder(w).Encode(response); err != nil {
+// 			log.Fatalf("Error encoding response: %v", err)
+// 		}
+// 	})
+//
+// 	// Create a new httptest server using the handler
+// 	server := httptest.NewServer(handler)
+// 	defer server.Close()
+//
+// 	// Use server.URL to access the server in your tests
+// 	log.Println("Mock server running at:", server.URL)
+//
+// 	// In a test, you can make HTTP requests to server.URL
+// 	// For example: http.Get(server.URL + "/api/model_registry/v1alpha2/registered_models")
+// }
+//

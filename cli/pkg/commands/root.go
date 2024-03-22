@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
+	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/images"
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/models"
 	"github.com/spf13/cobra"
 )
@@ -51,6 +52,7 @@ func init() {
 			rootCmd.PersistentFlags().StringP(f.String(), f.Shorthand(), f.Value(), f.Usage())
 		}
 	}
+	rootCmd.AddCommand(images.Cmd)
 	rootCmd.AddCommand(models.Cmd)
 }
 

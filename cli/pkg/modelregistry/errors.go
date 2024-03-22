@@ -36,10 +36,18 @@ var (
 
 	// ErrArtifactExists is returned when a model version artifact already exists for a given model version
 	ErrArtifactExists = errors.New("artifact already exists")
+	// ErrArtifactNotFound is returned when a model version artifact is not found
+	ErrArtifactNotFound = errors.New("artifact not found")
 
 	// ErrAlreadyExists is a generic error to check the model registry returned errors when an entity (Model, Version,
 	// Artifact) already exists
 	ErrAlreadyExists = errors.New("already exists")
+
+	// ErrFindModelVersion is returned when no model versions are found using FindModelVersion
+	ErrFindModelVersion = errors.New("no model versions found")
+
+	// ErrFindArtifact is returned when no artifacts are found using FindArtifact
+	ErrFindArtifact = errors.New("no model artifacts found")
 )
 
 // isOpenAPIErrorOfKind checks if the error is of the given kind (targetErr). It checks if sourceErr is an

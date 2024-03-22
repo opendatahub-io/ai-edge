@@ -28,6 +28,8 @@ type SubCommand int
 
 const (
 	SubCommandList SubCommand = iota
+	SubCommandSync
+	SubCommandBuild
 	SubCommandAdd
 )
 

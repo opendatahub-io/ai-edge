@@ -18,11 +18,20 @@ package common
 
 import "github.com/charmbracelet/lipgloss"
 
+const (
+	CheckMark    = "\u2713"
+	WaringSymbol = "⚠️"
+)
+
 var TableBaseStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.NormalBorder()).
 	BorderForeground(lipgloss.Color("#04B575"))
 
 var MessageStyle = lipgloss.NewStyle().
+	Bold(true)
+
+var Success = lipgloss.NewStyle().
+	Foreground(lipgloss.Color("#04B575")).
 	Bold(true)
 
 var ErrorStyle = lipgloss.NewStyle().

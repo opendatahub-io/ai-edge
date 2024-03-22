@@ -128,6 +128,27 @@ func compareRegisteredModels(t *testing.T, model openapi.RegisteredModel, expect
 	if model.GetDescription() != expected.GetDescription() {
 		t.Fatalf("\t%s:\t%s\tShould receive the expected Description, got %s", t.Name(), failed, model.GetDescription())
 	}
+	// if model.GState != expected.State {
+	// 	t.Fatalf("\t%s\tShould receive the expected State, got %s", failed, model.State)
+	// }
+	// t.Logf("\t%s\tShould receive the expected State", success)
+	//
+	// if model.CreateTimeSinceEpoch != expected.CreateTimeSinceEpoch {
+	// 	t.Fatalf("\t%s\tShould receive the expected CreateTimeSinceEpoch, got %s", failed, model.CreateTimeSinceEpoch)
+	// }
+	// t.Logf("\t%s\tShould receive the expected CreateTimeSinceEpoch", success)
+	//
+	// if model.LastUpdateTimeSinceEpoch != expected.LastUpdateTimeSinceEpoch {
+	// 	t.Fatalf(
+	// 		"\t%s\tShould receive the expected LastUpdateTimeSinceEpoch, got %s", failed, model.LastUpdateTimeSinceEpoch,
+	// 	)
+	// }
+	// t.Logf("\t%s\tShould receive the expected LastUpdateTimeSinceEpoch", success)
+	//
+	// if len(model.CustomProperties) != len(expected.CustomProperties) {
+	// 	t.Fatalf("\t%s\tShould receive the expected CustomProperties, got %v", failed, model.CustomProperties)
+	// }
+	// t.Logf("\t%s\tShould receive the expected CustomProperties", success)
 }
 
 func convertModelToItem(model openapi.RegisteredModel) map[string]interface{} {
@@ -149,4 +170,31 @@ func newRegisteredModel(id, name, description string) openapi.RegisteredModel {
 	model.SetName(name)
 	model.SetDescription(description)
 	return *model
+}
+
+func TestClient(t *testing.T) {
+	modelRegistryURL := "http://localhost:8080"
+	client := NewClient(modelRegistryURL)
+	// assert.Equal(t, modelRegistryURL, client.modelRegistryURL)
+	// assert.Assert(t, client.modelRegistryClient != nil)
+
+	// _, err := client.GetModelVersionArtifacts("123")
+	// v, err := client.CreateRegisteredModel("tensorflow-housing-test", "tensorflow-housing-test - ", nil)
+	s := openapi.NewMetadataStringValueWithDefaults()
+	s.SetStringValue("disabled")
+
+	v, err := client.UpdateModelVersion(
+		"6", map[string]openapi.MetadataValue{
+			"edge":   openapi.MetadataStringValueAsMetadataValue(s),
+			"deploy": openapi.MetadataStringValueAsMetadataValue(s),
+		},
+	)
+	// v, err := client.FindModelVersionArtifact("4", "tensorflow-housing-6")
+	// v, err := client.CreateModelArtifact(
+	// 	"6", "tensorflow-housing-test", "tensorflow-housing-test - ", "onnx", "1", "aws-connection-mybucket",
+	// )
+	fmt.Printf("v %v, err %v\n", v.GetCustomProperties(), err)
+	// assert.NilError(t, err)
+	// assert.Assert(t, errors.Is(err, ErrVersionNotFound))
+	// assert.Equal(t, "123", vs)
 }
