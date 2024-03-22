@@ -199,8 +199,8 @@ func (c *Client) CreateModelArtifact(
 
 	a, resp, err := c.modelRegistryClient.ModelRegistryServiceAPI.CreateModelVersionArtifact(
 		context.Background(), versionID,
-	).
-		Artifact(openapi.ModelArtifactAsArtifact(artifact)).Execute()
+	).Artifact(openapi.ModelArtifactAsArtifact(artifact)).Execute()
+
 	if err != nil {
 		if resp == nil {
 			return nil, fmt.Errorf("error creating model version artifact: %w", err)
