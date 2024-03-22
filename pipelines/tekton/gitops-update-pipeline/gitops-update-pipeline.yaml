@@ -27,6 +27,12 @@ spec:
     - name: gitTokenSecretKey
       default: token
       type: string
+    - name: yq-script
+      type: string
+      default: |
+        cd $(params.gitRepoName)/
+        yq eval -i '(.images[] | select(.name == "edge-model-template-image").newName) = "$(tasks.retrieve-image-info.results.target-registry-url)"' $(params.imageReferenceFilePath)
+        yq eval -i '(.images[] | select(.name == "edge-model-template-image").digest) = "$(tasks.retrieve-image-info.results.image-sha)"' $(params.imageReferenceFilePath)
   results:
     - name: target-registry-url
       description: The url of the target registry (e.g. quay.io/rhoai-models/ai-model/)
@@ -63,7 +69,22 @@ spec:
           workspace: git-workspace
         - name: basic-auth
           workspace: git-basic-auth
-    - name: commit-image-ref
+
+    - name: yq-update
+      params:
+        - name: SCRIPT
+          value: $(params.yq-script)
+      runAfter:
+        - retrieve-image-info
+        - git-clone
+      taskRef:
+        kind: Task
+        name: yq
+      workspaces:
+        - name: source
+          workspace: git-workspace
+
+    - name: git-commit-and-push
       params:
         - name: BASE_IMAGE
           value: cgr.dev/chainguard/git:root-2.39@sha256:7759f87050dd8bacabe61354d75ccd7f864d6b6f8ec42697db7159eccd491139
@@ -82,9 +103,6 @@ spec:
             PR_BRANCH=pipeline_$(context.pipelineRun.uid)
             git checkout -b $PR_BRANCH
 
-            sed -i -e "s%newName: .*%newName: $(tasks.retrieve-image-info.results.target-registry-url)%" $(params.imageReferenceFilePath)
-            sed -i -e "s/digest: .*/digest: $(tasks.retrieve-image-info.results.image-sha)/" $(params.imageReferenceFilePath)
-
             if [ -z "$(git status --porcelain)" ]; then
                 echo "Update did not cause a modification"
                 exit 0
@@ -97,8 +115,7 @@ spec:
         - name: VERBOSE
           value: "true"
       runAfter:
-        - retrieve-image-info
-        - git-clone
+        - yq-update
       taskRef:
         kind: ClusterTask
         name: git-cli
@@ -140,7 +157,7 @@ spec:
         - name: TITLE
           value: "Auto: update image ref"
       runAfter:
-        - commit-image-ref
+        - git-commit-and-push
       taskRef:
         kind: Task
         name: github-open-pr
@@ -148,7 +165,7 @@ spec:
         - input: $(tasks.git-clone.results.commit)
           operator: notin
           values:
-            - $(tasks.commit-image-ref.results.commit)
+            - $(tasks.git-commit-and-push.results.commit)
   workspaces:
     - name: git-workspace
     - name: git-basic-auth
