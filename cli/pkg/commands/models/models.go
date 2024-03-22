@@ -80,7 +80,13 @@ func (m teaModel) addModel() func() tea.Msg {
 		if err != nil {
 			return common.ErrMsg{err}
 		}
-		_, err = c.AddNewModelWithImage(m.args[0], m.args[1], m.args[2], "", params.ToSimpleMap())
+		_, err = c.AddNewModelWithImage(
+			m.flags[flags.FlagModelName.String()],
+			m.flags[flags.FlagModelDescription.String()],
+			m.flags[flags.FlagVersionName.String()],
+			"",
+			params.ToSimpleMap(),
+		)
 		if err != nil {
 			return common.ErrMsg{err}
 		}
@@ -114,8 +120,7 @@ func (m teaModel) View() string {
 	case common.SubCommandList:
 		return m.viewListModels()
 	case common.SubCommandAdd:
-		return common.MessageStyle.Render("\nModel added successfully\n\n")
-
+		return common.MessageStyle.Render("\nAdding model information.......") + common.Success.Render("[OK]\n\n")
 	}
 	return ""
 }

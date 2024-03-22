@@ -27,6 +27,11 @@ var TableBaseStyle = lipgloss.NewStyle().
 var MessageStyle = lipgloss.NewStyle().
 	Bold(true)
 
+// Success is the style for success messages
+var Success = lipgloss.NewStyle().
+	Foreground(lipgloss.Color("#04B575")).
+	Bold(true)
+
 // ErrorStyle is the style for error messages
 var ErrorStyle = lipgloss.NewStyle().
 	Foreground(lipgloss.Color("#FF0000")).

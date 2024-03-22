@@ -20,13 +20,14 @@ import (
 	"os"
 
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
+	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/images"
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/models"
 	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "odh-cli",
+	Use:   "odh",
 	Short: "Manage Open Data Hub resources from the command line.",
 	Long: `Manage Open Data Hub resources from the command line.
 
@@ -53,6 +54,7 @@ func init() {
 	for _, f := range rootFlags {
 		rootCmd.PersistentFlags().StringP(f.String(), f.Shorthand(), f.Value(), f.Usage())
 	}
+	rootCmd.AddCommand(images.Cmd)
 	rootCmd.AddCommand(models.Cmd)
 }
 

@@ -29,14 +29,15 @@ type Flag struct {
 	inherited  bool // Flag is inherited by subcommands
 	parentFlag bool // Flag is defined in the parent command
 	shorthand  string
-	value      string
+	required   bool
+	value      string // Default value, only if the flag is required
 	usage      string
 }
 
 var (
 	// FlagModelRegistryURL is the URL of the model registry
 	FlagModelRegistryURL = Flag{
-		name: "model-registry-url", inherited: true, shorthand: "m", value: "http://localhost:8080",
+		name: "model-registry-url", inherited: true, shorthand: "r", value: "http://localhost:8080",
 		usage: "URL of the model registry",
 	}
 
@@ -48,7 +49,12 @@ var (
 	}
 
 	// FlagNamespace is the namespace to use
-	FlagNamespace = Flag{name: "namespace"}
+	FlagNamespace = Flag{
+		name:      "namespace",
+		shorthand: "n",
+		value:     "default",
+		usage:     "namespace to use",
+	}
 
 	// FlagParams is the path to the build parameters file
 	FlagParams = Flag{
@@ -58,8 +64,41 @@ var (
 		usage:     "path to the build parameters file",
 	}
 
-	// Flags is a list of all flags
-	Flags = []Flag{FlagKubeconfig, FlagModelRegistryURL, FlagNamespace, FlagParams}
+	// FlagModelID is the ID of the model
+	FlagModelID = Flag{
+		name:      "model-id",
+		shorthand: "i",
+		usage:     "ID of the model",
+	}
+
+	// FlagModelName is the name of the model
+	FlagModelName = Flag{
+		name:      "model-name",
+		shorthand: "m",
+		usage:     "model name",
+	}
+
+	// FlagModelDescription is the description of the model
+	FlagModelDescription = Flag{
+		name:      "model-description",
+		shorthand: "d",
+		usage:     "model description",
+	}
+
+	// FlagVersionName is the name of the model version
+	FlagVersionName = Flag{
+		name:      "version-name",
+		shorthand: "v",
+		value:     "v1",
+		usage:     "model version name. A model can have multiple versions.",
+	}
+
+	// FlagModelImageID is the ID of the model image
+	FlagModelImageID = Flag{
+		name:      "image-id",
+		shorthand: "g",
+		usage:     "model image ID",
+	}
 )
 
 // String returns the name of the flag.
@@ -87,6 +126,18 @@ func (f Flag) SetParentFlag() Flag {
 // IsParentFlag returns true if the flag is defined in the parent command.
 func (f Flag) IsParentFlag() bool {
 	return f.parentFlag
+}
+
+// SetRequired sets the flag as required.
+func (f Flag) SetRequired() Flag {
+	f.required = true
+	f.usage += " (required)"
+	return f
+}
+
+// IsRequired returns true if the flag is required.
+func (f Flag) IsRequired() bool {
+	return f.required
 }
 
 // Shorthand returns the shorthand of the flag.
