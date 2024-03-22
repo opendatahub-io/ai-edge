@@ -17,15 +17,12 @@ limitations under the License.
 package commands
 
 import (
-	"fmt"
 	"os"
 
+	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
+	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/models"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
-
-var kubeconfig string
-var modelRegistryURL string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -34,6 +31,11 @@ var rootCmd = &cobra.Command{
 	Long: `Manage Open Data Hub resources from the command line.
 
 This application is a tool to perform various operations on Open Data Hub.`,
+}
+
+var rootFlags = []flags.Flag{
+	flags.FlagModelRegistryURL,
+	flags.FlagKubeconfig,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -47,17 +49,13 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	for _, f := range rootFlags {
+		rootCmd.PersistentFlags().StringP(f.String(), f.Shorthand(), f.Value(), f.Usage())
+	}
+	rootCmd.AddCommand(models.Cmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	viper.AutomaticEnv() // read in environment variables that match
-
-	if kubeconfig = viper.GetString("KUBECONFIG"); kubeconfig == "" {
-		kubeconfig = fmt.Sprintf("%s/.kube/config", os.Getenv("HOME"))
-	}
-
-	if modelRegistryURL = viper.GetString("MODEL_REGISTRY_URL"); modelRegistryURL == "" {
-		modelRegistryURL = "http://localhost:8080"
-	}
 }

@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/kubeflow/model-registry/pkg/openapi"
@@ -67,15 +68,28 @@ func (c *Client) AutoRegisterModelVersionArtifact(
 	if modelName == "" || modelDescription == "" || versionName == "" {
 		return nil, nil, nil, fmt.Errorf("name, description and version are required")
 	}
-
-	m, err := c.CreateRegisteredModel(modelName, modelDescription, nil)
+	m, err := c.FindRegisteredModel(modelName)
 	if err != nil {
-		return nil, nil, nil, err
+		if !errors.Is(err, ErrModelNotFound) {
+			return nil, nil, nil, err
+		}
+		// If the model is not found, create a new model
+		m, err = c.CreateRegisteredModel(modelName, modelDescription, nil)
+		if err != nil {
+			return nil, nil, nil, err
+		}
 	}
 
-	v, err := c.CreateModelVersion(m.GetId(), versionName, metaData)
+	v, err := c.FindModelVersion(m.GetId(), versionName)
 	if err != nil {
-		return nil, nil, nil, err
+		if !errors.Is(err, ErrVersionNotFound) {
+			return nil, nil, nil, err
+		}
+		// If the version is not found, create a new version
+		v, err = c.CreateModelVersion(m.GetId(), versionName, metaData)
+		if err != nil {
+			return nil, nil, nil, err
+		}
 	}
 
 	a, err := c.CreateModelArtifact(
@@ -239,6 +253,64 @@ func (c *Client) GetRegisteredModels() ([]openapi.RegisteredModel, error) {
 		return nil, fmt.Errorf("failed to get registered models: %s", resp.Status)
 	}
 	return models.Items, nil
+}
+
+// FindRegisteredModel finds a registered model by name
+func (c *Client) FindRegisteredModel(name string) (*openapi.RegisteredModel, error) {
+	if name == "" {
+		return nil, fmt.Errorf("name is required")
+	}
+	model, resp, err := c.modelRegistryClient.ModelRegistryServiceAPI.FindRegisteredModel(
+		context.Background(),
+	).Name(name).Execute()
+	if err != nil {
+		if resp == nil {
+			return nil, fmt.Errorf("error looking up model: %w", err)
+		}
+		if resp.StatusCode != 200 {
+			// TODO: Remove this workaround when model registry returns 404 when the model is not found
+			if isOpenAPIErrorOfKind(err, ErrModelNotFoundForName) {
+				return nil, fmt.Errorf("%w. model name: %s", ErrModelNotFound, name)
+			}
+		}
+		// This is a weird case where we got a response and an error that we're unable to handle.
+		return nil, fmt.Errorf(
+			"error while querying for a registered model: server responded with %s %w", resp.Status, err,
+		)
+	}
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("failed to find a registered model: %s", resp.Status)
+	}
+	return model, nil
+}
+
+// FindModelVersion finds a model version by name and model ID
+func (c *Client) FindModelVersion(modelID, versionName string) (*openapi.ModelVersion, error) {
+	if modelID == "" || versionName == "" {
+		return nil, fmt.Errorf("model ID and version name are required")
+	}
+	version, resp, err := c.modelRegistryClient.ModelRegistryServiceAPI.FindModelVersion(
+		context.Background(),
+	).ParentResourceID(modelID).
+		Name(versionName).Execute()
+	if err != nil {
+		if resp == nil {
+			return nil, fmt.Errorf("error looking up model version: %w", err)
+		}
+		if resp.StatusCode != 200 {
+			if isOpenAPIErrorOfKind(err, ErrVersionNotFoundForName) {
+				return nil, fmt.Errorf("%w. model ID: %s version name: %s", ErrVersionNotFound, modelID, versionName)
+			}
+		}
+		// This is a weird case where we got a response and an error that we're unable to handle.
+		return nil, fmt.Errorf(
+			"error while querying for a model version: server responded with %s %w", resp.Status, err,
+		)
+	}
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("failed to find a model version: %s", resp.Status)
+	}
+	return version, nil
 }
 
 type stringList struct {

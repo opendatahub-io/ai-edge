@@ -29,10 +29,15 @@ var (
 	// ErrModelNotFound is returned when a model is not found
 	ErrModelNotFound = errors.New("no registered model found")
 
+	// ErrModelNotFoundForName is returned when a model is not found for a given name using FindRegisteredModel
+	ErrModelNotFoundForName = errors.New("no registered models found")
+
 	// ErrVersionExists is returned when a version already exists for a given model
 	ErrVersionExists = errors.New("version already exists")
 	// ErrVersionNotFound is returned when a version is not found
 	ErrVersionNotFound = errors.New("no model version found")
+	// ErrVersionNotFoundForName is returned when a version is not found for a given name & model ID using FindModelVersion
+	ErrVersionNotFoundForName = errors.New("no model versions found")
 
 	// ErrArtifactExists is returned when a model version artifact already exists for a given model version
 	ErrArtifactExists = errors.New("artifact already exists")
