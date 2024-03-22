@@ -1,76 +1,67 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 labels:
   - includeSelectors: true
     pairs:
       app: bike-rental-app
-
 resources:
-- ../../base
-- bike-rental-inference-generator-cronjob.yaml
-
+  - ../../base
+  - bike-rental-inference-generator-cronjob.yaml
 namespace: bike-rental-app
 namePrefix: bike-rental-app-
-
 commonLabels:
   app: bike-rental-app-1
   model-name: bike-rentals-auto-ml
-
 configMapGenerator:
-- name: test-data
-  files:
-  - files/test-data.json
-
-
+  - name: test-data
+    files:
+      - files/test-data.json
 patches:
-- patch: |-
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: model-1
-    spec:
-      template:
-        spec:
-          containers:
-            - name: model
-              readinessProbe:
-                httpGet:
-                  path: /v2/models/bike-rentals-auto-ml/ready
-  target:
-    kind: Deployment
-
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: model-1
+      spec:
+        template:
+          spec:
+            containers:
+              - name: model
+                readinessProbe:
+                  httpGet:
+                    path: /v2/models/bike-rentals-auto-ml/ready
+    target:
+      kind: Deployment
 replacements:
-- source:
-    kind: Service
-    fieldPath: metadata.name
-  targets:
-  - select:
-      group: route.openshift.io
-      kind: Route
-    fieldPaths:
-      - spec.to.name
-- source:
-    kind: Service
-    fieldPath: metadata.labels.app
-  targets:
-  - select:
-      group: monitoring.coreos.com
-      kind: ServiceMonitor
-    fieldPaths:
-      - spec.selector.matchLabels.app
-- source:
-    kind: ConfigMap
-    name: test-data
-    fieldPath: metadata.name
-  targets:
-  - select:
-      kind: CronJob
-      name: bike-rental-inference-generator
-    fieldPaths:
-    - spec.jobTemplate.spec.template.spec.volumes.*.configMap.name
-
+  - source:
+      kind: Service
+      fieldPath: metadata.name
+    targets:
+      - select:
+          group: route.openshift.io
+          kind: Route
+        fieldPaths:
+          - spec.to.name
+  - source:
+      kind: Service
+      fieldPath: metadata.labels.app
+    targets:
+      - select:
+          group: monitoring.coreos.com
+          kind: ServiceMonitor
+        fieldPaths:
+          - spec.selector.matchLabels.app
+  - source:
+      kind: ConfigMap
+      name: test-data
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: CronJob
+          name: bike-rental-inference-generator
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.volumes.*.configMap.name
 images:
-- name: edge-model-template-image
-  newName: quay.io/rhoai-edge/bike-rentals-auto-ml
-  digest: sha256:c4d68d1de1d90f52cb4053d0655496c3a677c55821db21492908a9584dd2e93b
+  - name: edge-model-template-image
+    newName: quay.io/rhoai-edge/bike-rentals-auto-ml
+    digest: sha256:c4d68d1de1d90f52cb4053d0655496c3a677c55821db21492908a9584dd2e93b
