@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: application
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    path: acm/odh-edge/apps/app
+    repoURL: 'https://github.com/opendatahub-io/ai-edge.git'
+    targetRevision: main
+  destination:
+    namespace: namespace
+    server: 'https://kubernetes.default.svc'
+  syncPolicy:
+    automated:
+      prune: true
