@@ -4,5 +4,5 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 resources:
   - https://raw.githubusercontent.com/tektoncd/catalog/main/task/github-open-pr/0.2/github-open-pr.yaml
   - test-mlflow-retrieve-image-info-task.yaml
-  - tasks/yq.yaml
+  - tasks/yq-update.yaml
   - gitops-update-pipeline.yaml
