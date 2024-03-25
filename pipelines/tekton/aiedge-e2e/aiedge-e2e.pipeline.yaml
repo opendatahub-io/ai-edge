@@ -90,7 +90,7 @@ spec:
     value: $(tasks.check-model-and-containerfile-exists.results.model-files-list)
   - name: candidate-image-tag-reference
     description: The tag where the candidate model container image was pushed to
-    value: $(tasks.build-container.results.IMAGE_URL)
+    value: $(tasks.build-container-image.results.IMAGE_URL)
   - name: target-image-tag-references
     description: The fully qualified image reference that the image was pushed to (e.g. registry.example.com/my-org/ai-model:1.0-1)
     value: $(tasks.retrieve-build-image-info.results.target-image-tag-references)
@@ -102,7 +102,7 @@ spec:
     value: $(tasks.retrieve-build-image-info.results.image-size-bytes)
   - name: buildah-sha
     description: The SHA digest of the model container image
-    value: $(tasks.build-container.results.IMAGE_DIGEST)
+    value: $(tasks.build-container-image.results.IMAGE_DIGEST)
   - name: model-name
     description: The model name
     value: $(tasks.retrieve-build-image-info.results.model-name)
@@ -192,7 +192,7 @@ spec:
     workspaces:
     - name: workspace
       workspace: build-workspace-pv
-  - name: build-container
+  - name: build-container-image
     params:
     - name: IMAGE
       value: $(params.candidate-image-tag-reference)
@@ -275,7 +275,7 @@ spec:
       kind: ClusterTask
       name: openshift-client
     runAfter:
-      - build-container
+      - build-container-image
   - name: create-default-service
     params:
     - name: SCRIPT
@@ -338,7 +338,7 @@ spec:
     - name: namespace
       value: $(params.target-namespace)
     - name: buildah-sha
-      value: $(tasks.build-container.results.IMAGE_DIGEST)
+      value: $(tasks.build-container-image.results.IMAGE_DIGEST)
     - name: pipeline-run-uid
       value: $(context.pipelineRun.uid)
     - name: candidate-image-tag-reference
