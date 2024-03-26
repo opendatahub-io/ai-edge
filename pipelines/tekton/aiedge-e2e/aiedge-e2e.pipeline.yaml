@@ -176,6 +176,8 @@ spec:
       workspace: build-workspace-pv
     - name: basic-auth
       workspace: git-basic-auth
+    - name: ssl-ca-directory
+      workspace: ssl-certs
   - name: check-model-and-containerfile-exists
     params:
     - name: model-name

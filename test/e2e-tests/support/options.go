@@ -58,7 +58,7 @@ func setOptions() (*Options, error) {
 	}
 
 	if options.SelfSignedCert = os.Getenv(SelfSignedCertEnvKey); options.SelfSignedCert == "" {
-		fmt.Printf("optional env variable %v not set, set it to use self signed certs", SelfSignedCertEnvKey)
+		fmt.Printf("optional env variable %v not set, set it to use self signed certs\n", SelfSignedCertEnvKey)
 	}
 
 	return options, nil

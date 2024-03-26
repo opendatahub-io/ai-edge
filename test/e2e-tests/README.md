@@ -8,7 +8,7 @@ A local install of the Go compiler is needed to run the tests. Go version `1.21`
 - Log into the target cluster using `oc login`. This will update your default `kubeconfig` for the tests to use
 - Create a S3 bucket with the models in the root directory
 
-The following enviroment varaibles are required to run the test setup and the tests themselves. If any of these are not set then the tests will not run. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
+The following enviroment variables are required to run the test setup and the tests themselves. If any of these are not set then the tests will not run. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
 
 - `AWS_SECRET_ACCESS_KEY` - Secret from AWS
 - `AWS_ACCESS_KEY_ID` - Access key from AWS
@@ -17,8 +17,9 @@ The following enviroment varaibles are required to run the test setup and the te
 - `IMAGE_REGISTRY_USERNAME` - quay.io username
 - `IMAGE_REGISTRY_PASSWORD` - quay.io password
 
-The following enviroment varaibles are optional. You may still need to set them for the tests to pass depending on your setup. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
-- `SELF_SIGNED_CERT` - Path self signed cert to be used in pipeline
+The following enviroment variables are optional. You may still need to set them for the tests to pass depending on your setup. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
+
+- `SELF_SIGNED_CERT` - A path on your local machine to a self signed cert to be used in pipeline
 
 
 ```bash
@@ -27,22 +28,23 @@ make go-test-setup
 
 ## Run tests locally
 
-The following enviroment varaibles are required to run the tests. If any of these are not set then the tests will not run. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
+The following enviroment variables are required to run the tests. If any of these are not set then the tests will not run. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
 
 - `S3_BUCKET`	- Name of S3 bucket that contains the models
 - `NAMESPACE`	- Cluster namespace that tests are run in
 - `TARGET_IMAGE_TAGS_JSON`	- JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
 
-The following enviroment varaibles are optional. You may still need to set them for the tests to pass depending on your setup. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
-- `SELF_SIGNED_CERT` - Path self signed cert to be used in pipeline
-- `GO` - Custom Go installation path that is not used in `PATH`
+The following enviroment variables are optional. You may still need to set them for the tests to pass depending on your setup. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
+
+- `SELF_SIGNED_CERT` - A path on your local machine to a self signed cert to be used in pipeline
+- `GO` - Custom Go installation path that is not set in your `PATH`
 
 ```bash
 make go-test
 ```
 Set the go binary used for testing that is in your `PATH`
 ```bash
-make go-test
+make GO=go1.19 go-test
 ```
 
 ## CI/CD with Github Actions
