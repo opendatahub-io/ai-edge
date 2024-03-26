@@ -18,7 +18,8 @@ The following enviroment varaibles are required to run the test setup and the te
 - `IMAGE_REGISTRY_PASSWORD` - quay.io password
 
 The following enviroment varaibles are optional. You may still need to set them for the tests to pass depending on your setup. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
-- `SELF_SIGNED_CERT` - Path self signed cert to be used in pipeline
+
+- `SELF_SIGNED_CERT` - A path on your local machine to a self signed cert to be used in pipeline
 
 
 ```bash
@@ -34,8 +35,9 @@ The following enviroment varaibles are required to run the tests. If any of thes
 - `TARGET_IMAGE_TAGS_JSON`	- JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
 
 The following enviroment varaibles are optional. You may still need to set them for the tests to pass depending on your setup. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
-- `SELF_SIGNED_CERT` - Path self signed cert to be used in pipeline
-- `GO` - Custom Go installation path that is not used in `PATH`
+
+- `SELF_SIGNED_CERT` - A path on your local machine to a self signed cert to be used in pipeline
+- `GO` - Custom Go installation path that is not set in your `PATH`
 
 ```bash
 make go-test
