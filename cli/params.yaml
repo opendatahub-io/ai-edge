@@ -1,0 +1,36 @@
+params:
+  - name: s3-bucket-name
+    value: rhoai-abdalla-pipelines
+  - name: git-containerfile-repo
+    value: https://github.com/opendatahub-io/ai-edge.git
+  - name: git-containerfile-revision
+    value: "main"
+  - name: containerfileRelativePath
+    value: pipelines/containerfiles/Containerfile.seldonio.mlserver.mlflow
+  - name: fetch-model
+    value: "s3"
+  - name: git-model-repo
+    value: https://github.com/opendatahub-io/ai-edge.git
+  - name: modelRelativePath
+    value: ""
+  - name: git-model-revision
+    value: "main"
+  - name: test-endpoint
+    value: "invocations"
+  - name: candidate-image-tag-reference
+    value: quay.io/devguyio/$(params.model-name):$(params.model-version)-candidate
+  - name: target-image-tag-references
+    value:
+      - quay.io/devguyio/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
+      - quay.io/devguyio/$(params.model-name):$(params.model-version)
+      - quay.io/devguyio/$(params.model-name):latest
+  - name: upon-end
+    value: "delete"
+  - name: s3SecretName
+    value: "credentials-s3"
+  - name: testDataConfigMapName
+    value: "bike-rentals-test-data"
+  - name: addDirWorkspace
+    value: "true"
+#  - s3SecretName := "credentials-s3"
+#    testDataConfigMapName := "bike-rentals-test-data"

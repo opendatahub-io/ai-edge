@@ -13,24 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package commands
 
 import (
-	"context"
-	"fmt"
 	"os"
 
+	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
+	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/images"
+	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/models"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 )
-
-// clientSet is a kubernetes clientset that can be used to interact with the kubernetes API
-var clientSet kubernetes.Interface
-var kubeconfig string
-var modelRegistryURL string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -39,19 +32,7 @@ var rootCmd = &cobra.Command{
 	Long: `Manage Open Data Hub resources from the command line.
 
 This application is a tool to perform various operations on Open Data Hub.`,
-	Run: func(cmd *cobra.Command, args []string) {
 
-		// Get the pods in the "default" namespace
-		namespaces, err := clientSet.CoreV1().Namespaces().List(context.Background(), metav1.ListOptions{})
-		if err != nil {
-			panic(err.Error())
-		}
-
-		// Print the pod names
-		for _, ns := range namespaces.Items {
-			cmd.Printf("Namespace: %s\n", ns.Name)
-		}
-	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -65,28 +46,16 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+
+	for _, f := range flags.Flags {
+		if f.IsRootFlag() {
+			rootCmd.PersistentFlags().StringP(f.String(), f.Shorthand(), f.Value(), f.Usage())
+		}
+	}
+	rootCmd.AddCommand(images.Cmd)
+	rootCmd.AddCommand(models.Cmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	viper.AutomaticEnv() // read in environment variables that match
-
-	if kubeconfig = viper.GetString("KUBECONFIG"); kubeconfig == "" {
-		kubeconfig = fmt.Sprintf("%s/.kube/config", os.Getenv("HOME"))
-	}
-
-	if modelRegistryURL = viper.GetString("MODEL_REGISTRY_URL"); modelRegistryURL == "" {
-		modelRegistryURL = "http://localhost:8080"
-	}
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	// Create a new clientset which includes all the API schemas
-	clientSet, err = kubernetes.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
 }
