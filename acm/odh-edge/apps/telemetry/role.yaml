@@ -1,0 +1,12 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: otel-collector-role
+  namespace: opendatahub-edge-collector
+rules:
+  - verbs:
+      - '*'
+    apiGroups:
+      - opentelemetry.io
+    resources:
+      - opentelemetrycollectors

@@ -7,3 +7,4 @@ resources:
 - openshift-gitops-gitopscluster.yaml
 - overlays/bike-rental-app
 - overlays/tensorflow-housing-app
+- overlays/opentelemetry

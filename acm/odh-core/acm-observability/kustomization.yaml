@@ -5,6 +5,8 @@ resources:
   - namespace.yaml
   - multiclusterobservability.yaml
 
+namespace: open-cluster-management-observability
+
 configMapGenerator:
   - name: grafana-dashboard-edge-inference-health
     files:
@@ -14,15 +16,15 @@ configMapGenerator:
         observability.open-cluster-management.io/dashboard-folder: "Edge"
       labels:
         grafana-custom-dashboard: "true"
+  - name: observability-metrics-custom-allowlist
+    files:
+    - files/uwl_metrics_list.yaml
+    options:
+      disableNameSuffixHash: true
 
 secretGenerator:
 - name: thanos-object-storage
   files:
   - secrets/thanos.yaml
   options:
-    disableNameSuffixHash: true
-- name: observability-metrics-custom-allowlist
-  files:
-  - files/metrics_list.yaml
-  options:
-    disableNameSuffixHash: true
+    disableNameSuffixHash: true   
