@@ -161,7 +161,9 @@ Be sure to also use the correct config map with the test data.
 #### Create a new PipelineRun
 ```bash
 # From the root folder where this README is located
-oc create -f tekton/aiedge-e2e/aiedge-e2e.pipelinerun.yaml
+oc create -f tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml
+# and/or
+oc create -f tekton/aiedge-e2e/aiedge-e2e.tensorflow-housing.pipelinerun.yaml
 ```
 
 > [!IMPORTANT]
