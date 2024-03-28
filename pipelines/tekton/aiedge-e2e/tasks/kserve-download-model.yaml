@@ -17,7 +17,7 @@ spec:
     description: The S3 URL used to download the model
   steps:
   - name: download-model-s3
-    image: quay.io/opendatahub/kserve-storage-initializer:v0.11
+    image: quay.io/opendatahub/kserve-storage-initializer:v0.11.1.3
     script: |
       mkdir -p $(workspaces.workspace.path)/model_dir-$(params.model-name)/
 
