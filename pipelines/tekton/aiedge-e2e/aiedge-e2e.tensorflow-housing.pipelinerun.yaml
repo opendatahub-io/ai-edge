@@ -3,7 +3,8 @@ kind: PipelineRun
 metadata:
   labels:
     tekton.dev/pipeline: aiedge-e2e
-  generateName: aiedge-e2e-
+    model-name: tensorflow-housing
+  generateName: aiedge-e2e-tensorflow-housing-
 spec:
   params:
   - name: model-name

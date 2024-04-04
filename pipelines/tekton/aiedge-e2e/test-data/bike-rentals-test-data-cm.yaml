@@ -2,6 +2,7 @@ kind: ConfigMap
 apiVersion: v1
 metadata:
   name: bike-rentals-test-data
+  model-name: bike-rentals-test-data
 
 data:
   data.json: |+
