@@ -1,0 +1,43 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: gitops-update-pipeline-test-json-
+  labels:
+    tekton.dev/pipeline: gitops-update-pipeline
+spec:
+  params:
+  - name: model-name
+    value: tensorflow-housing
+  - name: gitServer
+    value: https://github.com
+  - name: gitApiServer
+    value: api.github.com
+  - name: gitOrgName
+    value: opendatahub-io
+  - name: gitRepoName
+    value: ai-edge
+  - name: gitRepoBranchBase
+    value: main
+  - name: imageReferenceFilePath
+    value: pipelines/tekton/gitops-update-pipeline/test/json/my-deployment.json
+  - name: gitTokenSecretName
+    value: edge-user-1
+  - name: yq-script
+    value: |
+      yq eval -i -o=json -I=4 "(.spec.template.spec.containers[] | select(.name == \"model\").image) = \"${IMAGE_NAME}@${IMAGE_DIGEST}\"" $(params.imageReferenceFilePath)
+  pipelineRef:
+    name: gitops-update-pipeline
+  serviceAccountName: pipeline
+  timeout: 1h0m0s
+  workspaces:
+  - name: git-workspace
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - name: git-basic-auth
+    secret:
+      secretName: edge-user-1
