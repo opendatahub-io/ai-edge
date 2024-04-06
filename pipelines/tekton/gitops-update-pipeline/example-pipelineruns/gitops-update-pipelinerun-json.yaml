@@ -18,13 +18,12 @@ spec:
     value: ai-edge
   - name: gitRepoBranchBase
     value: main
-  - name: imageReferenceFilePath
-    value: pipelines/tekton/gitops-update-pipeline/test/json/my-deployment.json
   - name: gitTokenSecretName
     value: edge-user-1
   - name: yq-script
     value: |
-      yq eval -i -o=json -I=4 "(.spec.template.spec.containers[] | select(.name == \"model\").image) = \"${IMAGE_NAME}@${IMAGE_DIGEST}\"" $(params.imageReferenceFilePath)
+      yq eval -i -o=json -I=4 "(.spec.template.spec.containers[] | select(.name == \"model\").image) = \"${IMAGE_NAME}@${IMAGE_DIGEST}\"" \
+        pipelines/tekton/gitops-update-pipeline/test/json/my-deployment.json
   pipelineRef:
     name: gitops-update-pipeline
   serviceAccountName: pipeline

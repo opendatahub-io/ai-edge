@@ -17,8 +17,6 @@ spec:
     - name: gitRepoBranchBase
       default: main
       type: string
-    - name: imageReferenceFilePath
-      type: string
     - name: gitApiPrefix
       default: ''
       type: string
@@ -33,9 +31,6 @@ spec:
         `$IMAGE_NAME` and `$IMAGE_DIGEST` will be set as environment variables, and can be used in the expressions.
         See the default value for an example that updates values in the `images section of a kustomization.yaml file.
       type: string
-      default: |
-        yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").newName) = \"${IMAGE_NAME}\"" $(params.imageReferenceFilePath)
-        yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").digest) = \"${IMAGE_DIGEST}\"" $(params.imageReferenceFilePath)
   results:
     - name: target-registry-url
       description: The url of the target registry (e.g. quay.io/rhoai-models/ai-model/)
@@ -160,7 +155,6 @@ spec:
             | Pipeline Name    | $(context.pipeline.name)                                                  |
             | PipelineRun Name | $(context.pipelineRun.name)                                               |
             | PipelinRun UID   | `$(context.pipelineRun.uid)`                                              |
-            | File Path        | `$(params.imageReferenceFilePath)`                                        |
             | Image registry   | `$(tasks.retrieve-image-info.results.target-registry-url)`                |
             | New Digest       | `$(tasks.retrieve-image-info.results.image-sha)`                          |
         - name: TITLE

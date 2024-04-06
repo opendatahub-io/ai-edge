@@ -18,10 +18,14 @@ spec:
     value: ai-edge-gitops
   - name: gitRepoBranchBase
     value: main
-  - name: imageReferenceFilePath
-    value: acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
   - name: gitTokenSecretName
     value: edge-user-1
+  - name: yq-script
+    value: |
+      yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").newName) = \"${IMAGE_NAME}\"" \
+        acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
+      yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").digest) = \"${IMAGE_DIGEST}\"" \
+        acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
   pipelineRef:
     name: gitops-update-pipeline
   serviceAccountName: pipeline
