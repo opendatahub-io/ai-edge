@@ -19,6 +19,7 @@ namePrefix: bike-rental-app-
 
 commonLabels:
   app: bike-rental-app-1
+  model-name: bike-rentals-auto-ml
 
 configMapGenerator:
 - name: test-data
@@ -32,7 +33,6 @@ patches:
     kind: Deployment
     metadata:
       name: model-1
-      model-name: bike-rentals-auto-ml
     spec:
       template:
         spec:

@@ -19,6 +19,7 @@ namePrefix: tensorflow-housing-app-
 
 commonLabels:
   app: tensorflow-housing-app-1
+  model-name: tensorflow-housing
 
 configMapGenerator:
 - name: test-data
@@ -31,7 +32,6 @@ patches:
     kind: Deployment
     metadata:
       name: model-1
-      model-name: tensorflow-housing
     spec:
       template:
         spec:
