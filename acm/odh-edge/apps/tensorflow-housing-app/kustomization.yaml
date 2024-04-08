@@ -31,6 +31,7 @@ patches:
     kind: Deployment
     metadata:
       name: model-1
+      model-name: tensorflow-housing
     spec:
       template:
         spec:
