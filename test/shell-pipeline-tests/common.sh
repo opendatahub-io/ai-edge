@@ -75,10 +75,90 @@ function createImageRegistrySecret() {
     sed -i "s|{{ IMAGE_REGISTRY_PASSWORD }}|${PASSWORD}|" "$IMAGE_REGISTRY_SECRET_PATH"
 }
 
+function createGitCredentialsSecret() {
+    local GIT_CREDENTIALS_SECRET_PATH_TEMPLATE=$1
+    local GIT_CREDENTIALS_SECRET_PATH=$2
+
+    local GH_TOKEN
+    GH_TOKEN=$(getGitHubToken)
+
+    cp "$GIT_CREDENTIALS_SECRET_PATH_TEMPLATE" "$GIT_CREDENTIALS_SECRET_PATH"
+
+    sed -i "s|{github_pat_1234567890ABCDAPI_TOKEN}|$GH_TOKEN|" "$GIT_CREDENTIALS_SECRET_PATH"
+    sed -i "s|{username}|ods-qe-test|" "$GIT_CREDENTIALS_SECRET_PATH"
+}
+
 function usePRBranchInPipelineRunIfPRCheck() {
   local -r PIPELINE_RUN_FILE_PATH=$1
 
   if [ -n "$PULL_NUMBER" ] && [ "$REPO_NAME" == "ai-edge" ]; then
     sed -i "s|value: \"main\"|value: \"pull/$PULL_NUMBER/head\"|" "$PIPELINE_RUN_FILE_PATH"
   fi
+}
+
+function assertContains() {
+  local -r STRING=$1
+  local -r SUBSTRING=$2
+
+  [[ "$STRING" =~ $SUBSTRING ]] || { echo -e "Assertion failed!\n '$STRING' does not contain '$SUBSTRING'" && return 1; }
+}
+
+assertGitHubPullRequest() {
+  local -r PIPELINE_RUN_NAME=$1
+  local -r PR_URL=$2
+
+  local -r PR_INFO_PATH="pr-info-${PIPELINE_RUN_NAME}.txt"
+  local -r PR_DIFF_PATH="pr-diff-${PIPELINE_RUN_NAME}.txt"
+
+  gh pr view "$PR_URL" > "$PR_INFO_PATH"
+  gh pr diff "$PR_URL" > "$PR_DIFF_PATH"
+
+  # Expected values
+  PIPELINE_RUN_UID=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.metadata.uid})
+  IMAGE_REGISTRY=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.status.results[?\(@.name==\'target-registry-url\'\)].value})
+  NEW_DIGEST=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.status.results[?\(@.name==\'image-sha\'\)].value})
+  BASE_REF_NAME=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.spec.params[?\(@.name==\'gitRepoBranchBase\'\)].value})
+  GIT_SERVER=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.spec.params[?\(@.name==\'gitServer\'\)].value})
+  GIT_ORG_NAME=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.spec.params[?\(@.name==\'gitOrgName\'\)].value})
+  GIT_REPO_NAME=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.spec.params[?\(@.name==\'gitRepoName\'\)].value})
+  GIT_URL="$GIT_SERVER/$GIT_ORG_NAME/$GIT_REPO_NAME"
+
+  # Actual values
+  PR_PIPELINE_RUN_NAME=$(grep "PipelineRun Name" "$PR_INFO_PATH" )
+  PR_PIPELINE_RUN_UID=$(grep "PipelinRun UID" "$PR_INFO_PATH")
+  PR_IMAGE_REGISTRY=$(grep "Image registry" "$PR_INFO_PATH")
+  PR_NEW_DIGEST=$(grep "New Digest" "$PR_INFO_PATH")
+  PR_BASE_REF_NAME=$(gh pr view "$PR_URL" --json baseRefName -q ".baseRefName")
+  PR_HEAD_REF_NAME=$(gh pr view "$PR_URL" --json headRefName -q ".headRefName")
+  PR_DIFF_DIGEST=$(grep "+ *digest" "$PR_DIFF_PATH")
+  PR_DIFF_NEW_NAME=$(grep "newName" "$PR_DIFF_PATH")
+
+  # Assertions
+  echo "Running Pull Request Assertions"
+  assertExitCode=0
+  assertContains "$PR_PIPELINE_RUN_NAME" "$PIPELINE_RUN_NAME"; (( assertExitCode = assertExitCode || $? ))
+  assertContains "$PR_PIPELINE_RUN_UID" "$PIPELINE_RUN_UID"; (( assertExitCode = assertExitCode || $? ))
+  assertContains "$PR_IMAGE_REGISTRY" "$IMAGE_REGISTRY"; (( assertExitCode = assertExitCode || $? ))
+  assertContains "$PR_NEW_DIGEST" "$NEW_DIGEST"; (( assertExitCode = assertExitCode || $? ))
+  assertContains "$PR_BASE_REF_NAME" "$BASE_REF_NAME"; (( assertExitCode = assertExitCode || $? ))
+  assertContains "$PR_URL" "$GIT_URL"; (( assertExitCode = assertExitCode || $? ))
+  assertContains "$PR_HEAD_REF_NAME" "pipeline_$PIPELINE_RUN_UID"; (( assertExitCode = assertExitCode || $? ))
+  assertContains "$PR_DIFF_DIGEST" "$NEW_DIGEST"; (( assertExitCode = assertExitCode || $? ))
+  assertContains "$PR_DIFF_NEW_NAME" "$IMAGE_REGISTRY"; (( assertExitCode = assertExitCode || $? ))
+
+  return "$assertExitCode"
+}
+
+function getGitHubToken() {
+  AI_EDGE_GITHUB_VAULT_OPENSHIFT_CI_SECRET_PATH="${CUSTOM_GIT_CREDENTIALS_SECRET_PATH:-/secrets/ai-edge-github}"
+  GH_TOKEN=$(cat "$AI_EDGE_GITHUB_VAULT_OPENSHIFT_CI_SECRET_PATH"/token)
+  echo "$GH_TOKEN"
+}
+
+function installGithubCLI() {
+  echo "Installing GitHub CLI"
+  wget -nv https://github.com/cli/cli/releases/download/v2.47.0/gh_2.47.0_linux_amd64.tar.gz
+  tar -xf gh_2.47.0_linux_amd64.tar.gz
+  export PATH="$(pwd)/gh_2.47.0_linux_amd64/bin:$PATH"
+  echo "Using GitHub CLI from $(which gh)"
 }

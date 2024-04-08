@@ -239,8 +239,7 @@ in your Git server.
   [`gitops-update-pipelinerun-tensorflow-housing.yaml`](tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml)
   to match location of your repository and the target branch for the pull request.
   The defaults assume `https://github.com/username/ai-edge-gitops` and `main`.
-- Update the [`example-git-credentials-secret.yaml`](tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml)
-  with your repository information and credentials.
+- Create a copy of the [`example-git-credentials-secret.yaml.template`](tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml.template) and update it with your repository information and credentials.
   For GitHub, the token can be generated at Settings > Developer Settings > Personal access tokens > Fine-grained tokens
   and it should have Read access to metadata and Read and Write access to code and pull requests permissions to the repository you use.
 
@@ -251,7 +250,11 @@ from the PipelineRun of the above Pipelines, and record information about that i
 
 ```bash
 oc apply -k tekton/gitops-update-pipeline/
-oc apply -f tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml
+
+cp tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml.template example-git-credentials-secret.yaml
+# Edit the credentials and add the credentials to the server
+oc apply -f example-git-credentials-secret.yaml
+
 oc create -f tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml
 # and/or
 oc create -f tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml
