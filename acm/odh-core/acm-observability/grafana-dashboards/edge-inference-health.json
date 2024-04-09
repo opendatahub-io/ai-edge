@@ -105,7 +105,7 @@
           "refId": "A"
         }
       ],
-      "title": "CPU usgae",
+      "title": "CPU Usage",
       "type": "timeseries"
     },
     {
