@@ -10,6 +10,7 @@ const (
 	S3BucketNameEnvKey     = "S3_BUCKET"
 	TargetImageTagsEnvKey  = "TARGET_IMAGE_TAGS_JSON"
 	ClusterNamespaceEnvKey = "NAMESPACE"
+	SelfSignedCertEnvKey   = "SELF_SIGNED_CERT"
 )
 
 var (
@@ -20,6 +21,7 @@ type Options struct {
 	S3BucketName             string   // required
 	ClusterNamespace         string   // required
 	TargetImageTagReferences []string // required
+	SelfSignedCert           string   // optional
 }
 
 func GetOptions() (*Options, error) {
@@ -53,6 +55,10 @@ func setOptions() (*Options, error) {
 
 	if options.ClusterNamespace = os.Getenv(ClusterNamespaceEnvKey); options.ClusterNamespace == "" {
 		return options, fmt.Errorf("env variable %v not set, but is required to run tests", ClusterNamespaceEnvKey)
+	}
+
+	if options.SelfSignedCert = os.Getenv(SelfSignedCertEnvKey); options.SelfSignedCert == "" {
+		fmt.Printf("optional env variable %v not set, set it to use self signed certs\n", SelfSignedCertEnvKey)
 	}
 
 	return options, nil
