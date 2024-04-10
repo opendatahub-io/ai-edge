@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: opendatahub-edge-collector
+  labels:
+    # If your OpenShift GitOps (or ArgoCD) is in a different namespace
+    # than openshift-gitops, then update this label value to match.
+    # More information:
+    # https://docs.openshift.com/gitops/1.11/argocd_instance/setting-up-argocd-instance.html
+    argocd.argoproj.io/managed-by: openshift-gitops
