@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: tensorflow-housing-test-data
   labels:
-    model-name: tensorflow-housing-test-data
+    model-name: tensorflow-housing
 
 data:
   data.json: |+

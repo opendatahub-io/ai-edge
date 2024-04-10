@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: bike-rentals-test-data
   labels:
-    model-name: bike-rentals-test-data
+    model-name: bike-rentals-auto-ml
 
 data:
   data.json: |+
