@@ -235,6 +235,7 @@ spec:
           creationTimestamp: null
           labels:
             app: $(params.model-name)-$(params.model-version)
+            model-name: $(params.model-name)
           name: $(params.model-name)-$(params.model-version)
           namespace: $(params.target-namespace)
         spec:

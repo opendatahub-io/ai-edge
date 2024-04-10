@@ -3,7 +3,8 @@ kind: PipelineRun
 metadata:
   labels:
     tekton.dev/pipeline: aiedge-e2e
-  generateName: aiedge-e2e-
+    model-name: bike-rentals-auto-ml
+  generateName: aiedge-e2e-bike-rentals-auto-ml-
 spec:
   params:
   - name: model-name
