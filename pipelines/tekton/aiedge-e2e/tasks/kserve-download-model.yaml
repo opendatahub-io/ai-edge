@@ -24,6 +24,11 @@ spec:
       export S3_URL="s3://$(params.s3-bucket-name)/$(params.model-name)"
       echo -n $S3_URL | tee $(results.s3-url.path) ;
 
+      if [ -n "$(workspaces.ssl-ca-directory.path)" ]; then
+        export CA_BUNDLE_CONFIGMAP_NAME=ssl-ca-directory
+        export AWS_CA_BUNDLE=$(workspaces.ssl-ca-directory.path)/ca-bundle.crt
+      fi
+      
       STORAGE_CONFIG="$(cat $(workspaces.s3-secret.path)/s3-storage-config)" /storage-initializer/scripts/initializer-entrypoint \
       $S3_URL \
       $(workspaces.workspace.path)/model_dir-$(params.model-name)/$(params.model-name)
@@ -32,3 +37,8 @@ spec:
     name: workspace
   - description: The S3 secret.
     name: s3-secret
+  - description: |
+      A workspace containing CA certificates, this will be used by kserve to
+      verify the peer with when fetching over HTTPS.
+    name: ssl-ca-directory
+    optional: true
