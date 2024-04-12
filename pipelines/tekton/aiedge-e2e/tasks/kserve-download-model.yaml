@@ -38,7 +38,7 @@ spec:
   - description: The S3 secret.
     name: s3-secret
   - description: |
-      A workspace containing CA certificates, this will be used by kserve to
+      A workspace containing CA certificates, this will be used by the model download script to
       verify the peer with when fetching over HTTPS.
     name: ssl-ca-directory
     optional: true

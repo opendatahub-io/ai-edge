@@ -60,11 +60,11 @@ func setOptions() (*Options, error) {
 	}
 
 	if options.GitSelfSignedCert = os.Getenv(GitSelfSignedCertEnvKey); options.GitSelfSignedCert == "" {
-		fmt.Printf("\noptional env variable %v not set, set it to use self signed certs with git", GitSelfSignedCertEnvKey)
+		fmt.Printf("\noptional env variable %v not set, set it to use self-signed certs with git", GitSelfSignedCertEnvKey)
 	}
 
 	if options.S3SelfSignedCert = os.Getenv(S3SelfSignedCertEnvKey); options.S3SelfSignedCert == "" {
-		fmt.Printf("\noptional env variable %v not set, set it to use self signed certs with S3", S3SelfSignedCertEnvKey)
+		fmt.Printf("\noptional env variable %v not set, set it to use self-signed certs with S3", S3SelfSignedCertEnvKey)
 	}
 
 	return options, nil

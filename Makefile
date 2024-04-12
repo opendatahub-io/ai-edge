@@ -34,14 +34,14 @@ GO=go
 GOFLAGS=""
 
 # requires:
-#	AWS_SECRET_ACCESS_KEY		- Secret from AWS
-#	AWS_ACCESS_KEY_ID		- Access key from AWS
-#	S3_REGION			- Region of the bucket used to store the model
-#	S3_ENDPOINT			- Endpint of the bucket
-#	IMAGE_REGISTRY_USERNAME		- quay.io username
-#	IMAGE_REGISTRY_PASSWORD		- quay.io password
-#	GIT_SELF_SIGNED_CERT		- Self signed cert to be used in pipeline by git (optional)
-#	S3_SELF_SIGNED_CERT		- Self signed cert to be used in pipeline by kserve (optional)
+#   AWS_SECRET_ACCESS_KEY       - Secret from AWS
+#   AWS_ACCESS_KEY_ID           - Access key from AWS
+#   S3_REGION                   - Region of the bucket used to store the model
+#   S3_ENDPOINT                 - Endpint of the bucket
+#   IMAGE_REGISTRY_USERNAME     - quay.io username
+#   IMAGE_REGISTRY_PASSWORD     - quay.io password
+#   GIT_SELF_SIGNED_CERT        - Self-signed cert to be used in pipeline by git (optional)
+#   S3_SELF_SIGNED_CERT         - Self-signed cert to be used in pipeline by the script that's used to download the model from S3-compatible object storage (optional)
 go-test-setup:
 ifndef AWS_SECRET_ACCESS_KEY
 	$(error AWS_SECRET_ACCESS_KEY is undefined)
@@ -72,11 +72,11 @@ endif
 	oc secret link pipeline credentials-image-registry
 
 # requires:
-#	S3_BUCKET	- Name of S3 bucket that contains the models
-#	NAMESPACE	- Cluster namespace that tests are run in
-#	TARGET_IMAGE_TAGS_JSON	- JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
-#	GIT_SELF_SIGNED_CERT	- Self signed cert to be used in pipeline by git (optional)
-#	S3_SELF_SIGNED_CERT	- Self signed cert to be used in pipeline when fetching models from S3 (optional)
+#   S3_BUCKET               - Name of S3 bucket that contains the models
+#   NAMESPACE               - Cluster namespace that tests are run in
+#   TARGET_IMAGE_TAGS_JSON  - JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
+#   GIT_SELF_SIGNED_CERT    - Self-signed cert to be used in pipeline by git (optional)
+#   S3_SELF_SIGNED_CERT     - Self-signed cert to be used in pipeline by the script that's used to download the model from S3-compatible object storage (optional)
 go-test:
 ifndef S3_BUCKET
 	$(error S3_BUCKET is undefined)

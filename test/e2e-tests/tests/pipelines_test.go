@@ -103,10 +103,10 @@ func Test_PipelineRunsComplete(t *testing.T) {
 
 		// if given a path to each cert then mount them to the pipeline run
 		if options.GitSelfSignedCert != "" {
-			support.MountConfigMapAsWorkspaceToPipelineRun("git-self-signed-cert", "git-ssl-certs", &pipelineRun)
+			support.MountConfigMapAsWorkspaceToPipelineRun("git-self-signed-cert", "git-ssl-cert", &pipelineRun)
 		}
 		if options.S3SelfSignedCert != "" {
-			support.MountConfigMapAsWorkspaceToPipelineRun("s3-self-signed-cert", "s3-ssl-certs", &pipelineRun)
+			support.MountConfigMapAsWorkspaceToPipelineRun("s3-self-signed-cert", "s3-ssl-cert", &pipelineRun)
 		}
 
 		// setting these values to the options passed in as env vars
