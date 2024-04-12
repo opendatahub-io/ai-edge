@@ -21,6 +21,9 @@ The following enviroment variables are optional. You may still need to set them 
 
 - `SELF_SIGNED_CERT` - A path on your local machine to a self signed cert to be used in pipeline
 
+- `GIT_SELF_SIGNED_CERT` - Self signed cert to be used by git when cloning (optional)
+- `S3_SELF_SIGNED_CERT` - Self signed cert to be used for S3 when pulling models (optional)
+
 
 ```bash
 make go-test-setup
@@ -36,7 +39,8 @@ The following enviroment variables are required to run the tests. If any of thes
 
 The following enviroment variables are optional. You may still need to set them for the tests to pass depending on your setup. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
 
-- `SELF_SIGNED_CERT` - A path on your local machine to a self signed cert to be used in pipeline
+- `GIT_SELF_SIGNED_CERT` - Self signed cert to be used by git when cloning (optional)
+- `S3_SELF_SIGNED_CERT` - Self signed cert to be used for S3 when pulling models (optional)
 - `GO` - Custom Go installation path that is not set in your `PATH`
 
 ```bash
