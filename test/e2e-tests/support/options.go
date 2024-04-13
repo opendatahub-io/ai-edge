@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	S3BucketNameEnvKey     = "S3_BUCKET"
-	TargetImageTagsEnvKey  = "TARGET_IMAGE_TAGS_JSON"
-	ClusterNamespaceEnvKey = "NAMESPACE"
-	SelfSignedCertEnvKey   = "SELF_SIGNED_CERT"
+	S3BucketNameEnvKey      = "S3_BUCKET"
+	TargetImageTagsEnvKey   = "TARGET_IMAGE_TAGS_JSON"
+	ClusterNamespaceEnvKey  = "NAMESPACE"
+	GitSelfSignedCertEnvKey = "GIT_SELF_SIGNED_CERT"
+	S3SelfSignedCertEnvKey  = "S3_SELF_SIGNED_CERT"
 )
 
 var (
@@ -21,7 +22,8 @@ type Options struct {
 	S3BucketName             string   // required
 	ClusterNamespace         string   // required
 	TargetImageTagReferences []string // required
-	SelfSignedCert           string   // optional
+	GitSelfSignedCert        string   // optional
+	S3SelfSignedCert         string   // optional
 }
 
 func GetOptions() (*Options, error) {
@@ -57,8 +59,12 @@ func setOptions() (*Options, error) {
 		return options, fmt.Errorf("env variable %v not set, but is required to run tests", ClusterNamespaceEnvKey)
 	}
 
-	if options.SelfSignedCert = os.Getenv(SelfSignedCertEnvKey); options.SelfSignedCert == "" {
-		fmt.Printf("optional env variable %v not set, set it to use self signed certs\n", SelfSignedCertEnvKey)
+	if options.GitSelfSignedCert = os.Getenv(GitSelfSignedCertEnvKey); options.GitSelfSignedCert == "" {
+		fmt.Printf("\noptional env variable %v not set, set it to use self-signed certs with git", GitSelfSignedCertEnvKey)
+	}
+
+	if options.S3SelfSignedCert = os.Getenv(S3SelfSignedCertEnvKey); options.S3SelfSignedCert == "" {
+		fmt.Printf("\noptional env variable %v not set, set it to use self-signed certs with S3", S3SelfSignedCertEnvKey)
 	}
 
 	return options, nil
