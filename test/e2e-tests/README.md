@@ -42,7 +42,6 @@ The following enviroment variables are optional. You may still need to set them 
 - `GO` - Custom Go installation path that is not set in your `PATH`
 
 ```bash
-- `S3_SELF_SIGNED_CERT` - Self signed cert to be used for S3 when pulling models
 make go-test
 ```
 Set the go binary used for testing that is in your `PATH`
