@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
-  generateName: gitops-update-pipeline-tensorflow-housing-
+  generateName: gitops-update-pipeline-test-json-
   labels:
     tekton.dev/pipeline: gitops-update-pipeline
 spec:
@@ -13,19 +13,17 @@ spec:
   - name: gitApiServer
     value: api.github.com
   - name: gitOrgName
-    value: username
+    value: opendatahub-io
   - name: gitRepoName
-    value: ai-edge-gitops
+    value: ai-edge
   - name: gitRepoBranchBase
     value: main
   - name: gitTokenSecretName
     value: edge-user-1
   - name: yq-script
     value: |
-      yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").newName) = \"${IMAGE_NAME}\"" \
-        acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
-      yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").digest) = \"${IMAGE_DIGEST}\"" \
-        acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
+      yq eval -i -o=json -I=4 "(.spec.template.spec.containers[] | select(.name == \"model\").image) = \"${IMAGE_NAME}@${IMAGE_DIGEST}\"" \
+        pipelines/tekton/gitops-update-pipeline/test/json/my-deployment.json
   pipelineRef:
     name: gitops-update-pipeline
   serviceAccountName: pipeline

@@ -1,96 +1,87 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 labels:
   - includeSelectors: true
     pairs:
       app: tensorflow-housing-app
-
 resources:
-- ../../base
-- housing-inference-generator.yaml
-
+  - ../../base
+  - housing-inference-generator.yaml
 namespace: tensorflow-housing-app
 namePrefix: tensorflow-housing-app-
-
 commonLabels:
   app: tensorflow-housing-app-1
   model-name: tensorflow-housing
-
 configMapGenerator:
-- name: test-data
-  files:
-  - files/test-data.json
-
+  - name: test-data
+    files:
+      - files/test-data.json
 patches:
-- patch: |-
-    apiVersion: apps/v1
-    kind: Deployment
-    metadata:
-      name: model-1
-    spec:
-      template:
-        spec:
-          containers:
-            - name: model
-              readinessProbe:
-                httpGet:
-                  path: /v2/models/tensorflow-housing/ready
-  target:
-    kind: Deployment
-- patch: |-
-    kind: CronJob
-    metadata:
-      name: housing-inference-generator
-    spec:
-      jobTemplate:
-        spec:
-          template:
-            spec:
-              containers:
-              - name: test-mlflow-container
-                env:
-                - name: MODEL_NAME
-                  value: "tensorflow-housing-app-model"
-                - name: MODEL_VERSION
-                  value: "1"
-                - name: TEST_ENDPOINT
-                  value: "v1/models/tensorflow-housing/versions/1:predict"
-  target:
-    kind: CronJob
-
-replacements:
-- source:
-    kind: Service
-    fieldPath: metadata.name
-  targets:
-  - select:
-      group: route.openshift.io
-      kind: Route
-    fieldPaths:
-      - spec.to.name
-- source:
-    kind: Service
-    fieldPath: metadata.labels.app
-  targets:
-  - select:
-      group: monitoring.coreos.com
-      kind: ServiceMonitor
-    fieldPaths:
-      - spec.selector.matchLabels.app
-
-- source:
-    kind: ConfigMap
-    name: test-data
-    fieldPath: metadata.name
-  targets:
-  - select:
+  - patch: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: model-1
+      spec:
+        template:
+          spec:
+            containers:
+              - name: model
+                readinessProbe:
+                  httpGet:
+                    path: /v2/models/tensorflow-housing/ready
+    target:
+      kind: Deployment
+  - patch: |-
       kind: CronJob
-      name: housing-inference-generator
-    fieldPaths:
-    - spec.jobTemplate.spec.template.spec.volumes.*.configMap.name
-
+      metadata:
+        name: housing-inference-generator
+      spec:
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                containers:
+                - name: test-mlflow-container
+                  env:
+                  - name: MODEL_NAME
+                    value: "tensorflow-housing-app-model"
+                  - name: MODEL_VERSION
+                    value: "1"
+                  - name: TEST_ENDPOINT
+                    value: "v1/models/tensorflow-housing/versions/1:predict"
+    target:
+      kind: CronJob
+replacements:
+  - source:
+      kind: Service
+      fieldPath: metadata.name
+    targets:
+      - select:
+          group: route.openshift.io
+          kind: Route
+        fieldPaths:
+          - spec.to.name
+  - source:
+      kind: Service
+      fieldPath: metadata.labels.app
+    targets:
+      - select:
+          group: monitoring.coreos.com
+          kind: ServiceMonitor
+        fieldPaths:
+          - spec.selector.matchLabels.app
+  - source:
+      kind: ConfigMap
+      name: test-data
+      fieldPath: metadata.name
+    targets:
+      - select:
+          kind: CronJob
+          name: housing-inference-generator
+        fieldPaths:
+          - spec.jobTemplate.spec.template.spec.volumes.*.configMap.name
 images:
-- name: edge-model-template-image
-  newName: quay.io/rhoai-edge/tensorflow-housing
-  digest: sha256:8486af7728e1214ac5f81c6b93d560078d357f2096d1b40c38a9ac8e1cd68767
+  - name: edge-model-template-image
+    newName: quay.io/rhoai-edge/tensorflow-housing
+    digest: sha256:8486af7728e1214ac5f81c6b93d560078d357f2096d1b40c38a9ac8e1cd68767
