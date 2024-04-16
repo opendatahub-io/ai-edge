@@ -9,13 +9,15 @@ spec:
   - name: model-name
     value: tensorflow-housing
   - name: model-version
-    value: "1"
+    value: "2"
   - name: s3-bucket-name
     value: rhoai-edge-models
   - name: model-registry-hostname
     value: "modelregistry-sample-http-default.apps.srbiswas-cluster2.dev.datahub.redhat.com"
   - name: git-containerfile-repo
     value: https://github.com/opendatahub-io/ai-edge.git
+  - name: model-registry-enabled
+    value: "false"
   - name: git-containerfile-revision
     value: "main"
   - name: containerfileRelativePath

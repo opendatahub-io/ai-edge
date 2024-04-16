@@ -126,22 +126,32 @@ spec:
   tasks:
   - name: fetch-model-registry
     params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: model-version
+      value: $(params.model-version)
     - name: model-registry-hostname
       value: $(params.model-registry-hostname)
-    - name: model-artifact-id
-      value: $(params.model-artifact-id)
-    - name: url
+    - name: model-registry-enabled
+      value: $(params.model-registry-enabled)
+    - name: git-model-repo
       value: $(params.git-model-repo)
-    - name: revision
+    - name: git-model-revision
       value: $(params.git-model-revision)
-    - name: subdirectory
-      value: /model_dir-$(params.model-name)/
+    - name: model-dir
+      value: model_dir-$(params.model-name)/
+    - name: fetch-model
+      value: $(params.fetch-model)
+    - name: modelRelativePath
+      value: $(params.modelRelativePath)
     taskRef:
       kind: Task
       name: model-registry-download
     workspaces:
     - name: workspace
       workspace: build-workspace-pv
+    - name: s3-secret
+      workspace: s3-secret
   - name: fetch-model-git
     taskRef:
       kind: ClusterTask
@@ -152,14 +162,16 @@ spec:
     - name: revision
       value: $(tasks.fetch-model-registry.results.git-model-revision)
     - name: subdirectory
-      value: /model_dir-$(params.model-name)/
+      value: model_dir-$(params.model-name)/
     workspaces:
     - name: output
       workspace: build-workspace-pv
     when:
-    - input: "$(tasks.fetch-model-registry.results.fetch-model)"
+    - input: "$(tasks.fetch-model-registry.results.fetch-model.path)"
       operator: in
       values: ["git"]
+    runAfter:
+    - fetch-model-registry
   # Use kserve-download-model container image to fetch from S3 storage
   - name: fetch-model-s3
     params:
@@ -178,9 +190,11 @@ spec:
     - name: s3-secret
       workspace: s3-secret
     when:
-    - input: "$(params.fetch-model)"
+    - input: "$(tasks.fetch-model-registry.results.fetch-model.path)"
       operator: in
       values: ["s3"]
+    runAfter:
+    - fetch-model-registry
   - name: git-clone-containerfile-repo
     params:
     - name: url
@@ -205,9 +219,9 @@ spec:
     - name: model-name
       value: $(params.model-name)
     - name: modelRelativePath
-      value: $(tasks.fetch-model-registry.results.modelRelativePath)
+      value: $(tasks.fetch-model-registry.results.modelRelativePath.path)
     - name: containerfilePath
-      value: containerfile_repo/$(params.containerfileRelativePath)
+      value: containerfile_repo/$(params.containerfileRelativePath.path)
     - name: current-namespace
       value: $(context.pipelineRun.namespace)
     runAfter:
