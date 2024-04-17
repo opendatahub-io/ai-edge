@@ -11,7 +11,7 @@ The following accounts are required to run the proof of concept
 > The rest of this documentation assumes usage of ACM for cluster and application management, and we highly recommend
 > this approach.
 > If you choose to use a different approach, you'll find some information on how to deploy the inference container
-> application using standalone ArgoCD instances on the edge clusters, in the dedicated
+> application using standalone Argo CD instances on the edge clusters, in the dedicated
 > [Bring Your Own Cluster Management document](./byo-mgmt-gitops.md).
 
 ## Components

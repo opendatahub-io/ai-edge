@@ -3,9 +3,9 @@
 If you don't have a centralized ACM managing your edge cluster(s), you can follow the steps in this document to deploy
 the inference service container image that was built using the MLOps Pipeline.
 
-## Install OpenShift Pipelines / ArgoCD
+## Install OpenShift Pipelines / Argo CD
 
-Just like in the case with ACM, ArgoCD will need to be installed on each target edge cluster that the GitOps-managed
+Just like in the case with ACM, Argo CD will need to be installed on each target edge cluster that the GitOps-managed
 inference service container will be deployed on.
 As a user with the ability to install operators from the OperatorHub on the target edge cluster(s), find and install the
 OpenShift GitOps operator in the OpenShift Console, in Menu > Operators > OperatorHub.
@@ -25,12 +25,12 @@ argocd.argoproj.io/managed-by: openshift-gitops
 For more information on this label, see the [OpenShift GitOps docs][OpenShift GitOps docs: Deploying resources to a
 different namespace].
 
-## Create ArgoCD Application on edge clusters
+## Create Argo CD Application on edge clusters
 
 Once the operator has been installed from the earlier step, the `Application` CRD will be available on the edge
 cluster(s), allowing the creation of Application CRs in the GitOps namespace.
 
-On each edge cluster, create an ArgoCD Application CR to point the ArgoCD instance at the location in the GitOps repo
+On each edge cluster, create an Argo CD Application CR to point the Argo CD instance at the location in the GitOps repo
 where the manifests are located.
 
 Examples using `kustomize` can be found in the [byo-mgmt](../byo-mgmt) directory.

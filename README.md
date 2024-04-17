@@ -59,7 +59,7 @@ and near edge clusters.
 > The rest of this documentation assumes usage of ACM[^2] for cluster and application management, and we highly recommend
 > this approach.
 > If you choose to use a different approach, you'll find some information on how to deploy the inference container
-> application using standalone ArgoCD instances on the edge clusters, in the dedicated
+> application using standalone Argo CD instances on the edge clusters, in the dedicated
 > [Bring Your Own Cluster Management document](docs/byo-mgmt-gitops.md).
 
 #### Core Cluster
@@ -74,7 +74,7 @@ and near edge clusters.
 #### Near Edge Cluster(s)
 - Run the AI/ML workloads as defined by the core cluster in a GitOps manner using `ACM`and `Red Hat OpenShift GitOps`.
 - Continuously reconcile the state of the AI/ML workloads with the core cluster using
-  [ACM's pull model with ArgoCD](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/gitops/gitops-overview#gitops-push-pull).
+  [ACM's pull model with Argo CD](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/gitops/gitops-overview#gitops-push-pull).
 - Collect metrics of the AI/ML workloads and send them to the core cluster using `Red Hat OpenShift Observability` and
   `ACM`.
 
@@ -107,7 +107,7 @@ you will use already built container images from the https://quay.io/organizatio
 
 ### Workflow 2: Deploying and Updating an Inference Application on Near Edge Clusters
 
-With the remote near edge clusters now available in the cluster set and the argocd, it is now possible to deploy the
+With the remote near edge clusters now available in the cluster set and the Argo CD, it is now possible to deploy the
 applications to those clusters using the Argo CD Pull model integration in [ACM GitOps](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.9/html/gitops/index).
 
 We will create the objects in the respective namespaces from the `acm/registration/` directory structure.
