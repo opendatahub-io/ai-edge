@@ -90,6 +90,7 @@ endif
 	(cd test/e2e-tests/tests && S3_BUCKET=${S3_BUCKET} TARGET_IMAGE_TAGS_JSON=${TARGET_IMAGE_TAGS_JSON} NAMESPACE=${NAMESPACE} GIT_SELF_SIGNED_CERT=${GIT_SELF_SIGNED_CERT} S3_SELF_SIGNED_CERT=${S3_SELF_SIGNED_CERT} ${GO} test -timeout 30m)
 
 test:
+	${MAKE} -C cli cli-test
 	@(./test/shell-pipeline-tests/seldon-bike-rentals/pipelines-test-seldon-bike-rentals.sh)
 	@(./test/shell-pipeline-tests/openvino-tensorflow-housing/pipelines-test-openvino-tensorflow-housing.sh)
 

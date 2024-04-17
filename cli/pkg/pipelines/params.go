@@ -1,0 +1,74 @@
+/*
+Copyright 2024. Open Data Hub Authors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package pipelines
+
+import (
+	"log"
+	"os"
+
+	"gopkg.in/yaml.v2"
+)
+
+// Param represents a parameter for a pipeline run
+type Param struct {
+	Name  string      `yaml:"name"`
+	Value interface{} `yaml:"value"`
+}
+
+// RunParams represents the parameters list for a pipeline run as defined in a YAML file
+type RunParams struct {
+	Params []Param `yaml:"params"`
+}
+
+// GetParamValue returns the value of a parameter by name
+func (p *RunParams) GetParamValue(name string) interface{} {
+	for _, param := range p.Params {
+		if param.Name == name {
+			return param.Value
+		}
+	}
+	return nil
+}
+
+// ToSimpleMap converts the RunParams struct to a simple map of string to interface{}
+func (p *RunParams) ToSimpleMap() map[string]interface{} {
+	params := make(map[string]interface{})
+	for _, param := range p.Params {
+		params[param.Name] = param.Value
+	}
+	return params
+}
+
+// ReadParams reads a YAML file with pipeline run parameters and returns a RunParams struct
+func ReadParams(paramsFile string) (*RunParams, error) {
+	// Read YAML file
+	data, err := os.ReadFile(paramsFile)
+	if err != nil {
+		log.Fatal("error reading file: ", err)
+		return nil, err
+	}
+
+	// Unmarshal YAML to struct
+	var runParams RunParams
+	err = yaml.Unmarshal([]byte(data), &runParams)
+	if err != nil {
+		log.Fatal("error unmarshalling yaml: ", err)
+		return nil, err
+	}
+
+	return &runParams, nil
+}

@@ -1,0 +1,47 @@
+params:
+    # The name of the S3 bucket where the model is stored
+  - name: s3-bucket-name
+    value: BUCKET_NAME
+    # The URL of the git repository where the containerfile is stored
+  - name: git-containerfile-repo
+    value: GIT_REPO_URL
+    # The branch of the git repository where the containerfile is stored
+  - name: git-containerfile-revision
+    value: GIT_BRANCH
+    # The relative path to the containerfile in the git repository
+  - name: containerfileRelativePath
+    value: RELATIVE_PATH
+    # The method used to fetch the model (s3 or git)
+  - name: fetch-model
+    value: FETCH_METHOD
+    # The URL of the git repository where the model is stored. This is only used if fetch-model is set to git.
+  - name: git-model-repo
+    value: GIT_REPO_URL
+    # The relative path to the model in the git repository. This is only used if fetch-model is set to git.
+  - name: modelRelativePath
+    value: RELATIVE_PATH
+    # The branch of the git repository where the model is stored. This is only used if fetch-model is set to git.
+  - name: git-model-revision
+    value: GIT_BRANCH
+    # The name of the model serving test endpoint (e.g. invocations)
+  - name: test-endpoint
+    value: ENDPOINT_NAME
+    # The candidate image tag reference. This is the intermediate image that is built during the pipeline.
+    # e.g. image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)-candidate
+  - name: candidate-image-tag-reference
+    value: CANDIDATE_IMAGE_TAG
+    # The target image tag references. These are the final images that are pushed to the image registry. A typical value would be:
+    # - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
+    # - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)
+    # - quay.io/rhoai-edge/$(params.model-name):latest
+  - name: target-image-tag-references
+    value:
+      - TARGET_IMAGE_TAG_1
+      - TARGET_IMAGE_TAG_2
+    # The action to take upon the completion of the pipeline (e.g. delete)
+  - name: upon-end
+    value: ACTION
+    # The name of the secret that contains the S3 credentials
+  - name: s3SecretName
+    value: SECRET_NAME
+    # The name of the config map that contains the test data
