@@ -50,7 +50,7 @@ spec:
   - name: model-registry-enabled
     type: string
     default: "false"
-    description: ""
+    description: "Using model registry when enabled"
   - name: test-endpoint
     type: string
     description: The inferencing endpoint for the model to use for testing
@@ -167,7 +167,7 @@ spec:
     - name: output
       workspace: build-workspace-pv
     when:
-    - input: "$(tasks.fetch-model-registry.results.fetch-model.path)"
+    - input: "$(tasks.fetch-model-registry.results.fetch-model)"
       operator: in
       values: ["git"]
     runAfter:
@@ -190,7 +190,7 @@ spec:
     - name: s3-secret
       workspace: s3-secret
     when:
-    - input: "$(tasks.fetch-model-registry.results.fetch-model.path)"
+    - input: "$(tasks.fetch-model-registry.results.fetch-model)"
       operator: in
       values: ["s3"]
     runAfter:
@@ -219,9 +219,9 @@ spec:
     - name: model-name
       value: $(params.model-name)
     - name: modelRelativePath
-      value: $(tasks.fetch-model-registry.results.modelRelativePath.path)
+      value: $(tasks.fetch-model-registry.results.modelRelativePath)
     - name: containerfilePath
-      value: containerfile_repo/$(params.containerfileRelativePath.path)
+      value: containerfile_repo/$(params.containerfileRelativePath)
     - name: current-namespace
       value: $(context.pipelineRun.namespace)
     runAfter:
