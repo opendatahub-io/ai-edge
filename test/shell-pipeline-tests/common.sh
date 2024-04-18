@@ -78,7 +78,7 @@ function createImageRegistrySecret() {
 function usePRBranchInPipelineRunIfPRCheck() {
   local -r PIPELINE_RUN_FILE_PATH=$1
 
-  if [ -n "$PULL_NUMBER" ]; then
+  if [ -n "$PULL_NUMBER" ] && [ "$REPO_NAME" == "ai-edge" ]; then
     sed -i "s|value: \"main\"|value: \"pull/$PULL_NUMBER/head\"|" "$PIPELINE_RUN_FILE_PATH"
   fi
 }
