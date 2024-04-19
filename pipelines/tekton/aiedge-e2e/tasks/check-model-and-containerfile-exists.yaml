@@ -3,7 +3,7 @@ kind: Task
 metadata:
   name: check-model-and-containerfile-exists
 spec:
-  description: This Task can be used to check if the model files and containerfile are present
+  description: This Task can be used to check if the model files and containerfile are present within the workspace
   params:
   - name: model-name
     type: string
@@ -27,7 +27,7 @@ spec:
 
       set -Eeuo pipefail
 
-      # Check model files exist
+      # Check model files exist based on where it is located within the workspace
       if [ -n "$(params.modelRelativePath)" ]; then
         ls -l model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)/ ;
 

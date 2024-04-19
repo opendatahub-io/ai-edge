@@ -141,6 +141,8 @@ spec:
     params:
     - name: model-name
       value: $(params.model-name)
+    - name: model-relative-path
+      value: $(params.modelRelativePath)
     - name: current-namespace
       value: $(context.pipelineRun.namespace)
     - name: s3-bucket-name
