@@ -21,7 +21,7 @@ import "github.com/opendatahub-io/ai-edge/cli/pkg/edgeclient"
 type modelImagesMsg []edgeclient.ModelImage
 type modelImageSyncedMsg struct{}
 type modelImageBuiltMsg struct {
-	pipelineRun edgeclient.PipelineRun
+	pipelineRun edgeclient.PipelineRunSummary
 }
 type modelImageDescribeMsg struct {
 	selectedImage edgeclient.ModelImage

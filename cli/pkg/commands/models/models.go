@@ -35,25 +35,63 @@ type newModelAddedMsg struct{}
 
 type teaModel struct {
 	args                 []string
-	flags                map[string]string
 	edgeClient           *edgeclient.Client
 	registeredModelsList []edgeclient.Model
 	err                  error
 	subCommand           common.SubCommand
+	modelRegistryURL     string
+	kubeconfig           string
+	paramsFile           string
+	modelName            string
+	modelDescription     string
+	versionName          string
 }
 
 // NewTeaModel creates a new bubbletea model for the models command
-func NewTeaModel(args []string, flgs map[string]string, subCommand common.SubCommand) tea.Model {
-	return &teaModel{
+func NewTeaModel(args []string, flagSet *flags.FlagSet, subCommand common.SubCommand) (tea.Model, error) {
+	model := teaModel{
 		args:       args,
-		flags:      flgs,
-		edgeClient: edgeclient.NewClient(flgs[flags.FlagModelRegistryURL.String()]),
 		subCommand: subCommand,
 	}
+	err := model.parseFlags(flagSet)
+	if err != nil {
+		return nil, err
+	}
+	model.edgeClient = edgeclient.NewClient(model.modelRegistryURL, model.kubeconfig)
+	return &model, nil
+}
+
+func (m *teaModel) parseFlags(flagSet *flags.FlagSet) error {
+	var err error
+	m.modelRegistryURL, err = flagSet.GetString(flags.FlagModelRegistryURL)
+	if err != nil {
+		return err
+	}
+	m.kubeconfig, err = flagSet.GetString(flags.FlagKubeconfig)
+	if err != nil {
+		return err
+	}
+	m.paramsFile, err = flagSet.GetString(flags.FlagParams)
+	if err != nil {
+		return err
+	}
+	m.modelName, err = flagSet.GetString(flags.FlagModelName)
+	if err != nil {
+		return err
+	}
+	m.modelDescription, err = flagSet.GetString(flags.FlagModelDescription)
+	if err != nil {
+		return err
+	}
+	m.versionName, err = flagSet.GetString(flags.FlagVersionName)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Init initializes the model according to the subcommand
-func (m teaModel) Init() tea.Cmd {
+func (m *teaModel) Init() tea.Cmd {
 	switch m.subCommand {
 	case common.SubCommandList:
 		return m.listRegisteredModels()
@@ -63,7 +101,7 @@ func (m teaModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m teaModel) listRegisteredModels() func() tea.Msg {
+func (m *teaModel) listRegisteredModels() func() tea.Msg {
 	c := m.edgeClient
 	return func() tea.Msg {
 		models, err := c.GetModels()
@@ -74,20 +112,14 @@ func (m teaModel) listRegisteredModels() func() tea.Msg {
 	}
 }
 
-func (m teaModel) addModel() func() tea.Msg {
+func (m *teaModel) addModel() func() tea.Msg {
 	c := m.edgeClient
 	return func() tea.Msg {
-		params, err := pipelines.ReadParams(m.flags[flags.FlagParams.String()])
+		params, err := pipelines.ReadParams(m.paramsFile)
 		if err != nil {
 			return common.ErrMsg{err}
 		}
-		_, err = c.AddNewModelWithImage(
-			m.flags[flags.FlagModelName.String()],
-			m.flags[flags.FlagModelDescription.String()],
-			m.flags[flags.FlagVersionName.String()],
-			"",
-			params.ToSimpleMap(),
-		)
+		_, err = c.AddNewModelWithImage(m.modelName, m.modelDescription, m.versionName, "", params.ToSimpleMap())
 		if err != nil {
 			return common.ErrMsg{err}
 		}
@@ -97,7 +129,7 @@ func (m teaModel) addModel() func() tea.Msg {
 }
 
 // Update updates the model according to the message
-func (m teaModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *teaModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case common.ErrMsg:
 		m.err = msg
@@ -113,7 +145,7 @@ func (m teaModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // View returns the view corresponding to the subcommand
-func (m teaModel) View() string {
+func (m *teaModel) View() string {
 	if m.err != nil {
 		return common.ErrorStyle.Render(fmt.Sprintf("Error: %s", m.err))
 	}
@@ -126,7 +158,7 @@ func (m teaModel) View() string {
 	return ""
 }
 
-func (m teaModel) viewListModels() string {
+func (m *teaModel) viewListModels() string {
 	columns := []table.Column{
 		{Title: "Id", Width: 4},
 		{Title: "Name", Width: 20},
@@ -172,7 +204,10 @@ var Cmd = common.NewCmd(
 
 This command will list all the registered models available in the Open Data Hub model registry.`,
 	cobra.NoArgs,
-	[]flags.Flag{flags.FlagModelRegistryURL.SetParentFlag()},
+	[]flags.Flag{
+		flags.FlagModelRegistryURL.SetParentFlag(),
+		flags.FlagKubeconfig,
+	},
 	common.SubCommandList,
 	NewTeaModel,
 )

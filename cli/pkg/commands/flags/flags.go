@@ -19,6 +19,9 @@ package flags
 import (
 	"fmt"
 	"os"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // Flag represents a command line flag.
@@ -32,6 +35,7 @@ type Flag struct {
 	required   bool
 	value      string // Default value, only if the flag is required
 	usage      string
+	boolean    bool
 }
 
 var (
@@ -99,6 +103,15 @@ var (
 		shorthand: "g",
 		usage:     "model image ID",
 	}
+
+	// FlagWidePrint is used to print a wide output with more details
+	FlagWidePrint = Flag{
+		name:      "wide",
+		shorthand: "w",
+		usage:     "print a wide output with more details such as the status of the last pipeline run",
+		value:     "false",
+		boolean:   true,
+	}
 )
 
 // String returns the name of the flag.
@@ -140,6 +153,17 @@ func (f Flag) IsRequired() bool {
 	return f.required
 }
 
+// SetBoolean sets the flag as a boolean flag.
+func (f Flag) SetBoolean() Flag {
+	f.boolean = true
+	return f
+}
+
+// IsBoolean returns true if the flag is a boolean flag.
+func (f Flag) IsBoolean() bool {
+	return f.boolean
+}
+
 // Shorthand returns the shorthand of the flag.
 func (f Flag) Shorthand() string {
 	return f.shorthand
@@ -153,4 +177,77 @@ func (f Flag) Value() string {
 // Usage returns the usage of the flag.
 func (f Flag) Usage() string {
 	return f.usage
+}
+
+// FlagSet represents a set of flags.
+type FlagSet struct {
+	flags map[string]interface{}
+}
+
+// NewFlagSet creates a new FlagSet.
+func NewFlagSet() *FlagSet {
+	return &FlagSet{
+		flags: make(map[string]interface{}),
+	}
+}
+
+// SetString sets a string flag.
+func (f *FlagSet) SetString(flag Flag, value string) {
+	f.flags[flag.String()] = value
+}
+
+// GetString returns the value of a string flag.
+func (f *FlagSet) GetString(flag Flag) (string, error) {
+	val, ok := f.flags[flag.String()]
+	if !ok {
+		return "", nil
+	}
+	if val, ok := val.(string); ok {
+		return val, nil
+	}
+	return "", fmt.Errorf("flag %s is not a string", flag)
+}
+
+// SetBool sets a boolean flag.
+func (f *FlagSet) SetBool(flag Flag, value bool) {
+	f.flags[flag.String()] = value
+}
+
+// GetBool returns the value of a boolean flag.
+func (f *FlagSet) GetBool(flag Flag) (bool, error) {
+	val, ok := f.flags[flag.String()]
+	if !ok {
+		return false, nil
+	}
+	if val, ok := val.(bool); ok {
+		return val, nil
+	}
+	return false, fmt.Errorf("flag %s is not a boolean", flag)
+}
+
+// SetFromCobra sets the flag value from a cobra command.
+func (f *FlagSet) SetFromCobra(flags []Flag, cmd *cobra.Command) error {
+	var cobraFS *pflag.FlagSet
+	for _, flag := range flags {
+		if flag.IsParentFlag() {
+			cobraFS = cmd.InheritedFlags()
+
+		} else {
+			cobraFS = cmd.Flags()
+		}
+		if flag.IsBoolean() {
+			val, err := cobraFS.GetBool(flag.String())
+			if err != nil {
+				return err
+			}
+			f.SetBool(flag, val)
+		} else {
+			val, err := cobraFS.GetString(flag.String())
+			if err != nil {
+				return err
+			}
+			f.SetString(flag, val)
+		}
+	}
+	return nil
 }

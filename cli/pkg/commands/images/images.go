@@ -31,55 +31,103 @@ import (
 )
 
 type imagesModel struct {
-	args          []string
-	flags         map[string]string
-	pipelineRun   edgeclient.PipelineRun
-	edgeClient    *edgeclient.Client
-	modelImages   []edgeclient.ModelImage
-	subCommand    common.SubCommand
-	msg           tea.Msg
-	err           error
-	selectedImage edgeclient.ModelImage
+	args             []string
+	pipelineRun      edgeclient.PipelineRunSummary
+	edgeClient       *edgeclient.Client
+	modelImages      []edgeclient.ModelImage
+	subCommand       common.SubCommand
+	msg              tea.Msg
+	err              error
+	selectedImage    edgeclient.ModelImage
+	modelID          string
+	versionName      string
+	modelRegistryURL string
+	paramsFile       string
+	kubeconfig       string
+	namespace        string
+	widePrint        bool
 }
 
 // NewImagesModel creates a new bubbletea model for the images command
 func NewImagesModel(
 	args []string,
-	flgs map[string]string,
+	flagSet *flags.FlagSet,
 	subCommand common.SubCommand,
-) tea.Model {
-	return &imagesModel{
+) (tea.Model, error) {
+	model := imagesModel{
 		args:       args,
-		flags:      flgs,
-		edgeClient: edgeclient.NewClient(flgs[flags.FlagModelRegistryURL.String()]),
 		subCommand: subCommand,
 	}
+	err := model.parseFlags(flagSet)
+	if err != nil {
+		return nil, err
+	}
+	model.edgeClient = edgeclient.NewClient(model.modelRegistryURL, model.kubeconfig)
+	return &model, nil
 }
 
-func (m imagesModel) listModelImages() func() tea.Msg {
+func (m *imagesModel) parseFlags(flagSet *flags.FlagSet) error {
+	var err error
+
+	m.modelID, err = flagSet.GetString(flags.FlagModelID)
+	if err != nil {
+		return err
+	}
+	m.versionName, err = flagSet.GetString(flags.FlagVersionName)
+	if err != nil {
+		return err
+	}
+	m.namespace, err = flagSet.GetString(flags.FlagNamespace)
+	if err != nil {
+		return err
+	}
+	m.modelRegistryURL, err = flagSet.GetString(flags.FlagModelRegistryURL)
+	if err != nil {
+		return err
+	}
+	m.paramsFile, err = flagSet.GetString(flags.FlagParams)
+	if err != nil {
+		return err
+	}
+	m.kubeconfig, err = flagSet.GetString(flags.FlagKubeconfig)
+	if err != nil {
+		return err
+	}
+	m.widePrint, err = flagSet.GetBool(flags.FlagWidePrint)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *imagesModel) listModelImages() func() tea.Msg {
 	c := m.edgeClient
 	return func() tea.Msg {
-		models, err := c.GetModelImages()
-		if err != nil {
-			return common.ErrMsg{err}
+		var models []edgeclient.ModelImage
+		var err error
+		if m.widePrint {
+			models, err = c.GetModelImagesWithPipelineRuns(m.namespace)
+			if err != nil {
+				return common.ErrMsg{err}
+			}
+		} else {
+			models, err = c.GetModelImages()
+			if err != nil {
+				return common.ErrMsg{err}
+			}
 		}
 		return modelImagesMsg(models)
 	}
 }
 
-func (m imagesModel) updateModelImage() func() tea.Msg {
+func (m *imagesModel) updateModelImage() func() tea.Msg {
 	c := m.edgeClient
 	return func() tea.Msg {
-		params, err := pipelines.ReadParams(m.flags[flags.FlagParams.String()])
+		params, err := pipelines.ReadParams(m.paramsFile)
 		if err != nil {
 			return common.ErrMsg{err}
 		}
-
-		_, err = c.UpdateModelImage(
-			m.flags[flags.FlagModelID.String()],
-			m.flags[flags.FlagVersionName.String()],
-			params.ToSimpleMap(),
-		)
+		_, err = c.UpdateModelImage(m.modelID, m.versionName, params.ToSimpleMap())
 		if err != nil {
 			return common.ErrMsg{err}
 		}
@@ -88,16 +136,10 @@ func (m imagesModel) updateModelImage() func() tea.Msg {
 
 }
 
-func (m imagesModel) buildModelImage() func() tea.Msg {
+func (m *imagesModel) buildModelImage() func() tea.Msg {
 	c := m.edgeClient
 	return func() tea.Msg {
-		pipelineRun, err := c.BuildModelImage(
-			m.flags[flags.FlagModelID.String()],
-			m.flags[flags.FlagVersionName.String()],
-			m.flags[flags.FlagNamespace.String()],
-			m.flags[flags.FlagKubeconfig.String()],
-			nil,
-		)
+		pipelineRun, err := c.BuildModelImage(m.modelID, m.versionName, m.namespace, m.kubeconfig, nil)
 		if err != nil {
 			return common.ErrMsg{err}
 		}
@@ -105,7 +147,7 @@ func (m imagesModel) buildModelImage() func() tea.Msg {
 	}
 }
 
-func (m imagesModel) describeModelImage() func() tea.Msg {
+func (m *imagesModel) describeModelImage() func() tea.Msg {
 	c := m.edgeClient
 	var modelImage modelImageDescribeMsg
 	return func() tea.Msg {
@@ -115,16 +157,15 @@ func (m imagesModel) describeModelImage() func() tea.Msg {
 		}
 
 		for _, model := range models {
-			if model.ModelID == m.flags[flags.FlagModelID.String()] && model.Version == m.flags[flags.FlagVersionName.String()] {
+			if model.ModelID == m.modelID && model.Version == m.versionName {
 				modelImage.selectedImage = model
 			}
 		}
-
-		return modelImageDescribeMsg(modelImage)
+		return modelImage
 	}
 }
 
-func (m imagesModel) Init() tea.Cmd {
+func (m *imagesModel) Init() tea.Cmd {
 	switch m.subCommand {
 	case common.SubCommandList:
 		return m.listModelImages()
@@ -138,7 +179,7 @@ func (m imagesModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m imagesModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *imagesModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.msg = msg
 	switch msg := msg.(type) {
 	case common.ErrMsg:
@@ -159,7 +200,7 @@ func (m imagesModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m imagesModel) View() string {
+func (m *imagesModel) View() string {
 	if m.err != nil {
 		return common.ErrorStyle.Render(fmt.Sprintf("Error: %s", m.err))
 	}
@@ -194,28 +235,39 @@ func (m imagesModel) View() string {
 	return ""
 }
 
-func (m imagesModel) viewListModelImages() string {
+func (m *imagesModel) viewListModelImages() string {
+
 	columns := []table.Column{
-		{Title: "Model Id", Width: 8},
+		{Title: "Model ID", Width: 8},
 		{Title: "Name", Width: 20},
 		{Title: "Description", Width: 40},
 		{Title: "Version", Width: 8},
-		{Title: "URI", Width: 60},
+	}
+	if m.widePrint {
+		columns = append(
+			columns,
+			table.Column{Title: "PipelineRun (Name)", Width: 30},
+			table.Column{Title: "PipelineRun (Started)", Width: 30},
+			table.Column{Title: "PipelineRun (Status)", Width: 30},
+		)
 	}
 
 	rows := make([]table.Row, 0)
 
 	if m.modelImages != nil {
 		for _, model := range m.modelImages {
-			rows = append(
-				rows, table.Row{
-					model.ModelID,
-					model.Name,
-					model.Description,
-					model.Version,
-					model.URI,
-				},
-			)
+			row := table.Row{
+				model.ModelID,
+				model.Name,
+				model.Description,
+				model.Version,
+			}
+			if m.widePrint && model.LastPipelineRun != nil {
+				row = append(row, model.LastPipelineRun.Name)
+				row = append(row, model.LastPipelineRun.StartTime.String())
+				row = append(row, model.LastPipelineRun.Status)
+			}
+			rows = append(rows, row)
 		}
 	}
 
@@ -236,7 +288,7 @@ func (m imagesModel) viewListModelImages() string {
 	return common.TableBaseStyle.Render(t.View()) + "\n"
 }
 
-func (m imagesModel) viewDescribeModelImages() string {
+func (m *imagesModel) viewDescribeModelImages() string {
 
 	var parameters []string
 	var paramItem string
@@ -277,14 +329,22 @@ func (m imagesModel) viewDescribeModelImages() string {
 }
 
 var Cmd = common.NewCmd(
-	"images",
+	fmt.Sprintf(
+		"images [-%s model-registery-url] | { -%s [-%s namespace] [-%s kubeconfig] }",
+		flags.FlagModelRegistryURL.Shorthand(),
+		flags.FlagWidePrint.Shorthand(),
+		flags.FlagNamespace.Shorthand(),
+		flags.FlagKubeconfig.Shorthand(),
+	),
 	"Manage inference container images",
 	`Manage Open Data Hub inference container images from the command line.
 
 This command allows you to list and build inference container images suitable for deployment in edge environments.`,
 	cobra.NoArgs,
 	[]flags.Flag{
-		flags.FlagNamespace.SetInherited(), flags.FlagModelRegistryURL.SetParentFlag(),
+		flags.FlagWidePrint,
+		flags.FlagNamespace.SetInherited(),
+		flags.FlagModelRegistryURL.SetParentFlag(),
 		flags.FlagKubeconfig.SetParentFlag(),
 	},
 	common.SubCommandList,
