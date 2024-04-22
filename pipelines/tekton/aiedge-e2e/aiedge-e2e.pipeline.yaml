@@ -10,7 +10,7 @@ spec:
   - default: "1"
     name: model-version
     type: string
-    description: Version of the model
+    description: Version of the model used for the base of the imagetag
   - name: s3-bucket-name
     type: string
     description: "[S3 ONLY] S3 bucket name where the model is stored"
@@ -257,6 +257,7 @@ spec:
               containers:
               - image: $(params.candidate-image-tag-reference)
                 name: $(params.model-name)-$(params.model-version)
+                imagePullPolicy: Always
                 livenessProbe:
                   failureThreshold: 10
                   httpGet:
