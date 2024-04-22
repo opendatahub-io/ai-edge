@@ -31,8 +31,7 @@ spec:
         # Check response:
         echo "Check response:"
         cat /tmp/output.json
-        # https://stackoverflow.com/a/7167115/19020549
-        grep -Pazo '\"predictions\":\s*\[\s*[-+]?([0-9]*\.[0-9]+|[0-9]+)*\s*\]' /tmp/output.json
+        test "$( python3 -m json.tool --no-indent $(workspaces.test-data.path)/output.json )" = "$( python3 -m json.tool --no-indent /tmp/output.json )"
 
   workspaces:
   - description: The workspace for test data.
