@@ -42,7 +42,7 @@ spec:
 
 
               # Call the service
-              SRVC_URL="http://$(MODEL_NAME)-$(MODEL_VERSION):8080/$(TEST_ENDPOINT)"
+              SRVC_URL="http://${MODEL_NAME}-${MODEL_VERSION}:8080/${TEST_ENDPOINT}"
               echo ""
               echo "Call inference service $SRVC_URL :"
               echo "Number of requests: ${R_COUNT} concurrent requests: ${R_RATE}"
