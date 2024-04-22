@@ -1,0 +1,35 @@
+FROM quay.io/opendatahub/openvino_model_server:stable
+
+# Name of the model that will be used as the based directory of the model files AND passed to openvino executable
+ARG MODEL_NAME
+# Location of the model files within the build context directory
+# Structure is based on OpenVino expectations of <BUILD_CONTEXT>/<MODEL_DIR>/<MODEL_VERSION>
+# See https://docs.openvino.ai/2024/ovms_docs_models_repository.html 
+ARG MODEL_DIR="."
+ARG GRPC_PORT=9090
+ARG REST_PORT=8080
+
+ENV MODEL_NAME=$MODEL_NAME
+ENV GRPC_PORT=$GRPC_PORT
+ENV REST_PORT=$REST_PORT
+
+USER root
+
+# Create the root directory for all models stored in this container
+RUN mkdir /models && chown ovms:ovms /models
+
+# Create /models/MODEL_NAME directory to ensure that --model_name passed to OpenVino matches
+# the directory where we store the model and version
+COPY --chown=ovms:ovms $MODEL_DIR /models/$MODEL_NAME
+
+# Remove the TensorFlow fingerprint.pb file if found as it causes an error in OpenVino when multiple
+#   protobuf(.pb) files  are present in the model directory
+#   See https://www.tensorflow.org/guide/saved_model for info on the TensorFlow model
+# Set permissions so that the container can run locally OR on OpenShift
+RUN find /models -name fingerprint.pb -delete && chmod o+rwX /models/ && chgrp -R 0 /models
+
+EXPOSE $REST_PORT $GRPC_PORT
+
+USER ovms
+
+ENTRYPOINT /ovms/bin/ovms --model_path /models/$MODEL_NAME --model_name $MODEL_NAME --port $GRPC_PORT --rest_port $REST_PORT --shape auto --metrics_enable
