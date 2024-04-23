@@ -117,6 +117,10 @@ Create a copy of the file(s) below to include the required credentials for acces
     # Linking secret is needed only if the secret from the Robot account hasn't been already applied and linked in the previous step
     $ oc secret link pipeline credentials-image-registry
     ```
+### Setup ODH Model Registry for Storing Models
+Setting up the Model Registry using [Model Registry Operator](https://github.com/opendatahub-io/model-registry-operator?tab=readme-ov-file#running-on-the-cluster) or the ODH Operator. The current workflow supports the below schema for storing the model parameters in the MR where the parameters from the pipeline run model is stored in the Model Version as a `customProperties` with `string_value` and `metadataType`.
+
+![](docs/images/edge-MR.png)
 
 ### Data for testing the model inferencing endpoint
 To verify that that model container is working successfully, the pipeline invokes a Task `test-model-rest-svc` which will send data to a testing container with the model inferencing endpoint and verify that expected output is returned.
