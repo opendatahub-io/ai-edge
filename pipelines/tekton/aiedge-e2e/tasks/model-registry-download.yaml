@@ -92,6 +92,11 @@ spec:
           "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json' | \
           jq -r --arg MODEL_PARAM "modelRelativePath" '.customProperties[$MODEL_PARAM].string_value')
           echo -n "$MODEL_RELATIVE_PATH" | tee $(results.modelRelativePath.path)
+
+          export S3-BUCKET-NAME=$(curl --silent -X 'GET' \
+          "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json' | \
+          jq -r --arg MODEL_PARAM "s3-bucket-name" '.customProperties[$MODEL_PARAM].string_value')
+          echo -n "$S3-BUCKET-NAME" | tee $(results.s3-bucket-name.path)
         fi
         else
           echo -n "Fetching params from PipelineRun"
