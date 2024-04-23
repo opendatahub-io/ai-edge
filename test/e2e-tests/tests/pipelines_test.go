@@ -11,9 +11,13 @@ import (
 )
 
 const (
-	AIEdgeE2EPipelineDirectoryRelativePath       = "../../../pipelines/tekton/aiedge-e2e"
-	BikeRentalsPipelineRunFileRelativePath       = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.bike-rentals.pipelinerun.yaml"
-	TensorflowHousingPipelineRunFileRelativePath = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
+	MLOpsPipelineDirectoryRelativePath            = "../../../pipelines/tekton/aiedge-e2e"
+	MLOpsBikeRentalsPipelineRunRelativePath       = MLOpsPipelineDirectoryRelativePath + "/aiedge-e2e.bike-rentals.pipelinerun.yaml"
+	MLOpsTensorflowHousingPipelineRunRelativePath = MLOpsPipelineDirectoryRelativePath + "/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
+
+	GitOpsPipelineDirectoryRelativePath            = "../../../pipelines/tekton/gitops-update-pipeline"
+	GitOpsBikeRentalsPipelineRunRelativePath       = GitOpsPipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml"
+	GitOpsTensorflowHousingPipelineRunRelativePath = GitOpsPipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml"
 )
 
 func CreateContext() context.Context {
@@ -55,13 +59,8 @@ func WaitForAllPipelineRunsToComplete(ctx context.Context, clients *support.Clie
 }
 
 // init is called before any test is run, and it is called once.
-// This is used to build then apply the kustomize config for the main pipeline
+// This is used to build then apply the kustomize config for each pipeline
 func init() {
-	resourceMap, err := support.KustomizeBuild(AIEdgeE2EPipelineDirectoryRelativePath)
-	if err != nil {
-		panic(fmt.Sprintf("error while building kustomize : %v", err.Error()))
-	}
-
 	ctx := CreateContext()
 
 	options, err := support.GetOptions()
@@ -74,13 +73,23 @@ func init() {
 		panic(fmt.Sprintf("error while creating client : %v", err.Error()))
 	}
 
-	err = support.CreateObjectsFromResourceMap(ctx, &clients, resourceMap, options.ClusterNamespace)
-	if err != nil {
-		panic(fmt.Errorf("error while creating objects from kustomize resources : %v", err.Error()))
+	kustomizePaths := []string{MLOpsPipelineDirectoryRelativePath, GitOpsPipelineDirectoryRelativePath}
+
+	for _, path := range kustomizePaths {
+		resourceMap, err := support.KustomizeBuild(path)
+		if err != nil {
+			panic(fmt.Sprintf("error while building kustomize : %v", err.Error()))
+		}
+
+		err = support.CreateObjectsFromResourceMap(ctx, &clients, resourceMap, options.ClusterNamespace)
+		if err != nil {
+			panic(fmt.Errorf("error while creating objects from kustomize resources : %v", err.Error()))
+		}
 	}
+
 }
 
-func Test_PipelineRunsComplete(t *testing.T) {
+func Test_MLOpsPipelineRunsComplete(t *testing.T) {
 	ctx := CreateContext()
 
 	options, err := support.GetOptions()
@@ -93,7 +102,7 @@ func Test_PipelineRunsComplete(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	pipelineRunPaths := []string{TensorflowHousingPipelineRunFileRelativePath, BikeRentalsPipelineRunFileRelativePath}
+	pipelineRunPaths := []string{MLOpsTensorflowHousingPipelineRunRelativePath, MLOpsBikeRentalsPipelineRunRelativePath}
 
 	for _, path := range pipelineRunPaths {
 		pipelineRun, err := support.ReadFileAsPipelineRun(path)
@@ -109,9 +118,52 @@ func Test_PipelineRunsComplete(t *testing.T) {
 			support.MountConfigMapAsWorkspaceToPipelineRun("s3-self-signed-cert", "s3-ssl-cert", &pipelineRun)
 		}
 
-		// setting these values to the options passed in as env vars
 		support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(options.S3BucketName), &pipelineRun)
 		support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(options.TargetImageTagReferences), &pipelineRun)
+
+		_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+	}
+
+	err = WaitForAllPipelineRunsToComplete(ctx, &clients)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+}
+
+func Test_GitOpsPipelineRunsComplete(t *testing.T) {
+	ctx := CreateContext()
+
+	options, err := support.GetOptions()
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	clients, err := support.CreateClients(options.ClusterNamespace)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	pipelineRunPaths := []string{GitOpsTensorflowHousingPipelineRunRelativePath, GitOpsBikeRentalsPipelineRunRelativePath}
+
+	gitURL, err := support.ParseGitURL(options.GitRepo)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	for _, path := range pipelineRunPaths {
+		pipelineRun, err := support.ReadFileAsPipelineRun(path)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+
+		support.SetPipelineRunParam("gitServer", support.NewStringParamValue(gitURL.Server), &pipelineRun)
+		support.SetPipelineRunParam("gitApiServer", support.NewStringParamValue(options.GitAPIServer), &pipelineRun)
+		support.SetPipelineRunParam("gitOrgName", support.NewStringParamValue(gitURL.OrgName), &pipelineRun)
+		support.SetPipelineRunParam("gitRepoName", support.NewStringParamValue(gitURL.RepoName), &pipelineRun)
+		support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(options.GitBranch), &pipelineRun)
 
 		_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 		if err != nil {

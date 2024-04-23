@@ -42,6 +42,8 @@ GOFLAGS=""
 #   IMAGE_REGISTRY_PASSWORD     - quay.io password
 #   GIT_SELF_SIGNED_CERT        - Self-signed cert to be used in pipeline by git (optional)
 #   S3_SELF_SIGNED_CERT         - Self-signed cert to be used in pipeline by the script that's used to download the model from S3-compatible object storage (optional)
+#   GIT_TOKEN
+#   GIT_USERNAME
 go-test-setup:
 ifndef AWS_SECRET_ACCESS_KEY
 	$(error AWS_SECRET_ACCESS_KEY is undefined)
@@ -67,9 +69,20 @@ endif
 ifdef S3_SELF_SIGNED_CERT
 	oc create configmap s3-self-signed-cert --from-file=ca-bundle.crt=${S3_SELF_SIGNED_CERT}
 endif
+ifndef GIT_TOKEN
+	$(error GIT_TOKEN is undefined)
+endif
+ifndef GIT_USERNAME
+	$(error GIT_USERNAME is undefined)
+endif
+	# MLOps pipieline setup
 	@sed -e "s#{{ AWS_SECRET_ACCESS_KEY }}#${AWS_SECRET_ACCESS_KEY}#g" -e "s#{{ AWS_ACCESS_KEY_ID }}#${AWS_ACCESS_KEY_ID}#g" -e "s#{{ S3_REGION }}#${S3_REGION}#g" -e "s#{{ S3_ENDPOINT }}#${S3_ENDPOINT}#g" pipelines/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template | oc create -f -
 	@sed -e "s#{{ IMAGE_REGISTRY_USERNAME }}#${IMAGE_REGISTRY_USERNAME}#g" -e "s#{{ IMAGE_REGISTRY_PASSWORD }}#${IMAGE_REGISTRY_PASSWORD}#g" pipelines/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template | oc create -f -
 	oc secret link pipeline credentials-image-registry
+
+	# GITOps pipeline setup
+	sed -e "s#{username}#${GIT_USERNAME}#g" -e "s#{github_pat_1234567890ABCDAPI_TOKEN}#${GIT_TOKEN}#g" pipelines/tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml | oc create -f -
+
 
 # requires:
 #   S3_BUCKET               - Name of S3 bucket that contains the models
@@ -77,6 +90,9 @@ endif
 #   TARGET_IMAGE_TAGS_JSON  - JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
 #   GIT_SELF_SIGNED_CERT    - Self-signed cert to be used in pipeline by git (optional)
 #   S3_SELF_SIGNED_CERT     - Self-signed cert to be used in pipeline by the script that's used to download the model from S3-compatible object storage (optional)
+#   GIT_REPO
+#   GIT_API_SERVER
+#   GIT_BRANCH 
 go-test:
 ifndef S3_BUCKET
 	$(error S3_BUCKET is undefined)
@@ -87,7 +103,16 @@ endif
 ifndef TARGET_IMAGE_TAGS_JSON
 	$(error TARGET_IMAGE_TAGS_JSON is undefined)
 endif
-	(cd test/e2e-tests/tests && S3_BUCKET=${S3_BUCKET} TARGET_IMAGE_TAGS_JSON=${TARGET_IMAGE_TAGS_JSON} NAMESPACE=${NAMESPACE} GIT_SELF_SIGNED_CERT=${GIT_SELF_SIGNED_CERT} S3_SELF_SIGNED_CERT=${S3_SELF_SIGNED_CERT} ${GO} test -timeout 30m)
+ifndef GIT_REPO
+	$(error GIT_REPO is undefined)
+endif
+ifndef GIT_API_SERVER
+	$(error GIT_API_SERVER is undefined)
+endif
+ifndef GIT_BRANCH
+	$(error GIT_BRANCH is undefined)
+endif
+	(cd test/e2e-tests/tests && S3_BUCKET=${S3_BUCKET} TARGET_IMAGE_TAGS_JSON=${TARGET_IMAGE_TAGS_JSON} NAMESPACE=${NAMESPACE} GIT_SELF_SIGNED_CERT=${GIT_SELF_SIGNED_CERT} S3_SELF_SIGNED_CERT=${S3_SELF_SIGNED_CERT} GIT_REPO=${GIT_REPO} GIT_API_SERVER=${GIT_API_SERVER} GIT_BRANCH=${GIT_BRANCH} ${GO} test -timeout 30m -shuffle off)
 
 test:
 	${MAKE} -C cli cli-test

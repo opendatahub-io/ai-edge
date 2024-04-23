@@ -12,6 +12,9 @@ const (
 	ClusterNamespaceEnvKey  = "NAMESPACE"
 	GitSelfSignedCertEnvKey = "GIT_SELF_SIGNED_CERT"
 	S3SelfSignedCertEnvKey  = "S3_SELF_SIGNED_CERT"
+	GitRepoEnvKey           = "GIT_REPO"
+	GitAPIServerEnvKey      = "GIT_API_SERVER"
+	GitBranchEnvKey         = "GIT_BRANCH"
 )
 
 var (
@@ -19,11 +22,18 @@ var (
 )
 
 type Options struct {
+	ClusterNamespace string // required
+
+	// MLOPs pipeline specific options
 	S3BucketName             string   // required
-	ClusterNamespace         string   // required
 	TargetImageTagReferences []string // required
 	GitSelfSignedCert        string   // optional
 	S3SelfSignedCert         string   // optional
+
+	// GitOPs pipeline specific options
+	GitRepo      string // required
+	GitAPIServer string // required
+	GitBranch    string // required
 }
 
 func GetOptions() (*Options, error) {
@@ -65,6 +75,18 @@ func setOptions() (*Options, error) {
 
 	if options.S3SelfSignedCert = os.Getenv(S3SelfSignedCertEnvKey); options.S3SelfSignedCert == "" {
 		fmt.Printf("\noptional env variable %v not set, set it to use self-signed certs with S3", S3SelfSignedCertEnvKey)
+	}
+
+	if options.GitRepo = os.Getenv(GitRepoEnvKey); options.GitRepo == "" {
+		return options, fmt.Errorf("env variable %v not set, but is required to run tests", GitRepoEnvKey)
+	}
+
+	if options.GitAPIServer = os.Getenv(GitAPIServerEnvKey); options.GitAPIServer == "" {
+		return options, fmt.Errorf("env variable %v not set, but is required to run tests", GitAPIServerEnvKey)
+	}
+
+	if options.GitBranch = os.Getenv(GitBranchEnvKey); options.GitBranch == "" {
+		return options, fmt.Errorf("env variable %v not set, but is required to run tests", GitBranchEnvKey)
 	}
 
 	return options, nil
