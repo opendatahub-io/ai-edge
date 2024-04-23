@@ -322,7 +322,7 @@ spec:
         if [ "$(params.upon-end)" == "stop" ]; then
           oc scale deployment.apps/$(params.model-name)-$(params.model-version) --replicas=0
         elif [ "$(params.upon-end)" == "delete" ]; then
-          oc delete all --selector=app=$(params.model-name)-$(params.model-version)
+          oc delete deployment,service --selector=app=$(params.model-name)-$(params.model-version)
         elif [ "$(params.upon-end)" == "keep" ]; then
           echo "Keeping the deployment running."
         else

@@ -29,6 +29,9 @@ This repo currently contains two examples:
 | **Model (Pipelines)** | `tensorflow-housing`     | `bike-rentals-auto-ml` |
 | **App (ACM)**         | `tensorflow-housing-app` | `bike-rental-app`      |
 
+
+*Additionally*, you can follow the [OpenShift AI tutorial - Fraud detection example](https://access.redhat.com/documentation/en-us/red_hat_openshift_ai_self-managed/2.8/html/openshift_ai_tutorial_-_fraud_detection_example/index) to execute the end to end workflow of training a model from scratch & building the [inferencing container](pipelines/containerfiles/Containerfile.openvino) to deliver to Edge environments.
+
 ### Clusters
 
 > **Note**

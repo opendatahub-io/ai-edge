@@ -1,3 +1,7 @@
+# This ContainerFile is used to manually convert the MLFlow tensorflow-housing example to a format that works with the OpenVino Model Server
+# The tensorflow-housing example we provide in the ai-edge repo copies the tensorflow-housing/tf2model/{saved_model.pb,variables/} directory to a
+#   format that is compatible with OpenVino Model Server: /model/<MODEL VERSION>/<TENSORFLOW SAVED MODEL FORMAT>
+# TensorFlow example source - https://github.com/mlflow/mlflow/tree/ef0f922ca874dd94f9b88e8bfbde2a8cb2c385d2/examples/tensorflow
 FROM quay.io/opendatahub/openvino_model_server:stable
 
 ARG MODEL_NAME
@@ -18,7 +22,8 @@ RUN mkdir /models && chown ovms:ovms /models
 # CHANGE THIS LINE TO MATCH YOUR MODEL
 COPY --chown=ovms:ovms $MODEL_DIR /models/1
 
-                                # Not deleting this file causes a bug                                                # https://docs.openshift.com/container-platform/4.13/openshift_images/create-images.html#use-uid_create-images
+# Not deleting this file causes a bug
+# https://docs.openshift.com/container-platform/4.13/openshift_images/create-images.html#use-uid_create-images
 RUN if echo "${MODEL_DIR}" | grep -q "tf2model"; then rm -f /models/1/fingerprint.pb; fi && chmod o+rwX /models/1 && chgrp -R 0 /models/1 && chmod -R g=u /models/1
 
 EXPOSE $REST_PORT $GRPC_PORT
