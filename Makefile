@@ -42,8 +42,8 @@ GOFLAGS=""
 #   IMAGE_REGISTRY_PASSWORD     - quay.io password
 #   GIT_SELF_SIGNED_CERT        - Self-signed cert to be used in pipeline by git (optional)
 #   S3_SELF_SIGNED_CERT         - Self-signed cert to be used in pipeline by the script that's used to download the model from S3-compatible object storage (optional)
-#   GIT_TOKEN
-#   GIT_USERNAME
+#   GIT_TOKEN                   - Auth token used by the git ops pipeline to make a pull request
+#   GIT_USERNAME                - Username linked to the GIT_TOKEN
 go-test-setup:
 ifndef AWS_SECRET_ACCESS_KEY
 	$(error AWS_SECRET_ACCESS_KEY is undefined)
@@ -90,9 +90,9 @@ endif
 #   TARGET_IMAGE_TAGS_JSON  - JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
 #   GIT_SELF_SIGNED_CERT    - Self-signed cert to be used in pipeline by git (optional)
 #   S3_SELF_SIGNED_CERT     - Self-signed cert to be used in pipeline by the script that's used to download the model from S3-compatible object storage (optional)
-#   GIT_REPO
-#   GIT_API_SERVER
-#   GIT_BRANCH 
+#   GIT_REPO                - Git repo URL used to make a pull request in the git ops pipeline (https://github.com/org/repo)
+#   GIT_API_SERVER          - Git API server (api.github.com)
+#   GIT_BRANCH              - Base branch used for pull request in git ops pipeline
 go-test:
 ifndef S3_BUCKET
 	$(error S3_BUCKET is undefined)
