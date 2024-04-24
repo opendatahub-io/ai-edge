@@ -29,9 +29,9 @@ spec:
               # Add your expected response here or remove this line if not needed
               INDEX=$(( RANDOM % 20 ))
               
-              # Number of requests between 100 and 1000
+              # Number of requests between 10 and 100
               R_COUNT=$(( RANDOM % 91 + 10 ))
-              # Number of concurrent requests between 100 and R_COUNT
+              # Number of concurrent requests between 10 and R_COUNT
               R_RATE=$(( RANDOM % ($R_COUNT - 9) + 10 ))
 
               # Randomly selects a record from data.json
