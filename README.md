@@ -207,7 +207,7 @@ name>-<application name>` to see more information.
   * Enable [monitoring for user-defined projects](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/monitoring/enabling-monitoring-for-user-defined-projects) in OpenShift clusters
     * `oc -n openshift-monitoring edit configmap cluster-monitoring-config`
     * Set variable `enableUserWorkload` to `true`
-  * Install the `Red Hat Build of Opentelemetry` from the OperatorHub
+  * Install the `Red Hat Build of OpenTelemetry` from the OperatorHub
 * Core/Hub cluster
   * Login to the core cluster using an account that has cluster-admin privileges
   * Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.
