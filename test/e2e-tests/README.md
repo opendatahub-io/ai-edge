@@ -24,6 +24,7 @@ The following enviroment variables are optional. You may still need to set them 
 - `GIT_SELF_SIGNED_CERT` - Self-signed cert to be used by git when cloning
 - `S3_SELF_SIGNED_CERT` - Self-signed cert to be used for S3 when pulling models
 
+Run `go-test-setup` to get the namespace ready for testing. This target is only expected to be run once, if you want to re-run the tests in the same namespace you can just re-run the `go-test` target, read the next section for more detail.
 
 ```bash
 make go-test-setup
@@ -53,6 +54,8 @@ Set the go binary used for testing that is in your `PATH`
 ```bash
 make GO=go1.19 go-test
 ```
+
+If you want to re-run the tests in the same namespace you can just re-run the `go-test` target. The tests fail if there are **any** failed pipeline runs. Therefore if you have a failed run and want to re-test make sure to delete any that have failed.
 
 ## CI/CD with Github Actions
 Not yet implemented

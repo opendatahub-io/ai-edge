@@ -76,12 +76,12 @@ ifndef GIT_USERNAME
 	$(error GIT_USERNAME is undefined)
 endif
 	# MLOps pipieline setup
-	@sed -e "s#{{ AWS_SECRET_ACCESS_KEY }}#${AWS_SECRET_ACCESS_KEY}#g" -e "s#{{ AWS_ACCESS_KEY_ID }}#${AWS_ACCESS_KEY_ID}#g" -e "s#{{ S3_REGION }}#${S3_REGION}#g" -e "s#{{ S3_ENDPOINT }}#${S3_ENDPOINT}#g" pipelines/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template | oc create -f -
-	@sed -e "s#{{ IMAGE_REGISTRY_USERNAME }}#${IMAGE_REGISTRY_USERNAME}#g" -e "s#{{ IMAGE_REGISTRY_PASSWORD }}#${IMAGE_REGISTRY_PASSWORD}#g" pipelines/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template | oc create -f -
+	@sed -e "s#{{ AWS_SECRET_ACCESS_KEY }}#${AWS_SECRET_ACCESS_KEY}#g" -e "s#{{ AWS_ACCESS_KEY_ID }}#${AWS_ACCESS_KEY_ID}#g" -e "s#{{ S3_REGION }}#${S3_REGION}#g" -e "s#{{ S3_ENDPOINT }}#${S3_ENDPOINT}#g" pipelines/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template | oc apply -f -
+	@sed -e "s#{{ IMAGE_REGISTRY_USERNAME }}#${IMAGE_REGISTRY_USERNAME}#g" -e "s#{{ IMAGE_REGISTRY_PASSWORD }}#${IMAGE_REGISTRY_PASSWORD}#g" pipelines/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template | oc apply -f -
 	oc secret link pipeline credentials-image-registry
 
 	# GITOps pipeline setup
-	sed -e "s#{username}#${GIT_USERNAME}#g" -e "s#{github_pat_1234567890ABCDAPI_TOKEN}#${GIT_TOKEN}#g" pipelines/tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml | oc create -f -
+	sed -e "s#{username}#${GIT_USERNAME}#g" -e "s#{github_pat_1234567890ABCDAPI_TOKEN}#${GIT_TOKEN}#g" pipelines/tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml | oc apply -f -
 
 
 # requires:
