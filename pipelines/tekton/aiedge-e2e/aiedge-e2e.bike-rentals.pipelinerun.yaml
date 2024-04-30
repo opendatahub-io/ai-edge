@@ -56,8 +56,6 @@ spec:
   - name: s3-secret
     secret:
         secretName: credentials-s3
-  - emptyDir: {}
-    name: workspace
   - configMap:
       name: bike-rentals-test-data
     name: test-data
