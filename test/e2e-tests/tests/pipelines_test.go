@@ -11,13 +11,13 @@ import (
 )
 
 const (
-	MLOpsPipelineDirectoryRelativePath            = "../../../pipelines/tekton/aiedge-e2e"
-	MLOpsBikeRentalsPipelineRunRelativePath       = MLOpsPipelineDirectoryRelativePath + "/aiedge-e2e.bike-rentals.pipelinerun.yaml"
-	MLOpsTensorflowHousingPipelineRunRelativePath = MLOpsPipelineDirectoryRelativePath + "/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
+	AIEdgeE2EPipelineDirectoryRelativePath            = "../../../pipelines/tekton/aiedge-e2e"
+	AIEdgeE2EBikeRentalsPipelineRunRelativePath       = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.bike-rentals.pipelinerun.yaml"
+	AIEdgeE2ETensorflowHousingPipelineRunRelativePath = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
 
-	GitOpsPipelineDirectoryRelativePath            = "../../../pipelines/tekton/gitops-update-pipeline"
-	GitOpsBikeRentalsPipelineRunRelativePath       = GitOpsPipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml"
-	GitOpsTensorflowHousingPipelineRunRelativePath = GitOpsPipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml"
+	GitOpsUpdatePipelineDirectoryRelativePath            = "../../../pipelines/tekton/gitops-update-pipeline"
+	GitOpsUpdateBikeRentalsPipelineRunRelativePath       = GitOpsUpdatePipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml"
+	GitOpsUpdateTensorflowHousingPipelineRunRelativePath = GitOpsUpdatePipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml"
 )
 
 func CreateContext() context.Context {
@@ -73,7 +73,7 @@ func init() {
 		panic(fmt.Sprintf("error while creating client : %v", err.Error()))
 	}
 
-	kustomizePaths := []string{MLOpsPipelineDirectoryRelativePath, GitOpsPipelineDirectoryRelativePath}
+	kustomizePaths := []string{AIEdgeE2EPipelineDirectoryRelativePath, GitOpsUpdatePipelineDirectoryRelativePath}
 
 	for _, path := range kustomizePaths {
 		resourceMap, err := support.KustomizeBuild(path)
@@ -102,7 +102,7 @@ func Test_MLOpsPipelineRunsComplete(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	pipelineRunPaths := []string{MLOpsTensorflowHousingPipelineRunRelativePath, MLOpsBikeRentalsPipelineRunRelativePath}
+	pipelineRunPaths := []string{AIEdgeE2ETensorflowHousingPipelineRunRelativePath, AIEdgeE2EBikeRentalsPipelineRunRelativePath}
 
 	for _, path := range pipelineRunPaths {
 		pipelineRun, err := support.ReadFileAsPipelineRun(path)
@@ -146,7 +146,7 @@ func Test_GitOpsPipelineRunsComplete(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	pipelineRunPaths := []string{GitOpsTensorflowHousingPipelineRunRelativePath, GitOpsBikeRentalsPipelineRunRelativePath}
+	pipelineRunPaths := []string{GitOpsUpdateTensorflowHousingPipelineRunRelativePath, GitOpsUpdateBikeRentalsPipelineRunRelativePath}
 
 	gitURL, err := support.ParseGitURL(options.GitRepo)
 	if err != nil {
