@@ -46,13 +46,17 @@ type Model struct {
 
 // ModelImage - A model to be registered in the model registry and is suitable for deployment in edge environments.
 type ModelImage struct {
-	ID          string
 	ModelID     string
 	Name        string
 	Description string
 	Version     string
 	URI         string
-	NeedsSync   bool
 	BuildParams map[string]interface{}
 	Status      modelImageStatus
+}
+
+// PipelineRun - Is used to identify a PipelineRun resource
+type PipelineRun struct {
+	Name      string
+	Namespace string
 }

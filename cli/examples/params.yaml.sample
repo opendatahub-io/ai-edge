@@ -45,3 +45,5 @@ params:
   - name: s3SecretName
     value: SECRET_NAME
     # The name of the config map that contains the test data
+  - name: testDataConfigMapName
+    value: CONFIG_MAP_NAME

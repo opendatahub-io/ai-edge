@@ -1,12 +1,18 @@
 # ODH Edge CLI
 
-The ODH Edge CLI is a command line interface that allows you to interact with the ODH Edge platform. It is a tool that allows you to manage your ODH Edge models and images. 
+The ODH Edge CLI is a command line interface that allows you to interact with the ODH Edge platform. It is a tool that
+allows you to manage your ODH Edge models and images.
 
 ## Overview
 
-The ODH Edge CLI uses the Model Registry as the source of truth for all models and images. The Model Registry is a central repository that stores all the metadata about the models and images that are available on the ODH Edge platform. The ODH Edge CLI allows you to interact with the Model Registry to perform various operations such as listing and adding models.
+The ODH Edge CLI uses the Model Registry as the source of truth for all models and images. The Model Registry is a
+central repository that stores all the metadata about the models and images that are available on the ODH Edge platform.
+The ODH Edge CLI allows you to interact with the Model Registry to perform various operations such as listing and adding
+models.
 
-Since building a model image is done via OpenShift Pipelines, all the pipeline parameters that are required to build the model image can be stored in the Model Registry. The ODH Edge CLI allows you to interact with the Model Registry to store and retrieve these pipeline parameters.
+Since building a model image is done via OpenShift Pipelines, all the pipeline parameters that are required to build the
+model image can be stored in the Model Registry. The ODH Edge CLI allows you to interact with the Model Registry to
+store and retrieve these pipeline parameters.
 
 > [!NOTE]
 > The Model Registry stores the metadata about the models and images, but it does not store the actual model artifacts.
@@ -23,7 +29,8 @@ cd cli
 make cli-build
 ```
 
-This will create a binary called `odh` in your current directory. You can move this binary to a location in your PATH to make it easier to run the ODH Edge CLI from anywhere.
+This will create a binary called `odh` in your current directory. You can move this binary to a location in your PATH to
+make it easier to run the ODH Edge CLI from anywhere.
 
 ## Environment Setup
 
@@ -101,7 +108,8 @@ odh -m <model-registry-url> models
 
 ### Adding a Model
 
-Adding a model to the model registry means adding the metadata about the model to the Model Registry. This metadata includes the model name, a model version and the pipeline parameters that are required to build the model image.
+Adding a model to the model registry means adding the metadata about the model to the Model Registry. This metadata
+includes the model name, a model version and the pipeline parameters that are required to build the model image.
 
 #### Preparing The Pipeline Parameters
 
@@ -115,21 +123,56 @@ params:
     value: <parameter-value>
 ```
 
-This repository provides an example pipeline parameters file in the `cli/examples/params.yaml` file. You can use this file as a template to create your own pipeline parameters file.
+This repository provides an example pipeline parameters file in the `cli/examples/params.yaml` file. You can use this
+file as a template to create your own pipeline parameters file.
 
-After you have created the pipeline parameters file, you can add the model to the Model Registry by running the following command:
+After you have created the pipeline parameters file, you can add the model to the Model Registry by running the
+following command:
 
 ```bash
-odh -m <model-registry-url> models add -p <path-to-pipeline-parameters-file> <model-name> <model-description> <model-version>
+odh models add -i model-name -d model-description [-v model-version] [-m model-registry-url] [-p parameters-file]
 ```
 
 This should print out the message `Model added successfully` if the model was added successfully.
 
-To verify that the model was added successfully, you can list all the models in the Model Registry by running the following command:
+To verify that the model was added successfully, you can list all the models in the Model Registry by running the
+following command:
 
 ```bash
-odh -m <model-registry-url> models
+odh models [-m model-registry-url]
 ```
 
+### Listing Images
 
+> [!NOTE]
+> A model image is represented by a registered model and a specific version of the model. The model image is the actual
+> image that is built from the model and is used to deploy the model on the ODH Edge platform.
+> The model image is stored in a container registry such as Quay.io but only the metadata about the model image is stored
+> in the Model Registry.
 
+To list all the model images that are available in the Model Registry, run the following command:
+
+```bash
+odh images [-m model-registry-url]
+```
+
+### Updating Build Parameters
+
+To update the build parameters for a model version, you can run the following command:
+
+```bash
+odh images update -i model-id -v version [-m model-registry-url] [-p params-file]"
+```
+
+This command will update the build parameters for the specified model version. The parameters can be provided via a yaml
+file. For more information on the parameters file, see the section on adding a model.
+
+### Building a Model Image
+
+To build a model image, the CLI uses the OpenShift Pipelines to build the model image. The pipeline parameters that are
+required to build the model image are stored in the Model Registry. The ODH Edge CLI allows you to create a pipeline run
+using the pipeline parameters that are stored in the Model Registry. To build a model image, run the following command:
+
+```bash
+odh images build -i model-id -v version [-m model-registry-url] [-n namespace] [-k kubeconfig]
+```

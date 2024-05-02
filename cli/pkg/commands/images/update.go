@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package models
+package images
 
 import (
 	"fmt"
@@ -24,39 +24,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var addCmd = common.NewCmd(
+var updateCmd = common.NewCmd(
 	fmt.Sprintf(
-		"add -%s model-name -%s model-description [-%s version-name] [-%s model-registry-url] [-%s params-file]",
-		flags.FlagModelName.Shorthand(),
-		flags.FlagModelDescription.Shorthand(),
+		"update -%s model-id -%s version [-%s model-registry-url] [-%s params-file]",
+		flags.FlagModelID.Shorthand(),
 		flags.FlagVersionName.Shorthand(),
 		flags.FlagModelRegistryURL.Shorthand(),
 		flags.FlagParams.Shorthand(),
 	),
-	"Add model information to the model registry including the model name, model description, model version "+
-		"and build parameters.",
-	`Add model image information to the model registry including the model name, model description, model version and `+
-		`build parameters.
+	"Update image parameters for an edge model in the model registry.",
+	`Update image parameters for an edge model in the model registry.
 
-If you don't provide a version name, the version name will be set to 'v1'.
-
-Build parameters are provided via a YAML file with the following format:
-
-params:
-  - name: <parameter-name>
-    value: <parameter-value>
-  - name: <parameter-name>
-    value: <parameter-value>
-    ...
+This command allows you to update the build parameters stored in the model registry for a specific version of a model.
 `,
 	cobra.NoArgs,
 	[]flags.Flag{
-		flags.FlagModelName.SetRequired(),
-		flags.FlagModelDescription.SetRequired(),
-		flags.FlagVersionName,
+		flags.FlagModelID.SetRequired(),
+		flags.FlagVersionName.SetRequired(),
 		flags.FlagModelRegistryURL.SetParentFlag(),
 		flags.FlagParams,
 	},
-	common.SubCommandAdd,
-	NewTeaModel,
+	common.SubCommandUpdate,
+	NewImagesModel,
 )

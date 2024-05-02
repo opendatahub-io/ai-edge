@@ -32,6 +32,10 @@ const (
 	SubCommandList SubCommand = iota
 	// SubCommandAdd is a subcommand to add items
 	SubCommandAdd
+	// SubCommandUpdate is a subcommand to sync items
+	SubCommandUpdate
+	// SubCommandBuild is a subcommand to build items
+	SubCommandBuild
 )
 
 // NewCmd creates a new cobra command.
@@ -92,12 +96,24 @@ func NewCmd(
 		},
 	}
 
+	// Disable the addition of [flags] to the usage line of a command when printing help or generating docs
+	cmd.DisableFlagsInUseLine = true
+
+	cmd.Flags().SortFlags = false
+
 	for _, f := range flags {
 		if !f.IsParentFlag() {
 			if f.IsInherited() {
 				cmd.PersistentFlags().StringP(f.String(), f.Shorthand(), f.Value(), f.Usage())
 			} else {
 				cmd.Flags().StringP(f.String(), f.Shorthand(), f.Value(), f.Usage())
+			}
+			if f.IsRequired() {
+				err := cmd.MarkFlagRequired(f.String())
+				if err != nil {
+					cmd.PrintErrf("Error marking flag %s as required: %v\n", f, err)
+					os.Exit(1)
+				}
 			}
 		}
 	}
