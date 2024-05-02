@@ -34,8 +34,8 @@ var describeCmd = common.NewCmd(
 		flags.FlagModelRegistryURL.Shorthand(),
 		flags.FlagParams.Shorthand(),
 	),
-	"View details of a edge model image.",
-	`View details of a edge model image.
+	"View details of an edge model image.",
+	`View details of an edge model image.
 
 This command allows you to view details of a specific edge model image along with its parameters.
 `,

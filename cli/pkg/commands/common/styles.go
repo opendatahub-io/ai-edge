@@ -39,7 +39,11 @@ var ErrorStyle = lipgloss.NewStyle().
 	Height(4).
 	Width(120)
 
+// KeyStyle is the style to decorate keys in map
 var KeyStyle = lipgloss.NewStyle().Bold(true).Width(20)
+
+// ParamKeyStyle is the style to decorate params value
 var ParamKeyStyle = lipgloss.NewStyle().Width(40).MarginLeft(10)
 
+// ParamKeyStyle is the style to decorate the title text
 var TitleStyle = lipgloss.NewStyle().Bold(true).Underline(true).PaddingTop(1)
