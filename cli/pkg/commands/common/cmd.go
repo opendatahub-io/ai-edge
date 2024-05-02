@@ -20,8 +20,9 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
 	"github.com/spf13/cobra"
+
+	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
 )
 
 // SubCommand is a type to represent the subcommand

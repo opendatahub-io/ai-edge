@@ -19,9 +19,10 @@ package models
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/common"
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
-	"github.com/spf13/cobra"
 )
 
 var addCmd = common.NewCmd(

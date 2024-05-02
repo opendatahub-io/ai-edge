@@ -23,14 +23,14 @@ import (
 	"strings"
 
 	"github.com/kubeflow/model-registry/pkg/openapi"
-	"github.com/opendatahub-io/ai-edge/cli/pkg/modelregistry"
 	tektonv1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 	tektonclientset "github.com/tektoncd/pipeline/pkg/client/clientset/versioned"
-
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/clientcmd"
+
+	"github.com/opendatahub-io/ai-edge/cli/pkg/modelregistry"
 )
 
 // Client is a client representing the edge environment
