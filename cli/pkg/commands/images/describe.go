@@ -28,11 +28,10 @@ import (
 
 var describeCmd = common.NewCmd(
 	fmt.Sprintf(
-		"describe -%s model-id -%s version [-%s model-registry-url] [-%s params-file]",
+		"describe -%s model-id -%s version [-%s model-registry-url]",
 		flags.FlagModelID.Shorthand(),
 		flags.FlagVersionName.Shorthand(),
 		flags.FlagModelRegistryURL.Shorthand(),
-		flags.FlagParams.Shorthand(),
 	),
 	"View details of an edge model image.",
 	`View details of an edge model image.
@@ -44,7 +43,6 @@ This command allows you to view details of a specific edge model image along wit
 		flags.FlagModelID.SetRequired(),
 		flags.FlagVersionName.SetRequired(),
 		flags.FlagModelRegistryURL.SetParentFlag(),
-		flags.FlagParams,
 	},
 	SubCommandDescribe,
 	NewImagesModel,

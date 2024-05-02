@@ -114,7 +114,7 @@ func (m imagesModel) describeModelImage() func() tea.Msg {
 		}
 
 		for _, model := range models {
-			if model.ModelID == m.flags["model-id"] && model.Version == m.flags["version-name"] {
+			if model.ModelID == m.flags[flags.FlagModelID.String()] && model.Version == m.flags[flags.FlagVersionName.String()] {
 				modelImage.selectedImage = model
 			}
 		}
@@ -239,8 +239,8 @@ func (m imagesModel) viewDescribeModelImages() string {
 	var parameters []string
 	var paramItem string
 	for key, value := range m.selectedImage.BuildParams {
-		if key == "target-image-tag-references" {
-			for index, v := range value.([]string) {
+		if keySlice, ok := value.([]string); ok {
+			for index, v := range keySlice {
 				if index == 0 {
 					paramItem = common.ParamKeyStyle.Render(fmt.Sprintf("%s:", key)) + fmt.Sprint(v)
 					parameters = append(parameters, paramItem)
@@ -269,7 +269,7 @@ func (m imagesModel) viewDescribeModelImages() string {
 			lipgloss.Left,
 			parameters...,
 		)
-	return renderView
+	return renderView + "\n"
 }
 
 var Cmd = common.NewCmd(
