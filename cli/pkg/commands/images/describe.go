@@ -19,11 +19,10 @@ package images
 import (
 	"fmt"
 
-	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/common"
-	. "github.com/opendatahub-io/ai-edge/cli/pkg/commands/common"
-	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
-	. "github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
 	"github.com/spf13/cobra"
+
+	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/common"
+	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
 )
 
 var describeCmd = common.NewCmd(
@@ -39,11 +38,11 @@ var describeCmd = common.NewCmd(
 This command allows you to view details of a specific edge model image along with its parameters.
 `,
 	cobra.NoArgs,
-	[]Flag{
+	[]flags.Flag{
 		flags.FlagModelID.SetRequired(),
 		flags.FlagVersionName.SetRequired(),
 		flags.FlagModelRegistryURL.SetParentFlag(),
 	},
-	SubCommandDescribe,
+	common.SubCommandDescribe,
 	NewImagesModel,
 )

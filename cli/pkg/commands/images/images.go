@@ -153,6 +153,7 @@ func (m imagesModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	case modelImageDescribeMsg:
 		m.selectedImage = msg.selectedImage
+		return m, tea.Quit
 	}
 	return m, nil
 }
