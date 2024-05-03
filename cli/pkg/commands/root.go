@@ -19,10 +19,11 @@ package commands
 import (
 	"os"
 
+	"github.com/spf13/cobra"
+
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/images"
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/models"
-	"github.com/spf13/cobra"
 )
 
 // rootCmd represents the base command when called without any subcommands

@@ -22,11 +22,12 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/spf13/cobra"
+
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/common"
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
 	"github.com/opendatahub-io/ai-edge/cli/pkg/edgeclient"
 	"github.com/opendatahub-io/ai-edge/cli/pkg/pipelines"
-	"github.com/spf13/cobra"
 )
 
 type registeredModelsMsg []edgeclient.Model
