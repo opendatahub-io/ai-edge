@@ -174,3 +174,6 @@ oc-debug-pod.yaml
 
 # The odh binary
 cli/odh
+
+# GoLand
+.idea/
