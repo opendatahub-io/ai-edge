@@ -262,8 +262,10 @@ func (m imagesModel) viewDescribeModelImages() string {
 		lipgloss.Left,
 		common.TitleStyle.Render("Image Details"),
 		common.KeyStyle.Render("Name:")+m.selectedImage.Name,
+		common.KeyStyle.Render("Id:")+m.selectedImage.ModelID,
 		common.KeyStyle.Render("Description:")+m.selectedImage.Description,
 		common.KeyStyle.Render("Version:")+m.selectedImage.Version,
+		common.KeyStyle.Render("URI:")+m.selectedImage.URI,
 		common.TitleStyle.Render("Parameters:")+"",
 	) + fmt.Sprintln("") +
 		lipgloss.JoinVertical(
