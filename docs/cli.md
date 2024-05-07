@@ -62,20 +62,20 @@ To install the Model Registry, follow the following steps:
 4. Create a Model Registry namespace:
 
     ```bash
-   kubectl create ns odh-model-registry
+   oc create ns odh-model-registry
     ```
 5. Edit the `config/samples/mysql/modelregistry_v1alpha1_modelregistry.yaml` and change the `spec.rest.serviceRoute` to `enabled`.
 
 6. Create a Model Registry instance:
 
     ```bash
-   kubectl -n odh-model-registry apply -k config/samples/mysql
+   oc -n odh-model-registry apply -k config/samples/mysql
     ```
 
 7. Wait for the Model Registry pods to be ready:
 
     ```bash
-    kubectl -n odh-model-registry get pods -w
+    oc -n odh-model-registry get pods -w
     ```
 
 8. Create a model-registry route:

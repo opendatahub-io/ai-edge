@@ -9,7 +9,7 @@ MAKE_ENV_FILE = local.vars.mk
 
 # Setup the secret required for observability then generate and apply the files
 setup-observability: acm/odh-core/acm-observability/kustomization.yaml
-	kustomize build acm/odh-core/acm-observability | kubectl apply -f -
+	oc apply -k acm/odh-core/acm-observability
 
 # Generate app manifests using ACM GitOps flow, from custom GitHub org/branch, to custom namespace
 # Example invocations:
@@ -28,7 +28,7 @@ endif
 ifndef CUSTOM_APP_NAMESPACE
 	$(error CUSTOM_APP_NAMESPACE is undefined)
 endif
-	kustomize build test/acm/$(subst -generate,,$(subst test-acm-,,$@))/ | sed -e "s|https://github.com/opendatahub-io/ai-edge|$(GIT_REPO_URL)|g" -e "s|my-git-branch|$(GIT_BRANCH)|g" -e "s|custom-prefix-|$(CUSTOM_PREFIX)|g" -e "s|custom-app-namespace|$(CUSTOM_APP_NAMESPACE)|g"
+	oc kustomize test/acm/$(subst -generate,,$(subst test-acm-,,$@))/ | sed -e "s|https://github.com/opendatahub-io/ai-edge|$(GIT_REPO_URL)|g" -e "s|my-git-branch|$(GIT_BRANCH)|g" -e "s|custom-prefix-|$(CUSTOM_PREFIX)|g" -e "s|custom-app-namespace|$(CUSTOM_APP_NAMESPACE)|g"
 
 GO=go
 GOFLAGS=""
