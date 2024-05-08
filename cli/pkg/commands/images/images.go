@@ -31,14 +31,15 @@ import (
 )
 
 type imagesModel struct {
-	args        []string
-	flags       map[string]string
-	pipelineRun edgeclient.PipelineRun
-	edgeClient  *edgeclient.Client
-	modelImages []edgeclient.ModelImage
-	subCommand  common.SubCommand
-	msg         tea.Msg
-	err         error
+	args          []string
+	flags         map[string]string
+	pipelineRun   edgeclient.PipelineRun
+	edgeClient    *edgeclient.Client
+	modelImages   []edgeclient.ModelImage
+	subCommand    common.SubCommand
+	msg           tea.Msg
+	err           error
+	selectedImage edgeclient.ModelImage
 }
 
 // NewImagesModel creates a new bubbletea model for the images command
@@ -104,6 +105,25 @@ func (m imagesModel) buildModelImage() func() tea.Msg {
 	}
 }
 
+func (m imagesModel) describeModelImage() func() tea.Msg {
+	c := m.edgeClient
+	var modelImage modelImageDescribeMsg
+	return func() tea.Msg {
+		models, err := c.GetModelImages()
+		if err != nil {
+			return common.ErrMsg{err}
+		}
+
+		for _, model := range models {
+			if model.ModelID == m.flags[flags.FlagModelID.String()] && model.Version == m.flags[flags.FlagVersionName.String()] {
+				modelImage.selectedImage = model
+			}
+		}
+
+		return modelImageDescribeMsg(modelImage)
+	}
+}
+
 func (m imagesModel) Init() tea.Cmd {
 	switch m.subCommand {
 	case common.SubCommandList:
@@ -112,6 +132,8 @@ func (m imagesModel) Init() tea.Cmd {
 		return m.updateModelImage()
 	case common.SubCommandBuild:
 		return m.buildModelImage()
+	case common.SubCommandDescribe:
+		return m.describeModelImage()
 	}
 	return nil
 }
@@ -129,6 +151,9 @@ func (m imagesModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.pipelineRun = msg.pipelineRun
 		return m, tea.Quit
 	case modelImageSyncedMsg:
+		return m, tea.Quit
+	case modelImageDescribeMsg:
+		m.selectedImage = msg.selectedImage
 		return m, tea.Quit
 	}
 	return m, nil
@@ -160,6 +185,10 @@ func (m imagesModel) View() string {
 					),
 				),
 			)
+		}
+	case common.SubCommandDescribe:
+		if _, ok := m.msg.(modelImageDescribeMsg); ok {
+			return m.viewDescribeModelImages()
 		}
 	}
 	return ""
@@ -207,7 +236,46 @@ func (m imagesModel) viewListModelImages() string {
 	return common.TableBaseStyle.Render(t.View()) + "\n"
 }
 
-// Cmd represents the images command
+func (m imagesModel) viewDescribeModelImages() string {
+
+	var parameters []string
+	var paramItem string
+	for key, value := range m.selectedImage.BuildParams {
+		if keySlice, ok := value.([]string); ok {
+			for index, v := range keySlice {
+				if index == 0 {
+					paramItem = common.ParamKeyStyle.Render(fmt.Sprintf("%s:", key)) + fmt.Sprint(v)
+					parameters = append(parameters, paramItem)
+				} else {
+					paramItem = common.ParamKeyStyle.Render("") + fmt.Sprint(v)
+					parameters = append(parameters, paramItem)
+				}
+			}
+
+		} else {
+			paramItem = common.ParamKeyStyle.Render(fmt.Sprintf("%s:", key)) + fmt.Sprint(value)
+			parameters = append(parameters, paramItem)
+		}
+
+	}
+
+	renderView := lipgloss.JoinVertical(
+		lipgloss.Left,
+		common.TitleStyle.Render("Image Details"),
+		common.KeyStyle.Render("Name:")+m.selectedImage.Name,
+		common.KeyStyle.Render("Id:")+m.selectedImage.ModelID,
+		common.KeyStyle.Render("Description:")+m.selectedImage.Description,
+		common.KeyStyle.Render("Version:")+m.selectedImage.Version,
+		common.KeyStyle.Render("URI:")+m.selectedImage.URI,
+		common.TitleStyle.Render("Parameters:")+"",
+	) + fmt.Sprintln("") +
+		lipgloss.JoinVertical(
+			lipgloss.Left,
+			parameters...,
+		)
+	return renderView + "\n"
+}
+
 var Cmd = common.NewCmd(
 	"images",
 	"Manage inference container images",
@@ -226,4 +294,5 @@ This command allows you to list and build inference container images suitable fo
 func init() {
 	Cmd.AddCommand(updateCmd)
 	Cmd.AddCommand(buildCmd)
+	Cmd.AddCommand(describeCmd)
 }

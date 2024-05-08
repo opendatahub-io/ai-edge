@@ -23,3 +23,6 @@ type modelImageSyncedMsg struct{}
 type modelImageBuiltMsg struct {
 	pipelineRun edgeclient.PipelineRun
 }
+type modelImageDescribeMsg struct {
+	selectedImage edgeclient.ModelImage
+}
