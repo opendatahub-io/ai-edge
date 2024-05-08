@@ -45,5 +45,5 @@ var KeyStyle = lipgloss.NewStyle().Bold(true).Width(20)
 // ParamKeyStyle is the style to decorate params value
 var ParamKeyStyle = lipgloss.NewStyle().Width(40).MarginLeft(10)
 
-// ParamKeyStyle is the style to decorate the title text
+// TitleStyle is the style to decorate the title text
 var TitleStyle = lipgloss.NewStyle().Bold(true).Underline(true).PaddingTop(1)
