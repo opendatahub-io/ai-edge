@@ -1,0 +1,12 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: tensorflow-housing
+spec:
+  bindings:
+  - name: git-containerfile-revision
+    value: $(body.head_commit.id)
+  - name: git-containerfile-repo
+    value: $(body.repository.clone_url)
+  template:
+    ref: tensorflow-housing

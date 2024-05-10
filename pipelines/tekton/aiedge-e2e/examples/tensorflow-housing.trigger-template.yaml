@@ -1,0 +1,100 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: tensorflow-housing
+spec:
+  params:
+  - name: model-name
+    default: tensorflow-housing
+  - name: model-version
+    default: "1"
+  - name: s3-bucket-name
+    default: rhoai-edge-models
+  - name: git-containerfile-repo
+    default: https://github.com/opendatahub-io/ai-edge.git
+  - name: git-containerfile-revision
+    default: "main"
+  - name: containerfileRelativePath
+    default: pipelines/containerfiles/Containerfile.openvino.mlserver.mlflow
+  - name: fetch-model
+    default: "git"
+  - name: git-model-repo
+    default: https://github.com/opendatahub-io/ai-edge.git
+  - name: modelRelativePath
+    default: pipelines/models
+  - name: model-dir
+    default: "tf2model"
+  - name: git-model-revision
+    default: "main"
+  - name: test-endpoint
+    default: "v1/models/tensorflow-housing/versions/1:predict"
+  - name: candidate-image-tag-reference
+    default: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)-candidate
+  - name: target-image-tag-references
+    default: quay.io/grdryn/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
+    #- quay.io/grdryn/$(params.model-name):$(params.model-version)
+    #- quay.io/grdryn/$(params.model-name):latest
+  - name: upon-end
+    default: "delete"
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      labels:
+        tekton.dev/pipeline: aiedge-e2e
+        model-name: tensorflow-housing
+      generateName: aiedge-e2e-tensorflow-housing-
+    spec:
+      params:
+      - name: model-name
+        value: $(tt.params.model-name)
+      - name: model-version
+        value: $(tt.params.model-version)
+      - name: s3-bucket-name
+        value: $(tt.params.s3-bucket-name)
+      - name: git-containerfile-repo
+        value: $(tt.params.git-containerfile-repo)
+      - name: git-containerfile-revision
+        value: $(tt.params.git-containerfile-revision)
+      - name: containerfileRelativePath
+        value: $(tt.params.containerfileRelativePath)
+      - name: fetch-model
+        value: $(tt.params.fetch-model)
+      - name: git-model-repo
+        value: $(tt.params.git-model-repo)
+      - name: modelRelativePath
+        value: $(tt.params.modelRelativePath)
+      - name: model-dir
+        value: $(tt.params.model-dir)
+      - name: git-model-revision
+        value: $(tt.params.git-model-revision)
+      - name: test-endpoint
+        value: $(tt.params.test-endpoint)
+      - name: candidate-image-tag-reference
+        value: $(tt.params.candidate-image-tag-reference)
+      - name: target-image-tag-references
+        value:
+          - $(tt.params.target-image-tag-references)
+      - name: upon-end
+        value: $(tt.params.upon-end)
+      pipelineRef:
+        name: aiedge-e2e
+      serviceAccountName: pipeline
+      timeout: 1h0m0s
+      workspaces:
+      - name: build-workspace-pv
+        # Have the tekton controller allocate a PVC for each pipeline run that persists for the life of each PipelineRun object.
+        # NOTE: This PVC will be deleted by the Tekton controller when the PipelineRun is deleted
+        volumeClaimTemplate:
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+      - name: s3-secret
+        secret:
+            secretName: credentials-s3
+      - configMap:
+          name: tensorflow-housing-test-data
+        name: test-data
