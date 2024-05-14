@@ -125,8 +125,7 @@ endif
 ifndef GIT_BRANCH
 	$(error GIT_BRANCH is undefined)
 endif
-	(cd test/e2e-tests/tests && \ 
-	S3_BUCKET=${S3_BUCKET} \
+	(cd test/e2e-tests/tests && S3_BUCKET=${S3_BUCKET} \
 	TARGET_IMAGE_TAGS_JSON=${TARGET_IMAGE_TAGS_JSON} \
 	NAMESPACE=${NAMESPACE} \
 	GIT_SELF_SIGNED_CERT=${GIT_SELF_SIGNED_CERT} \
