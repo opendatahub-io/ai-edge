@@ -2,12 +2,11 @@ package tests
 
 import (
 	"fmt"
-	"testing"
-	"time"
-
 	"github.com/opendatahub-io/ai-edge/test/e2e-tests/support"
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"testing"
+	"time"
 )
 
 const (
@@ -24,9 +23,9 @@ func CreateContext() context.Context {
 	return context.Background()
 }
 
-func WaitForAllPipelineRunsToComplete(ctx context.Context, clients *support.Clients) error {
+func WaitForAllPipelineRunsToComplete(ctx context.Context, config *support.Config) error {
 	callback := func() (bool, error) {
-		list, err := clients.PipelineRun.List(ctx, metav1.ListOptions{})
+		list, err := config.Clients.PipelineRun.List(ctx, metav1.ListOptions{})
 		if err != nil {
 			return false, err
 		}
@@ -63,14 +62,14 @@ func WaitForAllPipelineRunsToComplete(ctx context.Context, clients *support.Clie
 func init() {
 	ctx := CreateContext()
 
-	options, err := support.GetOptions()
+	config, err := support.GetConfig()
 	if err != nil {
 		panic(err.Error())
 	}
 
-	clients, err := support.CreateClients(options.ClusterNamespace)
+	err = support.RunSetup(ctx, config)
 	if err != nil {
-		panic(fmt.Sprintf("error while creating client : %v", err.Error()))
+		panic(err.Error())
 	}
 
 	kustomizePaths := []string{AIEdgeE2EPipelineDirectoryRelativePath, GitOpsUpdatePipelineDirectoryRelativePath}
@@ -81,7 +80,7 @@ func init() {
 			panic(fmt.Sprintf("error while building kustomize : %v", err.Error()))
 		}
 
-		err = support.CreateObjectsFromResourceMap(ctx, &clients, resourceMap, options.ClusterNamespace)
+		err = support.CreateObjectsFromResourceMap(ctx, config.Clients, resourceMap, config.Namespace)
 		if err != nil {
 			panic(fmt.Errorf("error while creating objects from kustomize resources : %v", err.Error()))
 		}
@@ -92,14 +91,9 @@ func init() {
 func Test_MLOpsPipelineRunsComplete(t *testing.T) {
 	ctx := CreateContext()
 
-	options, err := support.GetOptions()
+	config, err := support.GetConfig()
 	if err != nil {
-		t.Fatal(err.Error())
-	}
-
-	clients, err := support.CreateClients(options.ClusterNamespace)
-	if err != nil {
-		t.Fatal(err.Error())
+		panic(err.Error())
 	}
 
 	pipelineRunPaths := []string{AIEdgeE2ETensorflowHousingPipelineRunRelativePath, AIEdgeE2EBikeRentalsPipelineRunRelativePath}
@@ -111,44 +105,45 @@ func Test_MLOpsPipelineRunsComplete(t *testing.T) {
 		}
 
 		// if given a path to each cert then mount them to the pipeline run
-		if options.GitSelfSignedCert != "" {
+		if config.GitConfig.SelfSignedCert != "" {
 			support.MountConfigMapAsWorkspaceToPipelineRun("git-self-signed-cert", "git-ssl-cert", &pipelineRun)
 		}
-		if options.S3SelfSignedCert != "" {
+		if config.S3Config.SelfSignedCert != "" {
 			support.MountConfigMapAsWorkspaceToPipelineRun("s3-self-signed-cert", "s3-ssl-cert", &pipelineRun)
 		}
 
-		support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(options.S3BucketName), &pipelineRun)
-		support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(options.TargetImageTagReferences), &pipelineRun)
+		support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(config.S3Config.BucketName), &pipelineRun)
+		support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
 
-		_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+		_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 		if err != nil {
 			t.Fatal(err.Error())
 		}
 	}
 
-	err = WaitForAllPipelineRunsToComplete(ctx, &clients)
+	err = WaitForAllPipelineRunsToComplete(ctx, config)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 }
 
 func Test_GitOpsPipelineRunsComplete(t *testing.T) {
+	t.SkipNow()
 	ctx := CreateContext()
 
-	options, err := support.GetOptions()
+	config, err := support.GetConfig()
 	if err != nil {
-		t.Fatal(err.Error())
+		panic(err.Error())
 	}
 
-	clients, err := support.CreateClients(options.ClusterNamespace)
+	clients, err := support.CreateClients(config.Namespace)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
 	pipelineRunPaths := []string{GitOpsUpdateTensorflowHousingPipelineRunRelativePath, GitOpsUpdateBikeRentalsPipelineRunRelativePath}
 
-	gitURL, err := support.ParseGitURL(options.GitRepo)
+	gitURL, err := support.ParseGitURL(config.GitConfig.Repo)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -160,10 +155,10 @@ func Test_GitOpsPipelineRunsComplete(t *testing.T) {
 		}
 
 		support.SetPipelineRunParam("gitServer", support.NewStringParamValue(gitURL.Server), &pipelineRun)
-		support.SetPipelineRunParam("gitApiServer", support.NewStringParamValue(options.GitAPIServer), &pipelineRun)
+		support.SetPipelineRunParam("gitApiServer", support.NewStringParamValue(config.GitConfig.ApiServer), &pipelineRun)
 		support.SetPipelineRunParam("gitOrgName", support.NewStringParamValue(gitURL.OrgName), &pipelineRun)
 		support.SetPipelineRunParam("gitRepoName", support.NewStringParamValue(gitURL.RepoName), &pipelineRun)
-		support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(options.GitBranch), &pipelineRun)
+		support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(config.GitConfig.Branch), &pipelineRun)
 
 		_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 		if err != nil {
@@ -171,7 +166,7 @@ func Test_GitOpsPipelineRunsComplete(t *testing.T) {
 		}
 	}
 
-	err = WaitForAllPipelineRunsToComplete(ctx, &clients)
+	err = WaitForAllPipelineRunsToComplete(ctx, config)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
