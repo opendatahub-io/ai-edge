@@ -1,0 +1,24 @@
+{
+    "NAMESPACE": "",
+    "IMAGE_REGISTRY_USERNAME": "",
+    "IMAGE_REGISTRY_PASSWORD": "",
+    "TARGET_IMAGE_TAGS": [""],
+    
+    "git": {
+        "TOKEN": "",
+        "USERNAME": "",
+        "REPO": "",
+        "API_SERVER": "",
+        "BRANCH": "",
+        "SELF_SIGNED_CERT": ""
+    },
+
+    "s3": {
+        "AWS_SECRET": "",
+        "AWS_ACCESS": "",
+        "REGION": "",
+        "ENDPOINT": "",
+        "BUCKET_NAME": "",
+        "SELF_SIGNED_CERT": ""
+    }
+}
