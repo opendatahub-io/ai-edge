@@ -124,7 +124,7 @@ spec:
     description: The buildah version used to build the model container image
     value: $(tasks.retrieve-build-image-info.results.buildah-version)
   tasks:
-  - name: fetch-model-registry
+  - name: fetch-model-params
     params:
     - name: model-name
       value: $(params.model-name)
@@ -139,7 +139,7 @@ spec:
     - name: git-model-revision
       value: $(params.git-model-revision)
     - name: model-dir
-      value: model_dir-$(params.model-name)/
+      value: $(params.model-dir)
     - name: fetch-model
       value: $(params.fetch-model)
     - name: modelRelativePath
@@ -158,20 +158,20 @@ spec:
       name: git-clone
     params:
     - name: url
-      value: $(tasks.fetch-model-registry.results.git-model-repo)
+      value: $(tasks.fetch-model-params.results.git-model-repo)
     - name: revision
-      value: $(tasks.fetch-model-registry.results.git-model-revision)
+      value: $(tasks.fetch-model-params.results.git-model-revision)
     - name: subdirectory
       value: model_dir-$(params.model-name)/
     workspaces:
     - name: output
       workspace: build-workspace-pv
     when:
-    - input: "$(tasks.fetch-model-registry.results.fetch-model)"
+    - input: "$(tasks.fetch-model-params.results.fetch-model)"
       operator: in
       values: ["git"]
     runAfter:
-    - fetch-model-registry
+    - fetch-model-params
   # Use kserve-download-model container image to fetch from S3 storage
   - name: fetch-model-s3
     params:
@@ -190,11 +190,11 @@ spec:
     - name: s3-secret
       workspace: s3-secret
     when:
-    - input: "$(tasks.fetch-model-registry.results.fetch-model)"
+    - input: "$(tasks.fetch-model-params.results.fetch-model)"
       operator: in
       values: ["s3"]
     runAfter:
-    - fetch-model-registry
+    - fetch-model-params
   - name: git-clone-containerfile-repo
     params:
     - name: url
@@ -219,7 +219,7 @@ spec:
     - name: model-name
       value: $(params.model-name)
     - name: modelRelativePath
-      value: $(tasks.fetch-model-registry.results.modelRelativePath)
+      value: $(tasks.fetch-model-params.results.modelRelativePath)
     - name: containerfilePath
       value: containerfile_repo/$(params.containerfileRelativePath)
     - name: current-namespace
@@ -243,13 +243,13 @@ spec:
     - name: DOCKERFILE
       value: containerfile_repo/$(params.containerfileRelativePath)
     - name: CONTEXT
-      value: model_dir-$(params.model-name)/$(tasks.fetch-model-registry.results.modelRelativePath)/$(params.model-name)
+      value: model_dir-$(params.model-name)/$(tasks.fetch-model-params.results.modelRelativePath)/$(params.model-name)
     - name: TLSVERIFY
       value: "true"
     - name: FORMAT
       value: oci
     - name: BUILD_EXTRA_ARGS
-      value: "--build-arg MODEL_NAME=$(params.model-name) --build-arg MODEL_DIR=$(tasks.fetch-model-registry.results.model-dir)"
+      value: "--build-arg MODEL_NAME=$(params.model-name) --build-arg MODEL_DIR=$(tasks.fetch-model-params.results.model-dir)"
     - name: SKIP_PUSH
       value: "false"
     runAfter:

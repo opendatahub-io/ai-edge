@@ -9,25 +9,19 @@ spec:
   - name: model-name
     value: tensorflow-housing
   - name: model-version
-    value: "1"
+    value: "2"
   - name: s3-bucket-name
     value: rhoai-edge-models
+  - name: model-registry-hostname
+    value: "modelregistry-sample-http-default.apps.srbiswas-cluster2.dev.datahub.redhat.com"
   - name: git-containerfile-repo
     value: https://github.com/opendatahub-io/ai-edge.git
+  - name: model-registry-enabled
+    value: "true"
   - name: git-containerfile-revision
     value: "main"
   - name: containerfileRelativePath
     value: pipelines/containerfiles/Containerfile.openvino.mlserver.mlflow
-  - name: fetch-model
-    value: "git"
-  - name: git-model-repo
-    value: https://github.com/opendatahub-io/ai-edge.git
-  - name: modelRelativePath
-    value: pipelines/models
-  - name: model-dir
-    value: "tf2model"
-  - name: git-model-revision
-    value: "main"
   - name: test-endpoint
     value: "v1/models/tensorflow-housing/versions/1:predict"
   - name: candidate-image-tag-reference
