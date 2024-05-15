@@ -88,7 +88,7 @@ func init() {
 
 }
 
-func Test_MLOpsPipelineRunsComplete(t *testing.T) {
+func Test_MLOpsPipeline_S3Fetch(t *testing.T) {
 	ctx := CreateContext()
 
 	config, err := support.GetConfig()
@@ -96,29 +96,59 @@ func Test_MLOpsPipelineRunsComplete(t *testing.T) {
 		panic(err.Error())
 	}
 
-	pipelineRunPaths := []string{AIEdgeE2ETensorflowHousingPipelineRunRelativePath, AIEdgeE2EBikeRentalsPipelineRunRelativePath}
+	if !config.S3Enabled {
+		t.Skipf("skipping %v, S3 is not enabled by the given configuration", t.Name())
+	}
 
-	for _, path := range pipelineRunPaths {
-		pipelineRun, err := support.ReadFileAsPipelineRun(path)
-		if err != nil {
-			t.Fatal(err.Error())
-		}
+	pipelineRun, err := support.ReadFileAsPipelineRun(AIEdgeE2ETensorflowHousingPipelineRunRelativePath)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
 
-		// if given a path to each cert then mount them to the pipeline run
-		if config.GitConfig.SelfSignedCert != "" {
-			support.MountConfigMapAsWorkspaceToPipelineRun("git-self-signed-cert", "git-ssl-cert", &pipelineRun)
-		}
-		if config.S3Config.SelfSignedCert != "" {
-			support.MountConfigMapAsWorkspaceToPipelineRun("s3-self-signed-cert", "s3-ssl-cert", &pipelineRun)
-		}
+	if config.S3Config.SelfSignedCert != "" {
+		support.MountConfigMapAsWorkspaceToPipelineRun("s3-self-signed-cert", "s3-ssl-cert", &pipelineRun)
+	}
 
-		support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(config.S3Config.BucketName), &pipelineRun)
-		support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
+	support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(config.S3Config.BucketName), &pipelineRun)
+	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
 
-		_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
-		if err != nil {
-			t.Fatal(err.Error())
-		}
+	_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = WaitForAllPipelineRunsToComplete(ctx, config)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+}
+
+func Test_MLOpsPipeline_GitFetch(t *testing.T) {
+	ctx := CreateContext()
+
+	config, err := support.GetConfig()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if !config.GitEnabled {
+		t.Skipf("skipping %v, Git is not enabled by the given configuration", t.Name())
+	}
+
+	pipelineRun, err := support.ReadFileAsPipelineRun(AIEdgeE2EBikeRentalsPipelineRunRelativePath)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	if config.GitConfig.SelfSignedCert != "" {
+		support.MountConfigMapAsWorkspaceToPipelineRun("git-self-signed-cert", "git-ssl-cert", &pipelineRun)
+	}
+
+	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
+
+	_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+	if err != nil {
+		t.Fatal(err.Error())
 	}
 
 	err = WaitForAllPipelineRunsToComplete(ctx, config)
