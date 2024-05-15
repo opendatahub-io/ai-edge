@@ -1,24 +1,34 @@
 {
-    "NAMESPACE": "",
-    "IMAGE_REGISTRY_USERNAME": "",
-    "IMAGE_REGISTRY_PASSWORD": "",
-    "TARGET_IMAGE_TAGS": [""],
-    
-    "git": {
-        "TOKEN": "",
-        "USERNAME": "",
-        "REPO": "",
-        "API_SERVER": "",
-        "BRANCH": "",
-        "SELF_SIGNED_CERT": ""
-    },
+  "NAMESPACE": "",
+  "IMAGE_REGISTRY_USERNAME": "",
+  "IMAGE_REGISTRY_PASSWORD": "",
+  "TARGET_IMAGE_TAGS": [],
 
-    "s3": {
-        "AWS_SECRET": "",
-        "AWS_ACCESS": "",
-        "REGION": "",
-        "ENDPOINT": "",
-        "BUCKET_NAME": "",
-        "SELF_SIGNED_CERT": ""
-    }
+  "git-fetch": {
+    "CONTAINERFILE_REPO": "",
+    "CONTAINERFILE_REVISION": "",
+    "CONTAINER_RELATIVE_PATH": "",
+    "MODEL_REPO": "",
+    "MODEL_RELATIVE_PATH": "",
+    "MODEL_REVISION": "",
+    "MODEL_DIR": "",
+    "SELF_SIGNED_CERT": ""
+  },
+
+  "s3-fetch": {
+    "AWS_SECRET": "",
+    "AWS_ACCESS": "",
+    "REGION": "",
+    "ENDPOINT": "",
+    "BUCKET_NAME": "",
+    "SELF_SIGNED_CERT": ""
+  },
+
+  "gitops": {
+    "TOKEN": "",
+    "USERNAME": "",
+    "REPO": "",
+    "API_SERVER": "",
+    "BRANCH": ""
+  }
 }
