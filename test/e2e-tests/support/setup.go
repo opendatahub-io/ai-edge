@@ -42,7 +42,7 @@ func RunSetup(ctx context.Context, config *Config) error {
 
 	// S3 config has been set, load the credential template file
 	// and fill in the values in the config, then apply
-	if config.S3Enabled {
+	if config.S3FetchEnabled {
 		bytes, err := os.ReadFile(S3CredentialsTemplatePath)
 		if err != nil {
 			return err
@@ -55,10 +55,10 @@ func RunSetup(ctx context.Context, config *Config) error {
 		}
 
 		storageConfigString := secret.StringData["s3-storage-config"]
-		storageConfigString = strings.ReplaceAll(storageConfigString, "{{ AWS_ACCESS_KEY_ID }}", config.S3Config.AWSAccess)
-		storageConfigString = strings.ReplaceAll(storageConfigString, "{{ AWS_SECRET_ACCESS_KEY }}", config.S3Config.AWSSecret)
-		storageConfigString = strings.ReplaceAll(storageConfigString, "{{ S3_ENDPOINT }}", config.S3Config.Endpoint)
-		storageConfigString = strings.ReplaceAll(storageConfigString, "{{ S3_REGION }}", config.S3Config.Region)
+		storageConfigString = strings.ReplaceAll(storageConfigString, "{{ AWS_ACCESS_KEY_ID }}", config.S3FetchConfig.AWSAccess)
+		storageConfigString = strings.ReplaceAll(storageConfigString, "{{ AWS_SECRET_ACCESS_KEY }}", config.S3FetchConfig.AWSSecret)
+		storageConfigString = strings.ReplaceAll(storageConfigString, "{{ S3_ENDPOINT }}", config.S3FetchConfig.Endpoint)
+		storageConfigString = strings.ReplaceAll(storageConfigString, "{{ S3_REGION }}", config.S3FetchConfig.Region)
 		secret.StringData["s3-storage-config"] = storageConfigString
 
 		_, err = config.Clients.Kubernetes.CoreV1().Secrets(config.Namespace).Apply(ctx, &secret, metav1.ApplyOptions{FieldManager: "Apply"})
@@ -69,7 +69,7 @@ func RunSetup(ctx context.Context, config *Config) error {
 
 	// Git config has been set, load the credential template file
 	// and fill in the values in the config, then apply
-	if config.GitEnabled {
+	if config.GitFetchEnabled {
 		bytes, err := os.ReadFile(GitCredentialsTemplatePath)
 		if err != nil {
 			return err
@@ -81,8 +81,8 @@ func RunSetup(ctx context.Context, config *Config) error {
 			return err
 		}
 
-		secret.StringData["token"] = config.GitConfig.Token
-		secret.StringData[".git-credentials"] = fmt.Sprintf("https://%v:%v@github.com", config.GitConfig.Username, config.GitConfig.Token)
+		secret.StringData["token"] = config.GitOpsConfig.Token
+		secret.StringData[".git-credentials"] = fmt.Sprintf("https://%v:%v@github.com", config.GitOpsConfig.Username, config.GitOpsConfig.Token)
 
 		_, err = config.Clients.Kubernetes.CoreV1().Secrets(config.Namespace).Apply(ctx, &secret, metav1.ApplyOptions{FieldManager: "Apply"})
 		if err != nil {

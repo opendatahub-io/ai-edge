@@ -96,20 +96,20 @@ func Test_MLOpsPipeline_S3Fetch(t *testing.T) {
 		panic(err.Error())
 	}
 
-	if !config.S3Enabled {
+	if !config.S3FetchEnabled {
 		t.Skipf("skipping %v, S3 is not enabled by the given configuration", t.Name())
 	}
 
-	pipelineRun, err := support.ReadFileAsPipelineRun(AIEdgeE2ETensorflowHousingPipelineRunRelativePath)
+	pipelineRun, err := support.ReadFileAsPipelineRun(AIEdgeE2EBikeRentalsPipelineRunRelativePath)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	if config.S3Config.SelfSignedCert != "" {
+	if config.S3FetchConfig.SelfSignedCert != "" {
 		support.MountConfigMapAsWorkspaceToPipelineRun("s3-self-signed-cert", "s3-ssl-cert", &pipelineRun)
 	}
 
-	support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(config.S3Config.BucketName), &pipelineRun)
+	support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(config.S3FetchConfig.BucketName), &pipelineRun)
 	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
 
 	_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
@@ -131,20 +131,27 @@ func Test_MLOpsPipeline_GitFetch(t *testing.T) {
 		panic(err.Error())
 	}
 
-	if !config.GitEnabled {
+	if !config.GitFetchEnabled {
 		t.Skipf("skipping %v, Git is not enabled by the given configuration", t.Name())
 	}
 
-	pipelineRun, err := support.ReadFileAsPipelineRun(AIEdgeE2EBikeRentalsPipelineRunRelativePath)
+	pipelineRun, err := support.ReadFileAsPipelineRun(AIEdgeE2ETensorflowHousingPipelineRunRelativePath)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	if config.GitConfig.SelfSignedCert != "" {
+	if config.GitFetchConfig.SelfSignedCert != "" {
 		support.MountConfigMapAsWorkspaceToPipelineRun("git-self-signed-cert", "git-ssl-cert", &pipelineRun)
 	}
 
 	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
+	support.SetPipelineRunParam("git-containerfile-repo", support.NewStringParamValue(config.GitFetchConfig.CONTAINERFILE_REPO), &pipelineRun)
+	support.SetPipelineRunParam("git-containerfile-revision", support.NewStringParamValue(config.GitFetchConfig.CONTAINERFILE_REVISION), &pipelineRun)
+	support.SetPipelineRunParam("containerRelativePath", support.NewStringParamValue(config.GitFetchConfig.CONTAINER_RELATIVE_PATH), &pipelineRun)
+	support.SetPipelineRunParam("git-model-repo", support.NewStringParamValue(config.GitFetchConfig.MODEL_REPO), &pipelineRun)
+	support.SetPipelineRunParam("modelRelativePath", support.NewStringParamValue(config.GitFetchConfig.MODEL_RELATIVE_PATH), &pipelineRun)
+	support.SetPipelineRunParam("git-model-revision", support.NewStringParamValue(config.GitFetchConfig.MODEL_REVISION), &pipelineRun)
+	support.SetPipelineRunParam("model-dir", support.NewStringParamValue(config.GitFetchConfig.MODEL_DIR), &pipelineRun)
 
 	_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 	if err != nil {
@@ -157,8 +164,7 @@ func Test_MLOpsPipeline_GitFetch(t *testing.T) {
 	}
 }
 
-func Test_GitOpsPipelineRunsComplete(t *testing.T) {
-	t.SkipNow()
+func Test_GitOpsUpdatePipeline(t *testing.T) {
 	ctx := CreateContext()
 
 	config, err := support.GetConfig()
@@ -166,14 +172,33 @@ func Test_GitOpsPipelineRunsComplete(t *testing.T) {
 		panic(err.Error())
 	}
 
+	if !config.GitOpsEnabled {
+		t.Skipf("skipping %v, Gitops pipeline not configured", t.Name())
+	}
+
+	if !config.GitFetchEnabled && !config.S3FetchEnabled {
+		t.Skipf("skipping %v, neither fetch methods were not configured", t.Name())
+	}
+
 	clients, err := support.CreateClients(config.Namespace)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	pipelineRunPaths := []string{GitOpsUpdateTensorflowHousingPipelineRunRelativePath, GitOpsUpdateBikeRentalsPipelineRunRelativePath}
+	// the pipeline runs we can run here are based on the fetch models used by the mlops pipeline
+	// because this pipeline depends on the finished pipeline run of the mlops pipeline
+	// -> https://issues.redhat.com/browse/RHOAIENG-4982
+	// there is also a possibilty to split these based on the fetch types like the mlops pipeline
+	var pipelineRunPaths []string
+	if config.GitFetchEnabled {
+		pipelineRunPaths = append(pipelineRunPaths, GitOpsUpdateTensorflowHousingPipelineRunRelativePath)
+	}
 
-	gitURL, err := support.ParseGitURL(config.GitConfig.Repo)
+	if config.S3FetchEnabled {
+		pipelineRunPaths = append(pipelineRunPaths, GitOpsUpdateBikeRentalsPipelineRunRelativePath)
+	}
+
+	gitURL, err := support.ParseGitURL(config.GitOpsConfig.Repo)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -185,10 +210,10 @@ func Test_GitOpsPipelineRunsComplete(t *testing.T) {
 		}
 
 		support.SetPipelineRunParam("gitServer", support.NewStringParamValue(gitURL.Server), &pipelineRun)
-		support.SetPipelineRunParam("gitApiServer", support.NewStringParamValue(config.GitConfig.ApiServer), &pipelineRun)
+		support.SetPipelineRunParam("gitApiServer", support.NewStringParamValue(config.GitOpsConfig.ApiServer), &pipelineRun)
 		support.SetPipelineRunParam("gitOrgName", support.NewStringParamValue(gitURL.OrgName), &pipelineRun)
 		support.SetPipelineRunParam("gitRepoName", support.NewStringParamValue(gitURL.RepoName), &pipelineRun)
-		support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(config.GitConfig.Branch), &pipelineRun)
+		support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(config.GitOpsConfig.Branch), &pipelineRun)
 
 		_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 		if err != nil {
