@@ -23,30 +23,42 @@ type Config struct {
 	ImageRegistryPassword string   `json:"IMAGE_REGISTRY_PASSWORD"`
 	TargetImageTags       []string `json:"TARGET_IMAGE_TAGS"`
 
-	GitConfig GitConfig `json:"git"`
-	S3Config  S3Config  `json:"s3"`
+	GitFetchConfig GitFetchConfig `json:"git-fetch"`
+	S3FetchConfig  S3FetchConfig  `json:"s3-fetch"`
+	GitOpsConfig   GitOpsConfig   `json:"gitops"`
 
-	Clients    *Clients
-	GitEnabled bool
-	S3Enabled  bool
+	Clients         *Clients
+	GitFetchEnabled bool
+	S3FetchEnabled  bool
+	GitOpsEnabled   bool
 }
 
-type GitConfig struct {
-	Token          string `json:"TOKEN"`
-	Username       string `json:"USERNAME"`
-	Repo           string `json:"REPO"`
-	ApiServer      string `json:"API_SERVER"`
-	Branch         string `json:"BRANCH"`
-	SelfSignedCert string `json:"SELF_SIGNED_CERT"`
+type GitFetchConfig struct {
+	CONTAINERFILE_REPO      string `json:"CONTAINERFILE_REPO"`
+	CONTAINERFILE_REVISION  string `json:"CONTAINERFILE_REVISION"`
+	CONTAINER_RELATIVE_PATH string `json:"CONTAINER_RELATIVE_PATH"`
+	MODEL_REPO              string `json:"MODEL_REPO"`
+	MODEL_RELATIVE_PATH     string `json:"MODEL_RELATIVE_PATH"`
+	MODEL_REVISION          string `json:"MODEL_REVISION"`
+	MODEL_DIR               string `json:"MODEL_DIR"`
+	SelfSignedCert          string `json:"SELF_SIGNED_CERT"`
 }
 
-type S3Config struct {
+type S3FetchConfig struct {
 	AWSSecret      string `json:"AWS_SECRET"`
 	AWSAccess      string `json:"AWS_ACCESS"`
 	Region         string `json:"REGION"`
 	Endpoint       string `json:"ENDPOINT"`
 	BucketName     string `json:"BUCKET_NAME"`
 	SelfSignedCert string `json:"SELF_SIGNED_CERT"`
+}
+
+type GitOpsConfig struct {
+	Token     string `json:"TOKEN"`
+	Username  string `json:"USERNAME"`
+	Repo      string `json:"REPO"`
+	ApiServer string `json:"API_SERVER"`
+	Branch    string `json:"BRANCH"`
 }
 
 func GetConfig() (*Config, error) {
@@ -66,12 +78,16 @@ func GetConfig() (*Config, error) {
 		return config, err
 	}
 
-	if config.S3Config != (S3Config{}) {
-		config.S3Enabled = true
+	if config.GitFetchConfig != (GitFetchConfig{}) {
+		config.GitFetchEnabled = true
 	}
 
-	if config.GitConfig != (GitConfig{}) {
-		config.GitEnabled = true
+	if config.S3FetchConfig != (S3FetchConfig{}) {
+		config.S3FetchEnabled = true
+	}
+
+	if config.GitOpsConfig != (GitOpsConfig{}) {
+		config.GitOpsEnabled = true
 	}
 
 	clients, err := CreateClients(config.Namespace)
