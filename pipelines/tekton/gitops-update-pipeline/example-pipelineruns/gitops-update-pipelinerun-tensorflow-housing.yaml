@@ -8,6 +8,10 @@ spec:
   params:
   - name: model-name
     value: tensorflow-housing
+  - name: image-registry-repo
+    value: quay.io/rhoai-edge/tensorflow-housing
+  - name: image-digest
+    value: sha256:de11e6ee5519dfec8d9e388dd003cbdbdc4f4a00e292bf5d6d1293efa29729da
   - name: gitServer
     value: https://github.com
   - name: gitApiServer
