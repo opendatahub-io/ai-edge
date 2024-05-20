@@ -1,0 +1,138 @@
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: gitops-update-pipeline
+spec:
+  triggers:
+    - triggerRef: gitops-update-pipeline
+  resources:
+    kubernetesResource:
+      spec:
+        template:
+          spec:
+            serviceAccountName: tekton-triggers-sa
+            containers:
+              - resources:
+                  requests:
+                    memory: "64Mi"
+                    cpu: "250m"
+                  limits:
+                    memory: "128Mi"
+                    cpu: "500m"
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: Trigger
+metadata:
+  name: gitops-update-pipeline
+spec:
+  bindings:
+  - name: image-registry-repo
+    value: $(body.image-registry-repo)
+  - name: image-digest
+    value: $(body.image-digest)
+  template:
+    ref: gitops-update-pipeline
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: gitops-update-pipeline
+spec:
+  params:
+  - name: model-name
+    default: tensorflow-housing
+  - name: image-registry-repo
+    default: quay.io/rhoai-edge/tensorflow-housing
+  - name: image-digest
+    default: sha256:de11e6ee5519dfec8d9e388dd003cbdbdc4f4a00e292bf5d6d1293efa29729da
+  - name: gitServer
+    default: https://github.com
+  - name: gitApiServer
+    default: api.github.com
+  - name: gitOrgName
+    default: opendatahub-io
+  - name: gitRepoName
+    default: ai-edge
+  - name: gitRepoBranchBase
+    default: main
+  - name: gitTokenSecretName
+    default: edge-user-1
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: gitops-update-pipeline-tensorflow-housing-
+      labels:
+        tekton.dev/pipeline: gitops-update-pipeline
+    spec:
+      params:
+      - name: model-name
+        value: $(tt.params.model-name)
+      - name: image-registry-repo
+        value: $(tt.params.image-registry-repo)
+      - name: image-digest
+        value: $(tt.params.image-digest)
+      - name: gitServer
+        value: $(tt.params.gitServer)
+      - name: gitApiServer
+        value: $(tt.params.gitApiServer)
+      - name: gitOrgName
+        value: $(tt.params.gitOrgName)
+      - name: gitRepoName
+        value: $(tt.params.gitRepoName)
+      - name: gitRepoBranchBase
+        value: $(tt.params.gitRepoBranchBase)
+      - name: gitTokenSecretName
+        value: $(tt.params.gitTokenSecretName)
+      - name: yq-script
+        value: |
+          yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").newName) = \"$(tt.params.image-registry-repo)\"" \
+            acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
+          yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").digest) = \"$(tt.params.image-digest)\"" \
+            acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
+      pipelineRef:
+        name: gitops-update-pipeline
+      serviceAccountName: pipeline
+      timeout: 1h0m0s
+      workspaces:
+      - name: git-workspace
+        volumeClaimTemplate:
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+      - name: git-basic-auth
+        secret:
+          secretName: edge-user-1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tekton-triggers-sa
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: triggers-example-eventlistener-binding
+subjects:
+- kind: ServiceAccount
+  name: tekton-triggers-sa
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tekton-triggers-eventlistener-roles
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: triggers-example-eventlistener-clusterbinding
+subjects:
+- kind: ServiceAccount
+  name: tekton-triggers-sa
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tekton-triggers-eventlistener-clusterroles

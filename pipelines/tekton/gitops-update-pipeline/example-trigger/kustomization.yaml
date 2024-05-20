@@ -1,0 +1,36 @@
+---
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+resources:
+  - trigger.yaml
+
+# Namespace in which resources will be created.
+# This will also set the namespace for the SA referenced in the
+# ClusterRoleBinding.
+namespace: rhoaieng-4982
+
+patches:
+- patch: |-
+    - op: replace
+      path: /spec/params/0/default
+      value: tensorflow-housing
+    - op: replace
+      path: /spec/params/5/default
+      value: grdryn
+    - op: replace
+      path: /spec/params/6/default
+      value: ai-edge
+    - op: replace
+      path: /spec/resourcetemplates/0/metadata/generateName
+      value: gitops-update-pipeline-tensorflow-housing-
+    - op: replace
+      path: /spec/resourcetemplates/0/spec/params/0/value
+      value: |
+        yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").newName) = \"$(tt.params.image-registry-repo)\"" \
+          acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
+        yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").digest) = \"$(tt.params.image-digest)\"" \
+          acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
+  target:
+    group: triggers.tekton.dev
+    version: v1beta1
+    kind: TriggerTemplate

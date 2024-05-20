@@ -56,6 +56,10 @@ spec:
   - name: target-image-tag-references
     type: array
     description: "An array of fully qualified image tag references to be used for the final image push. E.g. registry.example.com/my-org/ai-model:1.0-1"
+  - name: gitops-update-pipeline-eventlistener-url
+    type: string
+    description: "An optional EventListener URL that can be used to trigger the GitOps Update Pipeline, if set"
+    default: ""
   - name: upon-end
     type: string
     description: "Action to perform on the k8s deployment created to test the model container image. Valid values in [delete, keep, stop]"
@@ -372,6 +376,23 @@ spec:
     workspaces:
     - name: images-url
       workspace: build-workspace-pv
+  - name: trigger-gitops-update-pipeline
+    taskRef:
+      kind: Task
+      name: trigger-gitops-update-pipeline
+    runAfter:
+    - skopeo-copy
+    params:
+    - name: target-image-tag-reference
+      value: $(params.target-image-tag-references[0])
+    - name: image-digest
+      value: $(tasks.build-container-image.results.IMAGE_DIGEST)
+    - name: eventlistener-webhook-url
+      value: $(params.gitops-update-pipeline-eventlistener-url)
+    when:
+    - input: "$(params.gitops-update-pipeline-eventlistener-url)"
+      operator: notin
+      values: [""]
   workspaces:
   - name: build-workspace-pv
   - name: s3-secret

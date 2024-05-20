@@ -1,0 +1,30 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: trigger-gitops-update-pipeline
+spec:
+  description: This Task calls the webhook to trigger the gitops-update-pipeline
+  params:
+  - name: target-image-tag-reference
+    type: string
+  - name: image-digest
+    type: string
+  - name: eventlistener-webhook-url
+    type: string
+  results:
+  - name: out
+    description: output from curl
+  steps:
+  - name: curl
+    image: registry.access.redhat.com/ubi9/ubi
+    script: |
+      #!/usr/bin/env bash
+
+      set -Eeuo pipefail
+
+      IMAGE_REGISTRY_REPO=$(echo $(params.target-image-tag-reference) | sed "s/:.*//") # strip the tag
+
+      curl -v \
+        --data "{\"image-registry-repo\": \"${IMAGE_REGISTRY_REPO}\", \"image-digest\": \"$(params.image-digest)\"}" \
+        $(params.eventlistener-webhook-url) \
+        | tee $(results.out.path)
