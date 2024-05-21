@@ -42,7 +42,7 @@ func RunSetup(ctx context.Context, config *Config) error {
 
 	// S3 config has been set, load the credential template file
 	// and fill in the values in the config, then apply
-	if config.S3FetchEnabled {
+	if config.S3FetchConfig.Enabled {
 		bytes, err := os.ReadFile(S3CredentialsTemplatePath)
 		if err != nil {
 			return err
@@ -69,7 +69,7 @@ func RunSetup(ctx context.Context, config *Config) error {
 
 	// Git config has been set, load the credential template file
 	// and fill in the values in the config, then apply
-	if config.GitFetchEnabled {
+	if config.GitFetchConfig.Enabled {
 		bytes, err := os.ReadFile(GitCredentialsTemplatePath)
 		if err != nil {
 			return err

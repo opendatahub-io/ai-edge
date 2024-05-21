@@ -18,47 +18,47 @@ var (
 )
 
 type Config struct {
-	Namespace             string   `json:"NAMESPACE"`
-	ImageRegistryUsername string   `json:"IMAGE_REGISTRY_USERNAME"`
-	ImageRegistryPassword string   `json:"IMAGE_REGISTRY_PASSWORD"`
-	TargetImageTags       []string `json:"TARGET_IMAGE_TAGS"`
+	Namespace             string   `json:"namespace"`
+	ImageRegistryUsername string   `json:"image_registry_username"`
+	ImageRegistryPassword string   `json:"image_registry_password"`
+	TargetImageTags       []string `json:"target_image_tags"`
 
-	GitFetchConfig GitFetchConfig `json:"git-fetch"`
-	S3FetchConfig  S3FetchConfig  `json:"s3-fetch"`
+	GitFetchConfig GitFetchConfig `json:"git_fetch"`
+	S3FetchConfig  S3FetchConfig  `json:"s3_fetch"`
 	GitOpsConfig   GitOpsConfig   `json:"gitops"`
 
-	Clients         *Clients
-	GitFetchEnabled bool
-	S3FetchEnabled  bool
-	GitOpsEnabled   bool
+	Clients *Clients
 }
 
 type GitFetchConfig struct {
-	CONTAINERFILE_REPO      string `json:"CONTAINERFILE_REPO"`
-	CONTAINERFILE_REVISION  string `json:"CONTAINERFILE_REVISION"`
-	CONTAINER_RELATIVE_PATH string `json:"CONTAINER_RELATIVE_PATH"`
-	MODEL_REPO              string `json:"MODEL_REPO"`
-	MODEL_RELATIVE_PATH     string `json:"MODEL_RELATIVE_PATH"`
-	MODEL_REVISION          string `json:"MODEL_REVISION"`
-	MODEL_DIR               string `json:"MODEL_DIR"`
-	SelfSignedCert          string `json:"SELF_SIGNED_CERT"`
+	Enabled               bool   `json:"enabled"`
+	ContainerFileRepo     string `json:"container_file_repo"`
+	ContainerFileRevision string `json:"container_file_revision"`
+	ContainerRelativePath string `json:"container_relative_path"`
+	ModelRepo             string `json:"model_repo"`
+	ModelRelativePath     string `json:"model_relative_path"`
+	ModelRevision         string `json:"model_revision"`
+	ModelDir              string `json:"model_dir"`
+	SelfSignedCert        string `json:"self_signed_cert"`
 }
 
 type S3FetchConfig struct {
-	AWSSecret      string `json:"AWS_SECRET"`
-	AWSAccess      string `json:"AWS_ACCESS"`
-	Region         string `json:"REGION"`
-	Endpoint       string `json:"ENDPOINT"`
-	BucketName     string `json:"BUCKET_NAME"`
-	SelfSignedCert string `json:"SELF_SIGNED_CERT"`
+	Enabled        bool   `json:"enabled"`
+	AWSSecret      string `json:"aws_secret"`
+	AWSAccess      string `json:"aws_access"`
+	Region         string `json:"region"`
+	Endpoint       string `json:"endpoint"`
+	BucketName     string `json:"bucket_name"`
+	SelfSignedCert string `json:"self_signed_cert"`
 }
 
 type GitOpsConfig struct {
-	Token     string `json:"TOKEN"`
-	Username  string `json:"USERNAME"`
-	Repo      string `json:"REPO"`
-	ApiServer string `json:"API_SERVER"`
-	Branch    string `json:"BRANCH"`
+	Enabled   bool   `json:"enabled"`
+	Token     string `json:"token"`
+	Username  string `json:"username"`
+	Repo      string `json:"repo"`
+	ApiServer string `json:"api_server"`
+	Branch    string `json:"branch"`
 }
 
 func GetConfig() (*Config, error) {
@@ -76,18 +76,6 @@ func GetConfig() (*Config, error) {
 	err = json.Unmarshal(bytes, &config)
 	if err != nil {
 		return config, err
-	}
-
-	if config.GitFetchConfig != (GitFetchConfig{}) {
-		config.GitFetchEnabled = true
-	}
-
-	if config.S3FetchConfig != (S3FetchConfig{}) {
-		config.S3FetchEnabled = true
-	}
-
-	if config.GitOpsConfig != (GitOpsConfig{}) {
-		config.GitOpsEnabled = true
 	}
 
 	clients, err := CreateClients(config.Namespace)
