@@ -96,7 +96,7 @@ func Test_MLOpsPipeline_S3Fetch(t *testing.T) {
 		panic(err.Error())
 	}
 
-	if !config.S3FetchEnabled {
+	if !config.S3FetchConfig.Enabled {
 		t.Skipf("skipping %v, S3 is not enabled by the given configuration", t.Name())
 	}
 
@@ -131,7 +131,7 @@ func Test_MLOpsPipeline_GitFetch(t *testing.T) {
 		panic(err.Error())
 	}
 
-	if !config.GitFetchEnabled {
+	if !config.GitFetchConfig.Enabled {
 		t.Skipf("skipping %v, Git is not enabled by the given configuration", t.Name())
 	}
 
@@ -145,13 +145,13 @@ func Test_MLOpsPipeline_GitFetch(t *testing.T) {
 	}
 
 	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
-	support.SetPipelineRunParam("git-containerfile-repo", support.NewStringParamValue(config.GitFetchConfig.CONTAINERFILE_REPO), &pipelineRun)
-	support.SetPipelineRunParam("git-containerfile-revision", support.NewStringParamValue(config.GitFetchConfig.CONTAINERFILE_REVISION), &pipelineRun)
-	support.SetPipelineRunParam("containerRelativePath", support.NewStringParamValue(config.GitFetchConfig.CONTAINER_RELATIVE_PATH), &pipelineRun)
-	support.SetPipelineRunParam("git-model-repo", support.NewStringParamValue(config.GitFetchConfig.MODEL_REPO), &pipelineRun)
-	support.SetPipelineRunParam("modelRelativePath", support.NewStringParamValue(config.GitFetchConfig.MODEL_RELATIVE_PATH), &pipelineRun)
-	support.SetPipelineRunParam("git-model-revision", support.NewStringParamValue(config.GitFetchConfig.MODEL_REVISION), &pipelineRun)
-	support.SetPipelineRunParam("model-dir", support.NewStringParamValue(config.GitFetchConfig.MODEL_DIR), &pipelineRun)
+	support.SetPipelineRunParam("git-containerfile-repo", support.NewStringParamValue(config.GitFetchConfig.ContainerFileRepo), &pipelineRun)
+	support.SetPipelineRunParam("git-containerfile-revision", support.NewStringParamValue(config.GitFetchConfig.ContainerFileRevision), &pipelineRun)
+	support.SetPipelineRunParam("containerRelativePath", support.NewStringParamValue(config.GitFetchConfig.ContainerRelativePath), &pipelineRun)
+	support.SetPipelineRunParam("git-model-repo", support.NewStringParamValue(config.GitFetchConfig.ModelRepo), &pipelineRun)
+	support.SetPipelineRunParam("modelRelativePath", support.NewStringParamValue(config.GitFetchConfig.ModelRelativePath), &pipelineRun)
+	support.SetPipelineRunParam("git-model-revision", support.NewStringParamValue(config.GitFetchConfig.ModelRevision), &pipelineRun)
+	support.SetPipelineRunParam("model-dir", support.NewStringParamValue(config.GitFetchConfig.ModelDir), &pipelineRun)
 
 	_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 	if err != nil {
@@ -172,11 +172,11 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 		panic(err.Error())
 	}
 
-	if !config.GitOpsEnabled {
+	if !config.GitOpsConfig.Enabled {
 		t.Skipf("skipping %v, Gitops pipeline not configured", t.Name())
 	}
 
-	if !config.GitFetchEnabled && !config.S3FetchEnabled {
+	if !config.GitFetchConfig.Enabled && !config.S3FetchConfig.Enabled {
 		t.Skipf("skipping %v, neither fetch methods were not configured", t.Name())
 	}
 
@@ -190,11 +190,11 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 	// -> https://issues.redhat.com/browse/RHOAIENG-4982
 	// there is also a possibilty to split these based on the fetch types like the mlops pipeline
 	var pipelineRunPaths []string
-	if config.GitFetchEnabled {
+	if config.GitFetchConfig.Enabled {
 		pipelineRunPaths = append(pipelineRunPaths, GitOpsUpdateTensorflowHousingPipelineRunRelativePath)
 	}
 
-	if config.S3FetchEnabled {
+	if config.S3FetchConfig.Enabled {
 		pipelineRunPaths = append(pipelineRunPaths, GitOpsUpdateBikeRentalsPipelineRunRelativePath)
 	}
 
