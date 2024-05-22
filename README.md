@@ -202,19 +202,20 @@ name>-<application name>` to see more information.
 
 ### Observability setup
 
-* Edge cluster(s)
-  * Login to the edge cluster using an account with cluster-admin privileges
-  * Enable [monitoring for user-defined projects](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/monitoring/enabling-monitoring-for-user-defined-projects) in OpenShift clusters
-    * `oc -n openshift-monitoring edit configmap cluster-monitoring-config`
-    * Set variable `enableUserWorkload` to `true`
-  * Install the `Red Hat Build of OpenTelemetry` from the OperatorHub
-* Core/Hub cluster
-  * Login to the core cluster using an account that has cluster-admin privileges
-  * Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.
-  * Install the [ACM observability stack](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html/observability/enabling-observability-service) by running `make setup-observability`
-  * Create the pull secret the MultiClusterObservability object expects by reading from the cluster secret
-    * ```DOCKER_CONFIG_JSON=`oc extract secret/pull-secret -n openshift-config --to=-` ```
-    * `oc create secret generic multiclusterhub-operator-pull-secret -n open-cluster-management-observability --from-literal=.dockerconfigjson="${DOCKER_CONFIG_JSON}" --type=kubernetes.io/dockerconfigjson`
+#### Core Cluster
+* Login to the core cluster using an account that has cluster-admin privileges
+* Edit contents of [thanos-secret](acm/odh-core/acm-observability/secrets/thanos.yaml) file.
+* Install the [ACM observability stack](https://access.redhat.com/documentation/en-us/red_hat_advanced_cluster_management_for_kubernetes/2.10/html/observability/enabling-observability-service) by running `make setup-observability`
+* Create the pull secret the MultiClusterObservability object expects by reading from the cluster secret
+  * ```DOCKER_CONFIG_JSON=`oc extract secret/pull-secret -n openshift-config --to=-` ```
+  * `oc create secret generic multiclusterhub-operator-pull-secret -n open-cluster-management-observability --from-literal=.dockerconfigjson="${DOCKER_CONFIG_JSON}" --type=kubernetes.io/dockerconfigjson`
+
+#### Edge cluster(s)
+* Login to the edge cluster using an account with cluster-admin privileges
+* Enable [monitoring for user-defined projects](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.13/html/monitoring/enabling-monitoring-for-user-defined-projects) in OpenShift clusters
+  * `oc -n openshift-monitoring edit configmap cluster-monitoring-config`
+  * Set variable `enableUserWorkload` to `true`
+* Install the `Red Hat Build of OpenTelemetry` from the OperatorHub
 
 > [!NOTE] 
 > If you are not deploying our example models then you must edit the [static list](acm/odh-edge/apps/telemetry/otel-collector.yaml) of targets to contain the service pointing to your custom model.
