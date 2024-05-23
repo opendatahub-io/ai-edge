@@ -56,6 +56,15 @@ spec:
   - name: target-image-tag-references
     type: array
     description: "An array of fully qualified image tag references to be used for the final image push. E.g. registry.example.com/my-org/ai-model:1.0-1"
+  - name: gitops-git-server
+  - name: gitops-git-api-server
+  - name: gitops-git-org-name
+  - name: gitops-git-repo-name
+  - name: gitops-git-repo-branch-base
+  - name: gitops-git-api-prefix
+  - name: gitops-git-token-secret-name
+  - name: gitops-git-token-secret-key
+  - name: gitops-yq-script
   - name: upon-end
     type: string
     description: "Action to perform on the k8s deployment created to test the model container image. Valid values in [delete, keep, stop]"
@@ -254,6 +263,7 @@ spec:
             spec:
               containers:
               - image: $(params.candidate-image-tag-reference)
+                imagePullPolicy: Always
                 name: $(params.model-name)-$(params.model-version)
                 livenessProbe:
                   failureThreshold: 10
@@ -372,6 +382,46 @@ spec:
     workspaces:
     - name: images-url
       workspace: build-workspace-pv
+  - name: trigger-gitops-update-pipeline
+    params:
+    - name: ARGS
+      value:
+      - pipeline
+      - start
+      - gitops-update-pipeline
+      - --param model-name=$(params.model-name)
+      - --param image-registry-repo=$(tasks.retrieve-build-image-info.results.first-image-registry-repo)
+      - --param image-digest=$(tasks.build-container-image.results.IMAGE_DIGEST)
+      - --param gitServer=$(params.gitops-git-server)
+      - --param gitApiServer=$(params.gitops-git-api-server)
+      - --param gitOrgName=$(params.gitops-git-org-name)
+      - --param gitRepoName=$(params.gitops-git-repo-name)
+      - --param gitRepoBranchBase=$(params.gitops-git-repo-branch-base)
+      - --param gitApiPrefix=$(params.gitops-git-api-prefix)
+      - --param gitTokenSecretName=$(params.gitops-git-token-secret-name)
+      - --param gitTokenSecretKey=$(params.gitops-git-token-secret-key)
+      - --param yq-script=$(params.gitops-yq-script)
+      - --workspace name=git-basic-auth,secret=edge-user-1 #TODO
+      - --workspace name=git-workspace,volumeClaimTemplateFile=/tmp/workspace-template.yaml
+    - name: SCRIPT
+      value: |
+        set -Eeuvo pipefail
+        cat << EOF > /tmp/workspace-template.yaml
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+        EOF
+        echo \"--------\"
+        cat /tmp/workspace-template.yaml
+        tkn $@
+    runAfter:
+    - skopeo-copy
+    taskRef:
+      kind: ClusterTask
+      name: tkn
   workspaces:
   - name: build-workspace-pv
   - name: s3-secret

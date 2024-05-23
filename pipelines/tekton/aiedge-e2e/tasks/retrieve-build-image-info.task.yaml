@@ -49,6 +49,10 @@ spec:
       skopeo inspect --format '{{index .Labels "io.buildah.version"}}' docker://$DOCKER_IMAGE_REF | tee $(results.buildah-version.path) ;
       echo ;
       echo -n "$@" | tee $(results.target-image-tag-references.path) ;
+      echo ;
+      echo -n "$(for i in $@ ; do echo $i | sed "s/:.*//" ; done)" | tee $(results.target-image-registry-repos.path)
+      echo ;
+      cat $(results.target-image-registry-repos.path) | cut -f 1 -d " " | xargs echo -n | tee $(results.first-image-registry-repo.path)
   - name: build-urls-txt
     image: registry.access.redhat.com/ubi9/ubi-micro
     args:
@@ -85,3 +89,7 @@ spec:
     description: The fully qualified image digest reference of the image
   - name: target-image-tag-references
     description: The fully qualified image reference that the image was pushed to (e.g. registry.example.com/my-org/ai-model:1.0-1)
+  - name: target-image-registry-repos
+    description: The repo names (without tag part) that the image was pushed to (e.g. registry.example.com/my-org/ai-model)
+  - name: first-image-registry-repo
+    description: The first registry repo name
