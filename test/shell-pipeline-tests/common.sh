@@ -100,6 +100,7 @@ function assertContains() {
   local -r STRING=$1
   local -r SUBSTRING=$2
 
+  [[ -z $SUBSTRING ]] && echo -e "Assertion failed!\n '$STRING' contains '$SUBSTRING' but it is empty, so the assertion would otherwise yield a false positive result" && return 1;
   [[ "$STRING" =~ $SUBSTRING ]] || { echo -e "Assertion failed!\n '$STRING' does not contain '$SUBSTRING'" && return 1; }
 }
 
@@ -115,8 +116,8 @@ assertGitHubPullRequest() {
 
   # Expected values
   PIPELINE_RUN_UID=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.metadata.uid})
-  IMAGE_REGISTRY=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.status.results[?\(@.name==\'target-registry-url\'\)].value})
-  NEW_DIGEST=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.status.results[?\(@.name==\'image-sha\'\)].value})
+  IMAGE_REGISTRY=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.spec.params[?\(@.name==\'image-registry-repo\'\)].value})
+  NEW_DIGEST=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.spec.params[?\(@.name==\'image-digest\'\)].value})
   BASE_REF_NAME=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.spec.params[?\(@.name==\'gitRepoBranchBase\'\)].value})
   GIT_SERVER=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.spec.params[?\(@.name==\'gitServer\'\)].value})
   GIT_ORG_NAME=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.spec.params[?\(@.name==\'gitOrgName\'\)].value})
