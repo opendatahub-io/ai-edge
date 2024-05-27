@@ -38,6 +38,28 @@ spec:
     - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
     - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)
     - quay.io/rhoai-edge/$(params.model-name):latest
+  - name: gitops-git-server
+    value: https://github.com
+  - name: gitops-git-api-server
+    value: api.github.com
+  - name: gitops-git-org-name
+    value: grdryn
+  - name: gitops-git-repo-name
+    value: ai-edge
+  - name: gitops-git-repo-branch-base
+    value: main
+  - name: gitops-git-api-prefix
+    value: ''
+  - name: gitops-git-token-secret-name
+    value: edge-user-1
+  - name: gitops-git-token-secret-key
+    value: token
+  - name: gitops-yq-script
+    value: |
+      yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").newName) = \"${IMAGE_NAME}\"" \
+        acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
+      yq eval -i "(.images[] | select(.name == \"edge-model-template-image\").digest) = \"${IMAGE_DIGEST}\"" \
+        acm/odh-edge/apps/tensorflow-housing-app/kustomization.yaml
   - name: upon-end
     value: "delete"
   pipelineRef:
@@ -61,3 +83,6 @@ spec:
   - configMap:
       name: tensorflow-housing-test-data
     name: test-data
+  - name: git-basic-auth
+    secret:
+      secretName: edge-user-1
