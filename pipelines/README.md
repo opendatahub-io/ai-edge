@@ -245,8 +245,8 @@ in your Git server.
 
 ### Deploy and run the GitOps pipeline
 
-The `gitops-update-pipeline` will fetch information about the last successfuly built and tested container image for the given model
-from the PipelineRun of the above Pipelines, and record information about that image in your git repo.
+Update the `image-registry-repo` and `image-digest` parameters corresponding to the image that the GitOps repository should be updated to.
+Then execute the following commands to create the Pipeline and start a PipelineRun.
 
 ```bash
 oc apply -k tekton/gitops-update-pipeline/
@@ -270,16 +270,8 @@ If the PipelineRun completes successfully, you can see the results in the OpenSh
 
 You can also click on the "YAML" tab in the PipelineRun and scroll down to the `pipelineResults` section, it will look something like this:
 
-<details><summary>Typical GitOps pipeline results</summary>
-
 ```yaml
   pipelineResults:
-    - name: target-registry-url
-      value: quay.io/pplaczek/tensorflow-housing
-    - name: image-sha
-      value: 'sha256:0cc9a636c2f18b0f15224a234995ecd27a3dc2e5eb7ffefc8ecfd72c099da31f'
     - name: pr-url
-      value: 'https://github.com/piotrpdev/ai-edge/pull/5'
+      value: 'https://github.com/opendatahub-io/ai-edge/pull/5'
 ```
-
-</details>

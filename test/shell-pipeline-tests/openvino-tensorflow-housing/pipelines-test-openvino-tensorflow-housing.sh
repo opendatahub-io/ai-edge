@@ -81,8 +81,11 @@ oc apply -k "$GITOPS_UPDATE_PIPELINE_DIR_PATH"/
 GITOPS_UPDATE_PIPELINERUN_PATH="$GITOPS_UPDATE_PIPELINE_DIR_PATH"/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml
 GITOPS_UPDATE_PIPELINERUN_OVERRIDDEN_PATH="$GITOPS_UPDATE_PIPELINE_DIR_PATH"/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing-overridden.yaml
 cp "$GITOPS_UPDATE_PIPELINERUN_PATH" "$GITOPS_UPDATE_PIPELINERUN_OVERRIDDEN_PATH"
+NEW_DIGEST=$(oc get pipelinerun "$PIPELINE_RUN_NAME" -o jsonpath={.status.results[?\(@.name==\'buildah-sha\'\)].value})
+
 sed -i "s|value: username|value: redhat-rhods-qe|" "$GITOPS_UPDATE_PIPELINERUN_OVERRIDDEN_PATH"
 sed -i "s|value: ai-edge-gitops|value: ai-edge-ci-test|" "$GITOPS_UPDATE_PIPELINERUN_OVERRIDDEN_PATH"
+sed -i "s|value: sha256.*|value: ${NEW_DIGEST}|" "$GITOPS_UPDATE_PIPELINERUN_OVERRIDDEN_PATH"
 
 ## oc create pipeline run
 oc create -f "$GITOPS_UPDATE_PIPELINERUN_OVERRIDDEN_PATH"

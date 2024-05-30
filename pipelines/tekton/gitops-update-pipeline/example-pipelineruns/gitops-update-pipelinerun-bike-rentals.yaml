@@ -8,6 +8,10 @@ spec:
   params:
   - name: model-name
     value: bike-rentals-auto-ml
+  - name: image-registry-repo
+    value: quay.io/rhoai-edge/bike-rentals-auto-ml
+  - name: image-digest
+    value: sha256:c978e95d366ecf057be47dbee958b69f45720d7e71ba1a91c28f0e6b3572c670
   - name: gitServer
     value: https://github.com
   - name: gitApiServer
