@@ -18,9 +18,11 @@ package common
 
 import (
 	"os"
+	"strconv"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/opendatahub-io/ai-edge/cli/pkg/commands/flags"
 )
@@ -62,9 +64,9 @@ const (
 func NewCmd(
 	use, short, long string,
 	args cobra.PositionalArgs,
-	flags []flags.Flag,
+	flgs []flags.Flag,
 	command SubCommand,
-	modelFactory func(args []string, flags map[string]string, subCommand SubCommand) tea.Model,
+	modelFactory func(args []string, fs *flags.FlagSet, subCommand SubCommand) (tea.Model, error),
 ) *cobra.Command {
 
 	cmd := cobra.Command{
@@ -73,26 +75,14 @@ func NewCmd(
 		Long:  long,
 		Args:  args,
 		Run: func(cmd *cobra.Command, args []string) {
-			ff := make(map[string]string)
-			for _, f := range flags {
-				v := ""
-				err := error(nil)
-				if f.IsParentFlag() {
-					v, err = cmd.InheritedFlags().GetString(f.String())
-					if err != nil {
-						cmd.PrintErrf("Error reading inherited flag %s: %v\n", f, err)
-						os.Exit(1)
-					}
-				} else {
-					v, err = cmd.Flags().GetString(f.String())
-					if err != nil {
-						cmd.PrintErrf("Error reading flag %s: %v\n", f, err)
-						os.Exit(1)
-					}
-				}
-				ff[f.String()] = v
+			flagSet := flags.NewFlagSet()
+			flagSet.SetFromCobra(flgs, cmd)
+			m, err := modelFactory(args, flagSet, command)
+			if err != nil {
+				cmd.PrintErrf("Error: %v\n", err)
+				os.Exit(1)
 			}
-			_, err := tea.NewProgram(modelFactory(args, ff, command)).Run()
+			_, err = tea.NewProgram(m).Run()
 			if err != nil {
 				cmd.PrintErrf("Error: %v\n", err)
 				os.Exit(1)
@@ -105,12 +95,23 @@ func NewCmd(
 
 	cmd.Flags().SortFlags = false
 
-	for _, f := range flags {
+	for _, f := range flgs {
 		if !f.IsParentFlag() {
+			var fs *pflag.FlagSet
 			if f.IsInherited() {
-				cmd.PersistentFlags().StringP(f.String(), f.Shorthand(), f.Value(), f.Usage())
+				fs = cmd.PersistentFlags()
 			} else {
-				cmd.Flags().StringP(f.String(), f.Shorthand(), f.Value(), f.Usage())
+				fs = cmd.Flags()
+			}
+			if f.IsBoolean() {
+				v, err := strconv.ParseBool(f.Value())
+				if err != nil {
+					cmd.PrintErrf("Error parsing boolean flag value %s: %v\n", f.Value(), err)
+					os.Exit(1)
+				}
+				fs.BoolP(f.String(), f.Shorthand(), v, f.Usage())
+			} else {
+				fs.StringP(f.String(), f.Shorthand(), f.Value(), f.Usage())
 			}
 			if f.IsRequired() {
 				err := cmd.MarkFlagRequired(f.String())

@@ -16,6 +16,8 @@ limitations under the License.
 
 package edgeclient
 
+import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 type modelImageStatus int
 
 const (
@@ -46,17 +48,28 @@ type Model struct {
 
 // ModelImage - A model to be registered in the model registry and is suitable for deployment in edge environments.
 type ModelImage struct {
-	ModelID     string
-	Name        string
-	Description string
-	Version     string
-	URI         string
-	BuildParams map[string]interface{}
-	Status      modelImageStatus
+	ModelID         string
+	Name            string
+	Description     string
+	Version         string
+	URI             string
+	BuildParams     map[string]interface{}
+	Status          modelImageStatus
+	LastPipelineRun *PipelineRunSummary
 }
 
-// PipelineRun - Is used to identify a PipelineRun resource
-type PipelineRun struct {
-	Name      string
-	Namespace string
+// PipelineRunSummary - Is used to identify a PipelineRun resource
+type PipelineRunSummary struct {
+	Name           string
+	Namespace      string
+	StartTime      *metav1.Time
+	CompletionTime *metav1.Time
+	Status         string
+	Message        string
+}
+
+// PipelineRunList - Is used to identify a list of PipelineRun resources per model name and version
+type PipelineRunList struct {
+	// ModelName -> ModelVersion -> PipelineRunSummary
+	PipelineRuns map[string]map[string]*PipelineRunSummary
 }

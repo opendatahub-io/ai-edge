@@ -156,6 +156,12 @@ To list all the model images that are available in the Model Registry, run the f
 odh images [-m model-registry-url]
 ```
 
+To view even more details about the model images including the status of the latest PipelineRun, you can run the following command:
+
+```bash
+odh images -w
+````
+
 ### Updating Build Parameters
 
 To update the build parameters for a model version, you can run the following command:
