@@ -64,42 +64,39 @@ spec:
         "$(params.model-registry-hostname)/api/model_registry/v1alpha3/registered_models/$MODEL_ID/versions?" -H 'accept: application/json' | \
         jq -r --arg MODEL_VERSION "$(params.model-version)" '.items[] | select(.name == $MODEL_VERSION).id')
         
-        echo -n "MODEL ID is $MODEL_ID"
-        echo -n "MODEL VERSION ID is $MODEL_VERSION_ID"
+        echo "MODEL ID = $MODEL_ID"
+        echo "MODEL VERSION ID = $MODEL_VERSION_ID"
 
-        if [[ ! -z "$MODEL_ID" ]]; then
-          echo -n "Fetching parameters from model-registry"
-
-          export FETCH_MODEL=$(curl --silent -X 'GET' \
-          "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json' | \
-          jq -r --arg MODEL_PARAM "fetch-model" '.customProperties[$MODEL_PARAM].string_value')
-          echo -n "$FETCH_MODEL" | tee $(results.fetch-model.path)
-
-          export GIT_MODEL_REPO=$(curl --silent -X 'GET' \
-          "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json' | \
-          jq -r --arg MODEL_PARAM "git-model-repo" '.customProperties[$MODEL_PARAM].string_value')
-          echo -n "$GIT_MODEL_REPO" | tee $(results.git-model-repo.path)
-
-          export GIT_MODEL_REVISION=$(curl --silent -X 'GET' \
-          "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json' | \
-          jq -r --arg MODEL_PARAM "git-model-revision" '.customProperties[$MODEL_PARAM].string_value')
-          echo -n "$GIT_MODEL_REVISION" | tee $(results.git-model-revision.path)
-
-          export MODEL_DIR=$(curl --silent -X 'GET' \
-          "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json' | \
-          jq -r --arg MODEL_PARAM "model-dir" '.customProperties[$MODEL_PARAM].string_value')
-          echo -n "$MODEL_DIR" | tee $(results.model-dir.path)
-
-          export MODEL_RELATIVE_PATH=$(curl --silent -X 'GET' \
-          "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json' | \
-          jq -r --arg MODEL_PARAM "modelRelativePath" '.customProperties[$MODEL_PARAM].string_value')
-          echo -n "$MODEL_RELATIVE_PATH" | tee $(results.modelRelativePath.path)
-
-          export S3_BUCKET_NAME=$(curl --silent -X 'GET' \
-          "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json' | \
-          jq -r --arg MODEL_PARAM "s3-bucket-name" '.customProperties[$MODEL_PARAM].string_value')
-          echo -n "$S3_BUCKET_NAME" | tee $(results.s3-bucket-name.path)
+        if [ -z "$MODEL_ID" ]; then
+          echo "$MODEL_ID is invalid"
+          exit 1
         fi
+        
+        echo "Fetching parameters from model-registry"
+
+        MODEL_VERSION_JSON=$(curl --silent -X 'GET' \
+        "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json')
+
+        echo "######################################"
+        echo "MODEL_VERSION_JSON=$(echo "$MODEL_VERSION_JSON" | jq .)"
+        echo "######################################"
+        echo
+
+        fetch_param() {
+          local MODEL_PARAM_NAME=$1
+          local PARAM_RESULT=$2
+          local VALUE=$(echo "$MODEL_VERSION_JSON" | jq -r --arg PARAM "$MODEL_PARAM_NAME" '.customProperties[$PARAM].string_value')
+          echo -n "$MODEL_PARAM_NAME= "
+          echo -n "$VALUE" | tee "$PARAM_RESULT"
+          echo
+        }
+        fetch_param "fetch-model" $(results.fetch-model.path)
+        fetch_param "git-model-repo" $(results.git-model-repo.path)
+        fetch_param "git-model-revision" $(results.git-model-revision.path)
+        fetch_param "model-dir" $(results.model-dir.path)
+        fetch_param "modelRelativePath" $(results.modelRelativePath.path)
+        fetch_param "s3-bucket-name" $(results.s3-bucket-name.path)
+
       else
           echo -n "Using params from PipelineRun"
           echo -n "$(params.fetch-model)" | tee $(results.fetch-model.path)
