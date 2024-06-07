@@ -6,46 +6,53 @@ A local install of the Go compiler is needed to run the tests. Go version `1.21`
 
 ## Setup
 - Log into the target cluster using `oc login`. This will update your default `kubeconfig` for the tests to use
-- Create a S3 bucket with the models in the root directory
-
-The following enviroment variables are required to run the test setup and the tests themselves. If any of these are not set then the tests will not run. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
-
-- `AWS_SECRET_ACCESS_KEY` - Secret from AWS
-- `AWS_ACCESS_KEY_ID` - Access key from AWS
-- `S3_REGION` - Region of the bucket used to store the model
-- `S3_ENDPOINT` - Endpint of the bucket
-- `IMAGE_REGISTRY_USERNAME` - quay.io username
-- `IMAGE_REGISTRY_PASSWORD` - quay.io password
-- `GIT_TOKEN` - Auth token used by the git ops pipeline to make a pull request, [see info here](../../pipelines/README.md#git-repository-and-credentials)
-- `GIT_USERNAME` - Username linked to the `GIT_TOKEN`
-
-The following enviroment variables are optional. You may still need to set them for the tests to pass depending on your setup. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
-
-- `GIT_SELF_SIGNED_CERT` - Self-signed cert to be used by git when cloning
-- `S3_SELF_SIGNED_CERT` - Self-signed cert to be used for S3 when pulling models
-
-Run `go-test-setup` to get the namespace ready for testing. This target is only expected to be run once, if you want to re-run the tests in the same namespace you can just re-run the `go-test` target, read the next section for more detail.
-
-```bash
-make go-test-setup
-```
 
 ## Run tests locally
 
-The following enviroment variables are required to run the tests. If any of these are not set then the tests will not run. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
+The e2e-tests use a `config.json` to read values passed to it. in the `e2e-tests` directory copy the `template.config.json` to `config.json`. You can now fill in the fields in the `config.json`.
 
-- `S3_BUCKET` - Name of S3 bucket that contains the models
-- `NAMESPACE` - Cluster namespace that tests are run in
-- `TARGET_IMAGE_TAGS_JSON` - JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
-- `GIT_REPO` - Git repo URL used to make a pull request in the git ops pipeline (https://github.com/org/repo)
-- `GIT_API_SERVER` - Git API server (api.github.com)
-- `GIT_BRANCH` - Base branch used for pull request in git ops pipeline
+```bash
+cp template.config.json config.json
+```
 
-The following enviroment variables are optional. You may still need to set them for the tests to pass depending on your setup. Read [here](../../pipelines/README.md#ai-edge-end-to-end-pipeline) for more context on how to set these up.
+The structure of the `config.json` is in four sections, the top level fields, `git_fetch`, `s3_fetch` and gitops. All fields at the top level are required.
 
-- `GIT_SELF_SIGNED_CERT` - Self-signed cert to be used by git when cloning
-- `S3_SELF_SIGNED_CERT` - Self-signed cert to be used for S3 when pulling models
-- `GO` - Custom Go installation path that is not set in your `PATH`
+- `namespace` - Cluster namespace that tests are run in
+- `image_registry_username` - quay.io username
+- `image_registry_password` - quay.io password
+- `target_image_tags` - JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
+
+After the top level fields each sub object is used for a type of test. Setting `enabled` to `true` in each of these will tell the test suite to use those values in that object and to run those tests.
+
+These are all the fields in `git_fetch`
+
+- `container_file_repo` - Git repo containing the container file
+- `container_file_revision` - Git branch in the container file repo
+- `container_file_relative_path` - Relative path from the root of the cotainer file repo to where the container file is
+- `model_repo` - Git repo of the model
+- `model_relative_path` - Relative path from the root of the model repo to where the model is 
+- `model_revision` - Branch of the model repo
+- `model_dir` - Sub-directory of the model in the model folder 
+- `self_signed_cert` - (optional) path to a self signed cert to connect to access the repo
+
+These are all the fields in `s3_fetch`
+
+- `aws_secret` - AWS secret key
+- `aws_access` - AWS access key
+- `region` - AWS region of the bucket used
+- `endpoint` - Endpoint of the bucket used
+- `bucket_name` - Name of the bucket 
+- `self_signed_cert` - (optional) path to a self signed cert to connect to access the bucket
+
+These are all the fields in `gitops`
+
+- `token` - Auth token used by the git ops pipeline to make a pull request, [see info here](../../pipelines/README.md#git-repository-and-credentials)
+- `username` - Username linked to the `GIT_TOKEN`
+- `repo` - Git repo URL used to make a pull request in the git ops pipeline (https://github.com/org/repo)
+- `api_server` - Git API server (api.github.com)
+- `branch` - Base branch used for pull request in git ops pipeline
+
+Now run the `e2e-tests` with:
 
 ```bash
 make go-test
