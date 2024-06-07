@@ -3,6 +3,7 @@ kind: PipelineRun
 metadata:
   labels:
     tekton.dev/pipeline: aiedge-e2e
+    model-name: tensorflow-housing
   generateName: aiedge-e2e-
 spec:
   params:
@@ -10,8 +11,6 @@ spec:
     value: tensorflow-housing
   - name: model-version
     value: "2"
-  - name: s3-bucket-name
-    value: rhoai-edge-models
   - name: model-registry-hostname
     value: "modelregistry-sample-http-default.apps.srbiswas-cluster2.dev.datahub.redhat.com"
   - name: git-containerfile-repo

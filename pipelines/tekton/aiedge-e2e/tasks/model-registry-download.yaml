@@ -9,7 +9,7 @@ spec:
     type: string
   - name: model-version
     type: string
-  #Values to be passed by pipeline run when model-register is disabled
+  #Values to be passed by pipeline run when model register is disabled
   - name: s3-bucket-name
     type: string
     default: ""
@@ -95,12 +95,12 @@ spec:
           jq -r --arg MODEL_PARAM "modelRelativePath" '.customProperties[$MODEL_PARAM].string_value')
           echo -n "$MODEL_RELATIVE_PATH" | tee $(results.modelRelativePath.path)
 
-          export S3-BUCKET-NAME=$(curl --silent -X 'GET' \
+          export S3_BUCKET_NAME=$(curl --silent -X 'GET' \
           "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json' | \
           jq -r --arg MODEL_PARAM "s3-bucket-name" '.customProperties[$MODEL_PARAM].string_value')
-          echo -n "$S3-BUCKET-NAME" | tee $(results.s3-bucket-name.path)
+          echo -n "$S3_BUCKET_NAME" | tee $(results.s3-bucket-name.path)
         fi
-        else
+      else
           echo -n "Using params from PipelineRun"
           echo -n "$(params.fetch-model)" | tee $(results.fetch-model.path)
           echo -n "$(params.git-model-repo)" | tee $(results.git-model-repo.path)
@@ -109,8 +109,3 @@ spec:
           echo -n "$(params.modelRelativePath)" | tee $(results.modelRelativePath.path)
           echo -n "$(params.s3-bucket-name)" | tee $(results.s3-bucket-name.path)
       fi
-  workspaces:
-  - description: The workspace for the downloaded model uris.
-    name: workspace
-  - description: The S3 secret.
-    name: s3-secret

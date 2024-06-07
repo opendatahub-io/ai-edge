@@ -28,6 +28,7 @@ spec:
   - name: modelRelativePath
     type: string
     description: "Location of the model within the context of the source location.  Leave blank if the model files are at the root of the source location."
+    default: ""
   - name: model-dir
     type: string
     description: Directory below <modelRelativePath>/<model-name>/ to be used as MODEL_DIR in image build.
@@ -35,6 +36,7 @@ spec:
   - name: fetch-model
     type: string
     description: "Fetch the model from Git or S3. Valid values in [s3, git]"
+    default: ""
   - name: git-model-repo
     type: string
     description: The git repo url where the model files are stored
@@ -144,14 +146,11 @@ spec:
       value: $(params.fetch-model)
     - name: modelRelativePath
       value: $(params.modelRelativePath)
+    - name: s3-bucket-name
+      value: $(params.s3-bucket-name)
     taskRef:
       kind: Task
       name: model-registry-download
-    workspaces:
-    - name: workspace
-      workspace: build-workspace-pv
-    - name: s3-secret
-      workspace: s3-secret
   - name: fetch-model-git
     taskRef:
       kind: ClusterTask
