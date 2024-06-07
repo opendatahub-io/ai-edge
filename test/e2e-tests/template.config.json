@@ -1,0 +1,37 @@
+{
+  "namespace": "",
+  "image_registry_username": "",
+  "image_registry_password": "",
+  "target_image_tags": [],
+
+  "git_fetch": {
+    "enabled": false,
+    "container_file_repo": "",
+    "container_file_revision": "",
+    "container_relative_path": "",
+    "model_repo": "",
+    "model_relative_path": "",
+    "model_revision": "",
+    "model_dir": "",
+    "self_signed_cert": ""
+  },
+
+  "s3_fetch": {
+    "enabled": false,
+    "aws_secret": "",
+    "aws_access": "",
+    "region": "",
+    "endpoint": "",
+    "bucket_name": "",
+    "self_signed_cert": ""
+  },
+
+  "gitops": {
+    "enabled": false,
+    "token": "",
+    "username": "",
+    "repo": "",
+    "api_server": "",
+    "branch": ""
+  }
+}
