@@ -34,7 +34,7 @@ GO=go
 GOFLAGS=""
 
 go-test:
-	(cd test/e2e-tests/tests ${GO} test -timeout 60m -shuffle off)
+	(cd test/e2e-tests/tests && ${GO} test -timeout 60m -shuffle off)
 
 test:
 	${MAKE} -C cli cli-test
