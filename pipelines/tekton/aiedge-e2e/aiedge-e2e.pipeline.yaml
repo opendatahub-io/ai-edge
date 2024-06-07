@@ -48,7 +48,7 @@ spec:
   - name: model-registry-hostname
     type: string
     default: ""
-    description: The servicename route for model registry 
+    description: The domain name of the model registry 
   - name: model-registry-enabled
     type: string
     default: "false"

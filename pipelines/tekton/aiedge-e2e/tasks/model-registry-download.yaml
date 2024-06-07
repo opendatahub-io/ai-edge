@@ -68,7 +68,7 @@ spec:
         echo -n "MODEL VERSION ID is $MODEL_VERSION_ID"
 
         if [[ ! -z "$MODEL_ID" ]]; then
-          echo -n "fetching parameters from model-registry"
+          echo -n "Fetching parameters from model-registry"
 
           export FETCH_MODEL=$(curl --silent -X 'GET' \
           "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json' | \

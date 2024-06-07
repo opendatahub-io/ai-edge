@@ -118,11 +118,14 @@ Create a copy of the file(s) below to include the required credentials for acces
     $ oc secret link pipeline credentials-image-registry
     ```
 ### Setup ODH Model Registry for Storing Models
-Setting up the Model Registry using [Model Registry Operator](https://github.com/opendatahub-io/model-registry-operator?tab=readme-ov-file#running-on-the-cluster) or the ODH Operator. We are currently using the MySQL Db of MR and needs the `serviceRoute` enabled [here](https://github.com/opendatahub-io/model-registry-operator/blob/main/config/samples/mysql/modelregistry_v1alpha1_modelregistry.yaml#L17). Once this option is set to enabled we add the MR Route under `model-registry-hostname` parameter to the pipeline run file. Following this we simply run the existing pipeline create commands to start the pipeline. 
+- Set up the Model Registry using [Model Registry Operator](https://github.com/opendatahub-io/model-registry-operator?tab=readme-ov-file#running-on-the-cluster) or the ODH Operator.
+- We are currently using the MySQL Db of MR and needs the `serviceRoute` enabled [here](https://github.com/opendatahub-io/model-registry-operator/blob/main/config/samples/mysql/modelregistry_v1alpha1_modelregistry.yaml#L17).
+- Once this option is set to enabled we add the MR host name under `model-registry-hostname` parameter to the pipeline run file.
+- Following this we simply run the existing pipeline create commands to start the pipeline.
 
 ![MR Schema](docs/images/edge-MR.png)
 
-The current workflow supports the above schema for storing the model parameters in the MR where the parameters from the pipeline run model is stored in the Model Version as a `customProperties` with `string_value` and `metadataType`.
+The current workflow supports the above schema for storing the model parameters in the MR, where the parameters for the PipelineRun model are stored in the Model Version as `customProperties`.
 
 ### Data for testing the model inferencing endpoint
 To verify that that model container is working successfully, the pipeline invokes a Task `test-model-rest-svc` which will send data to a testing container with the model inferencing endpoint and verify that expected output is returned.
