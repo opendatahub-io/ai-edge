@@ -12,7 +12,8 @@ spec:
   - name: model-version
     value: "2"
   - name: model-registry-hostname
-    value: "modelregistry-sample-http-default.apps.srbiswas-cluster2.dev.datahub.redhat.com"
+    value: "modelregistry-sample.odh-model-registry.svc:8080"
+    #Update this according to the cluster the pipelines are deployed in
   - name: git-containerfile-repo
     value: https://github.com/opendatahub-io/ai-edge.git
   - name: model-registry-enabled
