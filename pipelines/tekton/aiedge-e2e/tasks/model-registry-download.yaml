@@ -1,0 +1,108 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: model-registry-download
+spec:
+  description: This Task can be used to fetch a model properties from model registry when enabled or properties passed by pipelinerun 
+  params:
+  - name: model-name
+    type: string
+  - name: model-version
+    type: string
+  - name: model-registry-hostname
+    type: string
+    default: ""
+  - name: model-registry-enabled
+    type: string
+  - name: model-dir
+    type: string
+    default: "."
+  - name: git-model-repo
+    type: string
+    default: ""
+  - name: git-model-revision
+    type: string
+    default: "main"
+  - name: fetch-model
+    type: string  
+  - name: modelRelativePath
+    type: string
+    default: ""
+  - name: s3-bucket-name
+    type: string
+    default: ""
+  results:
+  - name: fetch-model
+    type: string
+    description: The fetch mechanism that will be forwarded to the pipeline
+  - name: git-model-repo
+    description: The GIT URI that will be forwarded to the pipeline
+  - name: s3-bucket-name
+    description: The s3 Bucket name that will be forwarded to the pipeline
+  - name: modelRelativePath
+    type: string
+  - name: model-dir
+    type: string
+  - name: git-model-revision
+    type: string
+  steps:
+  - name: download-model-registry
+    image: registry.access.redhat.com/ubi9/ubi
+    script: |
+      #!/usr/bin/env bash
+
+      set -Eeuo pipefail
+
+      if [ "$(params.model-registry-enabled)" == "true" ]; then
+        yum install jq -y
+
+        export MODEL_ID=$(curl --silent -X 'GET' \
+        "$(params.model-registry-hostname)/api/model_registry/v1alpha3/registered_models?" -H 'accept: application/json' | \
+        jq -r --arg MODEL_NAME "$(params.model-name)" '.items[] | select(.name == $MODEL_NAME).id')
+        
+        export MODEL_VERSION_ID=$(curl -X 'GET' \
+        "$(params.model-registry-hostname)/api/model_registry/v1alpha3/registered_models/$MODEL_ID/versions?" -H 'accept: application/json' | \
+        jq -r --arg MODEL_VERSION "$(params.model-version)" '.items[] | select(.name == $MODEL_VERSION).id')
+        
+        echo "MODEL ID = $MODEL_ID"
+        echo "MODEL VERSION ID = $MODEL_VERSION_ID"
+
+        if [ -z "$MODEL_ID" ]; then
+          echo "$MODEL_ID is invalid"
+          exit 1
+        fi
+        
+        echo "Fetching parameters from model-registry"
+
+        MODEL_VERSION_JSON=$(curl --silent -X 'GET' \
+        "$(params.model-registry-hostname)/api/model_registry/v1alpha3/model_versions/$MODEL_VERSION_ID" -H 'accept: application/json')
+
+        echo "######################################"
+        echo "MODEL_VERSION_JSON=$(echo "$MODEL_VERSION_JSON" | jq .)"
+        echo "######################################"
+        echo
+
+        fetch_param() {
+          local MODEL_PARAM_NAME=$1
+          local PARAM_RESULT=$2
+          local VALUE=$(echo "$MODEL_VERSION_JSON" | jq -r --arg PARAM "$MODEL_PARAM_NAME" '.customProperties[$PARAM].string_value')
+          echo -n "$MODEL_PARAM_NAME= "
+          echo -n "$VALUE" | tee "$PARAM_RESULT"
+          echo
+        }
+        fetch_param "fetch-model" $(results.fetch-model.path)
+        fetch_param "git-model-repo" $(results.git-model-repo.path)
+        fetch_param "git-model-revision" $(results.git-model-revision.path)
+        fetch_param "model-dir" $(results.model-dir.path)
+        fetch_param "modelRelativePath" $(results.modelRelativePath.path)
+        fetch_param "s3-bucket-name" $(results.s3-bucket-name.path)
+
+      else
+          echo -n "Using params from PipelineRun"
+          echo -n "$(params.fetch-model)" | tee $(results.fetch-model.path)
+          echo -n "$(params.git-model-repo)" | tee $(results.git-model-repo.path)
+          echo -n "$(params.git-model-revision)" | tee $(results.git-model-revision.path)
+          echo -n "$(params.model-dir)" | tee $(results.model-dir.path)
+          echo -n "$(params.modelRelativePath)" | tee $(results.modelRelativePath.path)
+          echo -n "$(params.s3-bucket-name)" | tee $(results.s3-bucket-name.path)
+      fi

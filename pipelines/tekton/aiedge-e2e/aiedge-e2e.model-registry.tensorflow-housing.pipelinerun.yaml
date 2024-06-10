@@ -1,0 +1,56 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  labels:
+    tekton.dev/pipeline: aiedge-e2e
+    model-name: tensorflow-housing
+  generateName: aiedge-e2e-
+spec:
+  params:
+  - name: model-name
+    value: tensorflow-housing
+  - name: model-version
+    value: "2"
+  - name: model-registry-hostname
+    value: "modelregistry-sample.odh-model-registry.svc:8080"
+    #Update this according to the cluster the pipelines are deployed in
+  - name: git-containerfile-repo
+    value: https://github.com/opendatahub-io/ai-edge.git
+  - name: model-registry-enabled
+    value: "true"
+  - name: git-containerfile-revision
+    value: "main"
+  - name: containerfileRelativePath
+    value: pipelines/containerfiles/Containerfile.openvino.mlserver.mlflow
+  - name: test-endpoint
+    value: "v1/models/tensorflow-housing/versions/1:predict"
+  - name: candidate-image-tag-reference
+    value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)-candidate
+  - name: target-image-tag-references
+    value:
+    - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)-$(context.pipelineRun.uid)
+    - quay.io/rhoai-edge/$(params.model-name):$(params.model-version)
+    - quay.io/rhoai-edge/$(params.model-name):latest
+  - name: upon-end
+    value: "delete"
+  pipelineRef:
+    name: aiedge-e2e
+  serviceAccountName: pipeline
+  timeout: 1h0m0s
+  workspaces:
+  - name: build-workspace-pv
+    # Have the tekton controller allocate a PVC for each pipeline run that persists for the life of each PipelineRun object.
+    # NOTE: This PVC will be deleted by the Tekton controller when the PipelineRun is deleted
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+  - name: s3-secret
+    secret:
+        secretName: credentials-s3
+  - configMap:
+      name: tensorflow-housing-test-data
+    name: test-data

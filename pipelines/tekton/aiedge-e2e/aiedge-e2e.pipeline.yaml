@@ -28,6 +28,7 @@ spec:
   - name: modelRelativePath
     type: string
     description: "Location of the model within the context of the source location.  Leave blank if the model files are at the root of the source location."
+    default: ""
   - name: model-dir
     type: string
     description: Directory below <modelRelativePath>/<model-name>/ to be used as MODEL_DIR in image build.
@@ -35,6 +36,7 @@ spec:
   - name: fetch-model
     type: string
     description: "Fetch the model from Git or S3. Valid values in [s3, git]"
+    default: ""
   - name: git-model-repo
     type: string
     description: The git repo url where the model files are stored
@@ -43,6 +45,14 @@ spec:
     type: string
     description: The Git ref to use when cloning the git repo with the saved model
     default: "main"
+  - name: model-registry-hostname
+    type: string
+    default: ""
+    description: The domain name of the model registry 
+  - name: model-registry-enabled
+    type: string
+    default: "false"
+    description: "Using model registry when enabled"
   - name: test-endpoint
     type: string
     description: The inferencing endpoint for the model to use for testing
@@ -116,26 +126,53 @@ spec:
     description: The buildah version used to build the model container image
     value: $(tasks.retrieve-build-image-info.results.buildah-version)
   tasks:
+  - name: fetch-model-params
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: model-version
+      value: $(params.model-version)
+    - name: model-registry-hostname
+      value: $(params.model-registry-hostname)
+    - name: model-registry-enabled
+      value: $(params.model-registry-enabled)
+    - name: model-dir
+      value: $(params.model-dir)
+    - name: git-model-repo
+      value: $(params.git-model-repo)
+    - name: git-model-revision
+      value: $(params.git-model-revision)
+    - name: fetch-model
+      value: $(params.fetch-model)
+    - name: modelRelativePath
+      value: $(params.modelRelativePath)
+    - name: s3-bucket-name
+      value: $(params.s3-bucket-name)
+    taskRef:
+      kind: Task
+      name: model-registry-download
   - name: fetch-model-git
     taskRef:
       kind: ClusterTask
       name: git-clone
     params:
     - name: url
-      value: $(params.git-model-repo)
+      value: $(tasks.fetch-model-params.results.git-model-repo)
     - name: revision
-      value: $(params.git-model-revision)
+      value: $(tasks.fetch-model-params.results.git-model-revision)
     - name: subdirectory
-      value: /model_dir-$(params.model-name)/
+      value: model_dir-$(params.model-name)/
     workspaces:
     - name: output
       workspace: build-workspace-pv
     - name: ssl-ca-directory
       workspace: git-ssl-cert
     when:
-    - input: "$(params.fetch-model)"
+    - input: "$(tasks.fetch-model-params.results.fetch-model)"
       operator: in
       values: ["git"]
+    runAfter:
+    - fetch-model-params
   # Use kserve-download-model container image to fetch from S3 storage
   - name: fetch-model-s3
     params:
@@ -156,9 +193,11 @@ spec:
     - name: ssl-ca-directory
       workspace: s3-ssl-cert
     when:
-    - input: "$(params.fetch-model)"
+    - input: "$(tasks.fetch-model-params.results.fetch-model)"
       operator: in
       values: ["s3"]
+    runAfter:
+    - fetch-model-params
   - name: git-clone-containerfile-repo
     params:
     - name: url
@@ -185,7 +224,7 @@ spec:
     - name: model-name
       value: $(params.model-name)
     - name: modelRelativePath
-      value: $(params.modelRelativePath)
+      value: $(tasks.fetch-model-params.results.modelRelativePath)
     - name: containerfilePath
       value: containerfile_repo/$(params.containerfileRelativePath)
     - name: current-namespace
@@ -209,13 +248,13 @@ spec:
     - name: DOCKERFILE
       value: containerfile_repo/$(params.containerfileRelativePath)
     - name: CONTEXT
-      value: model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)
+      value: model_dir-$(params.model-name)/$(tasks.fetch-model-params.results.modelRelativePath)/$(params.model-name)
     - name: TLSVERIFY
       value: "true"
     - name: FORMAT
       value: oci
     - name: BUILD_EXTRA_ARGS
-      value: "--build-arg MODEL_NAME=$(params.model-name) --build-arg MODEL_DIR=$(params.model-dir)"
+      value: "--build-arg MODEL_NAME=$(params.model-name) --build-arg MODEL_DIR=$(tasks.fetch-model-params.results.model-dir)"
     - name: SKIP_PUSH
       value: "false"
     runAfter:
