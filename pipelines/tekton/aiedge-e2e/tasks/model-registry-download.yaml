@@ -9,28 +9,28 @@ spec:
     type: string
   - name: model-version
     type: string
-  #Values to be passed by pipeline run when model register is disabled
-  - name: s3-bucket-name
+  - name: model-registry-hostname
     type: string
     default: ""
-  - name: modelRelativePath
+  - name: model-registry-enabled
     type: string
   - name: model-dir
     type: string
     default: "."
-  - name: fetch-model
-    type: string
   - name: git-model-repo
     type: string
     default: ""
   - name: git-model-revision
     type: string
     default: "main"
-  - name: model-registry-hostname
+  - name: fetch-model
+    type: string  
+  - name: modelRelativePath
     type: string
     default: ""
-  - name: model-registry-enabled
+  - name: s3-bucket-name
     type: string
+    default: ""
   results:
   - name: fetch-model
     type: string

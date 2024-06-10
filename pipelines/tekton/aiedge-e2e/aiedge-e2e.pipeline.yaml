@@ -136,12 +136,12 @@ spec:
       value: $(params.model-registry-hostname)
     - name: model-registry-enabled
       value: $(params.model-registry-enabled)
+    - name: model-dir
+      value: $(params.model-dir)
     - name: git-model-repo
       value: $(params.git-model-repo)
     - name: git-model-revision
       value: $(params.git-model-revision)
-    - name: model-dir
-      value: $(params.model-dir)
     - name: fetch-model
       value: $(params.fetch-model)
     - name: modelRelativePath
