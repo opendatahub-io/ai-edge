@@ -5,7 +5,7 @@
 MAKE_ENV_FILE = local.vars.mk
 -include $(MAKE_ENV_FILE)
 
-.PHONY: setup-observability test-acm-%-generate test go-test go-test-setup
+.PHONY: setup-observability test-acm-%-generate test go-test
 
 # Setup the secret required for observability then generate and apply the files
 setup-observability: acm/odh-core/acm-observability/kustomization.yaml
