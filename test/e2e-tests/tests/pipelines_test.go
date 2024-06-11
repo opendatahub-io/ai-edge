@@ -3,6 +3,7 @@ package tests
 import (
 	"fmt"
 	"github.com/opendatahub-io/ai-edge/test/e2e-tests/support"
+	v1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
@@ -20,9 +21,16 @@ const (
 	GitOpsUpdateTensorflowHousingPipelineRunRelativePath = GitOpsUpdatePipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml"
 )
 
+var (
+	TestStartTime time.Time
+)
+
 // init is called before any test is run, and it is called once.
 // This is used to build then apply the kustomize config for each pipeline
 func init() {
+
+	TestStartTime = time.Now() // used to track when pipeline runs were created
+
 	ctx := CreateContext()
 
 	config, err := support.GetConfig()
@@ -174,25 +182,32 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 		support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(config.GitOpsConfig.Branch), &pipelineRun)
 
 		// we need to get the results from the pipeline run created by the ml ops pipeline, we also need
-		// to get the correct one that is for this model, we know there is one of each type
+		// to get the correct one that is for this model. Using the correct label and ensuring it was
+		// created after the tests have started then we can ensure we are getting the correct one
 		completedPipelineRuns, err := config.Clients.PipelineRun.List(ctx, metav1.ListOptions{
 			LabelSelector: p.label,
-			Limit:         1,
 		})
 		if err != nil {
 			t.Fatal(err.Error())
 		}
 
-		if len(completedPipelineRuns.Items) != 1 {
-			t.Fatal(fmt.Errorf("no pipeline runs found with label `%v` when fetching results for gitops pipeline", p.label))
+		var targetPipelineRun *v1.PipelineRun
+		for i := 0; i < len(completedPipelineRuns.Items); i += 1 {
+			if completedPipelineRuns.Items[i].CreationTimestamp.After(TestStartTime) {
+				targetPipelineRun = &completedPipelineRuns.Items[i]
+			}
 		}
 
-		imageDigest, err := support.GetResultValueFromPipelineRun("buildah-sha", &completedPipelineRuns.Items[0])
+		if targetPipelineRun == nil {
+			t.Fatal(fmt.Errorf("no pipeline run found with label %v that was created during testing", p.label))
+		}
+
+		imageDigest, err := support.GetResultValueFromPipelineRun("buildah-sha", targetPipelineRun)
 		if err != nil {
 			t.Fatal(err.Error())
 		}
 
-		imageTagReferences, err := support.GetResultValueFromPipelineRun("target-image-tag-references", &completedPipelineRuns.Items[0])
+		imageTagReferences, err := support.GetResultValueFromPipelineRun("target-image-tag-references", targetPipelineRun)
 		if err != nil {
 			t.Fatal(err.Error())
 		}
