@@ -5,6 +5,7 @@ import (
 	"github.com/opendatahub-io/ai-edge/test/e2e-tests/support"
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 	"testing"
 	"time"
 )
@@ -18,44 +19,6 @@ const (
 	GitOpsUpdateBikeRentalsPipelineRunRelativePath       = GitOpsUpdatePipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml"
 	GitOpsUpdateTensorflowHousingPipelineRunRelativePath = GitOpsUpdatePipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml"
 )
-
-func CreateContext() context.Context {
-	return context.Background()
-}
-
-func WaitForAllPipelineRunsToComplete(ctx context.Context, config *support.Config) error {
-	callback := func() (bool, error) {
-		list, err := config.Clients.PipelineRun.List(ctx, metav1.ListOptions{})
-		if err != nil {
-			return false, err
-		}
-
-		pipelineStillRunning := false
-
-		for _, pipelineRun := range list.Items {
-			// conditions may be empty when pipeline run is first created
-			// this means it is counted as still running
-			if len(pipelineRun.Status.Conditions) == 0 {
-				pipelineStillRunning = true
-				break
-			}
-
-			for _, condition := range pipelineRun.Status.Conditions {
-				if condition.Reason == "Failed" {
-					return false, fmt.Errorf("pipelineRun \"%v\" failed with message \"%v\"", pipelineRun.Name, condition.Message)
-
-				} else if condition.Reason == "Running" {
-					pipelineStillRunning = true
-					break
-				}
-			}
-		}
-
-		return !pipelineStillRunning, nil
-	}
-
-	return support.WaitFor(18*time.Minute, 10*time.Second, callback)
-}
 
 // init is called before any test is run, and it is called once.
 // This is used to build then apply the kustomize config for each pipeline
@@ -177,7 +140,7 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 	}
 
 	if !config.GitFetchConfig.Enabled && !config.S3FetchConfig.Enabled {
-		t.Skipf("skipping %v, neither fetch methods were not configured", t.Name())
+		t.Skipf("skipping %v, neither git_fetch or s3_fetch was not enabled", t.Name())
 	}
 
 	clients, err := support.CreateClients(config.Namespace)
@@ -185,26 +148,21 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	// the pipeline runs we can run here are based on the fetch models used by the mlops pipeline
-	// because this pipeline depends on the finished pipeline run of the mlops pipeline
-	// -> https://issues.redhat.com/browse/RHOAIENG-4982
-	// there is also a possibilty to split these based on the fetch types like the mlops pipeline
-	var pipelineRunPaths []string
-	if config.GitFetchConfig.Enabled {
-		pipelineRunPaths = append(pipelineRunPaths, GitOpsUpdateTensorflowHousingPipelineRunRelativePath)
-	}
-
-	if config.S3FetchConfig.Enabled {
-		pipelineRunPaths = append(pipelineRunPaths, GitOpsUpdateBikeRentalsPipelineRunRelativePath)
-	}
-
 	gitURL, err := support.ParseGitURL(config.GitOpsConfig.Repo)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	for _, path := range pipelineRunPaths {
-		pipelineRun, err := support.ReadFileAsPipelineRun(path)
+	pipelineRunFilesAndLabels := []struct {
+		pipelineRun string
+		label       string
+	}{
+		{pipelineRun: GitOpsUpdateTensorflowHousingPipelineRunRelativePath, label: "model-name=tensorflow-housing"},
+		{pipelineRun: GitOpsUpdateBikeRentalsPipelineRunRelativePath, label: "model-name=bike-rentals-auto-ml"},
+	}
+
+	for _, p := range pipelineRunFilesAndLabels {
+		pipelineRun, err := support.ReadFileAsPipelineRun(p.pipelineRun)
 		if err != nil {
 			t.Fatal(err.Error())
 		}
@@ -214,6 +172,36 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 		support.SetPipelineRunParam("gitOrgName", support.NewStringParamValue(gitURL.OrgName), &pipelineRun)
 		support.SetPipelineRunParam("gitRepoName", support.NewStringParamValue(gitURL.RepoName), &pipelineRun)
 		support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(config.GitOpsConfig.Branch), &pipelineRun)
+
+		// we need to get the results from the pipeline run created by the ml ops pipeline, we also need
+		// to get the correct one that is for this model, we know there is one of each type
+		completedPipelineRuns, err := config.Clients.PipelineRun.List(ctx, metav1.ListOptions{
+			LabelSelector: p.label,
+			Limit:         1,
+		})
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+
+		if len(completedPipelineRuns.Items) != 1 {
+			t.Fatal(fmt.Errorf("no pipeline runs found with label `%v` when fetching results for gitops pipeline", p.label))
+		}
+
+		imageDigest, err := support.GetResultValueFromPipelineRun("buildah-sha", &completedPipelineRuns.Items[0])
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+
+		imageTagReferences, err := support.GetResultValueFromPipelineRun("target-image-tag-references", &completedPipelineRuns.Items[0])
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+
+		// there may be edge cases here where this fails
+		registryRepo := strings.Split(imageTagReferences.StringVal, " ")[0]
+
+		support.SetPipelineRunParam("image-digest", support.NewStringParamValue(imageDigest.StringVal), &pipelineRun)
+		support.SetPipelineRunParam("image-registry-repo", support.NewStringParamValue(registryRepo), &pipelineRun)
 
 		_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 		if err != nil {
@@ -225,4 +213,42 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 	if err != nil {
 		t.Fatal(err.Error())
 	}
+}
+
+func CreateContext() context.Context {
+	return context.Background()
+}
+
+func WaitForAllPipelineRunsToComplete(ctx context.Context, config *support.Config) error {
+	callback := func() (bool, error) {
+		list, err := config.Clients.PipelineRun.List(ctx, metav1.ListOptions{})
+		if err != nil {
+			return false, err
+		}
+
+		pipelineStillRunning := false
+
+		for _, pipelineRun := range list.Items {
+			// conditions may be empty when pipeline run is first created
+			// this means it is counted as still running
+			if len(pipelineRun.Status.Conditions) == 0 {
+				pipelineStillRunning = true
+				break
+			}
+
+			for _, condition := range pipelineRun.Status.Conditions {
+				if condition.Reason == "Failed" {
+					return false, fmt.Errorf("pipelineRun \"%v\" failed with message \"%v\"", pipelineRun.Name, condition.Message)
+
+				} else if condition.Reason == "Running" {
+					pipelineStillRunning = true
+					break
+				}
+			}
+		}
+
+		return !pipelineStillRunning, nil
+	}
+
+	return support.WaitFor(18*time.Minute, 10*time.Second, callback)
 }
