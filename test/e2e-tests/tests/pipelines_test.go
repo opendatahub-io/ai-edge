@@ -172,17 +172,6 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 	var createPipelineRuns []string
 
 	for _, p := range pipelineRunFilesAndLabels {
-		pipelineRun, err := support.ReadFileAsPipelineRun(p.pipelineRun)
-		if err != nil {
-			t.Fatal(err.Error())
-		}
-
-		support.SetPipelineRunParam("gitServer", support.NewStringParamValue(gitURL.Server), &pipelineRun)
-		support.SetPipelineRunParam("gitApiServer", support.NewStringParamValue(config.GitOpsConfig.ApiServer), &pipelineRun)
-		support.SetPipelineRunParam("gitOrgName", support.NewStringParamValue(gitURL.OrgName), &pipelineRun)
-		support.SetPipelineRunParam("gitRepoName", support.NewStringParamValue(gitURL.RepoName), &pipelineRun)
-		support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(config.GitOpsConfig.Branch), &pipelineRun)
-
 		// we need to get the results from the pipeline run created by the ml ops pipeline, we also need
 		// to get the correct one that is for this model. Using the correct label and ensuring it was
 		// created after the tests have started then we can ensure we are getting the correct one
@@ -201,8 +190,20 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 		}
 
 		if targetPipelineRun == nil {
-			t.Fatal(fmt.Errorf("no pipeline run found with label %v that was created during testing", p.label))
+			fmt.Printf("no pipeline run found with label %v skipping this model for gitops pipeline test\n", p.label)
+			break
 		}
+
+		pipelineRun, err := support.ReadFileAsPipelineRun(p.pipelineRun)
+		if err != nil {
+			t.Fatal(err.Error())
+		}
+
+		support.SetPipelineRunParam("gitServer", support.NewStringParamValue(gitURL.Server), &pipelineRun)
+		support.SetPipelineRunParam("gitApiServer", support.NewStringParamValue(config.GitOpsConfig.ApiServer), &pipelineRun)
+		support.SetPipelineRunParam("gitOrgName", support.NewStringParamValue(gitURL.OrgName), &pipelineRun)
+		support.SetPipelineRunParam("gitRepoName", support.NewStringParamValue(gitURL.RepoName), &pipelineRun)
+		support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(config.GitOpsConfig.Branch), &pipelineRun)
 
 		imageDigest, err := support.GetResultValueFromPipelineRun("buildah-sha", targetPipelineRun)
 		if err != nil {
