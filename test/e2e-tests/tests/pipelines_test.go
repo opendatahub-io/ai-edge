@@ -83,12 +83,12 @@ func Test_MLOpsPipeline_S3Fetch(t *testing.T) {
 	support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(config.S3FetchConfig.BucketName), &pipelineRun)
 	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
 
-	_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+	createdRun, err := config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	err = WaitForAllPipelineRunsToComplete(ctx, config)
+	err = WaitForAllPipelineRunsToComplete(ctx, []string{createdRun.Name}, config)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -124,12 +124,12 @@ func Test_MLOpsPipeline_GitFetch(t *testing.T) {
 	support.SetPipelineRunParam("git-model-revision", support.NewStringParamValue(config.GitFetchConfig.ModelRevision), &pipelineRun)
 	support.SetPipelineRunParam("model-dir", support.NewStringParamValue(config.GitFetchConfig.ModelDir), &pipelineRun)
 
-	_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+	createdRun, err := config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	err = WaitForAllPipelineRunsToComplete(ctx, config)
+	err = WaitForAllPipelineRunsToComplete(ctx, []string{createdRun.Name}, config)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -168,6 +168,8 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 		{pipelineRun: GitOpsUpdateTensorflowHousingPipelineRunRelativePath, label: "model-name=tensorflow-housing"},
 		{pipelineRun: GitOpsUpdateBikeRentalsPipelineRunRelativePath, label: "model-name=bike-rentals-auto-ml"},
 	}
+
+	var createPipelineRuns []string
 
 	for _, p := range pipelineRunFilesAndLabels {
 		pipelineRun, err := support.ReadFileAsPipelineRun(p.pipelineRun)
@@ -218,13 +220,15 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 		support.SetPipelineRunParam("image-digest", support.NewStringParamValue(imageDigest.StringVal), &pipelineRun)
 		support.SetPipelineRunParam("image-registry-repo", support.NewStringParamValue(registryRepo), &pipelineRun)
 
-		_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+		createdRun, err := clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 		if err != nil {
 			t.Fatal(err.Error())
 		}
+
+		createPipelineRuns = append(createPipelineRuns, createdRun.Name)
 	}
 
-	err = WaitForAllPipelineRunsToComplete(ctx, config)
+	err = WaitForAllPipelineRunsToComplete(ctx, createPipelineRuns, config)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -234,16 +238,36 @@ func CreateContext() context.Context {
 	return context.Background()
 }
 
-func WaitForAllPipelineRunsToComplete(ctx context.Context, config *support.Config) error {
+func WaitForAllPipelineRunsToComplete(ctx context.Context, pipelineRunNames []string, config *support.Config) error {
 	callback := func() (bool, error) {
-		list, err := config.Clients.PipelineRun.List(ctx, metav1.ListOptions{})
-		if err != nil {
-			return false, err
+		var pipelineRuns []v1.PipelineRun
+
+		// need to list each one as you can't use FieldSelector wtih an or operator
+		// ideally you could do.. metadata.name=X||metadata.name=Y
+		for _, name := range pipelineRunNames {
+			list, err := config.Clients.PipelineRun.List(ctx, metav1.ListOptions{
+				Limit:         1,
+				FieldSelector: fmt.Sprintf("metadata.name=%v", name),
+			})
+
+			if err != nil {
+				return false, err
+			}
+
+			if len(list.Items) != 1 {
+				return false, fmt.Errorf("pipelineRun \"%v\" could not be found when trying to get it's status", name)
+			}
+
+			pipelineRuns = append(pipelineRuns, list.Items[0])
 		}
 
 		pipelineStillRunning := false
 
-		for _, pipelineRun := range list.Items {
+		// checking the status of each run:
+		// any of failed or cancelled -> return with error
+		// some have finished but not all -> continue
+		// all of finished -> return with no error
+		for _, pipelineRun := range pipelineRuns {
 			// conditions may be empty when pipeline run is first created
 			// this means it is counted as still running
 			if len(pipelineRun.Status.Conditions) == 0 {
@@ -252,12 +276,18 @@ func WaitForAllPipelineRunsToComplete(ctx context.Context, config *support.Confi
 			}
 
 			for _, condition := range pipelineRun.Status.Conditions {
-				if condition.Reason == "Failed" {
-					return false, fmt.Errorf("pipelineRun \"%v\" failed with message \"%v\"", pipelineRun.Name, condition.Message)
-
-				} else if condition.Reason == "Running" {
+				switch condition.Reason {
+				case "Cancelled":
+					return true, fmt.Errorf("pipelineRun \"%v\" was cancelled while running", pipelineRun.Name)
+				case "Failed":
+					return true, fmt.Errorf("pipelineRun \"%v\" failed with message \"%v\"", pipelineRun.Name, condition.Message)
+				case "Running":
+					// not returning here allows for checking all existing runs to see if they have failed
 					pipelineStillRunning = true
 					break
+				case "Completed":
+					return true, nil
+
 				}
 			}
 		}
@@ -265,5 +295,5 @@ func WaitForAllPipelineRunsToComplete(ctx context.Context, config *support.Confi
 		return !pipelineStillRunning, nil
 	}
 
-	return support.WaitFor(18*time.Minute, 10*time.Second, callback)
+	return support.WaitFor(30*time.Minute, 10*time.Second, callback)
 }

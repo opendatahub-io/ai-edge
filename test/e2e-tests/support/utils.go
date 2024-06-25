@@ -5,6 +5,9 @@ import (
 	"time"
 )
 
+// WaitFor call a given function over a duration each tick given
+// if the function return true then it is complete
+// if the function ever returns an error then we stop checking and return
 func WaitFor(duration time.Duration, tickRate time.Duration, f func() (bool, error)) error {
 	timeout := time.After(duration)
 	tick := time.Tick(tickRate)
