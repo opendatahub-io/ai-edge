@@ -15,7 +15,7 @@ The e2e-tests use a `config.json` to read values passed to it. in the `e2e-tests
 cp template.config.json config.json
 ```
 
-The structure of the `config.json` is in four sections, the top level fields, `git_fetch`, `s3_fetch` and gitops. All fields at the top level are required.
+The structure of the `config.json` is in four sections, the top level fields, `git_fetch`, `s3_fetch` and `gitops`. All fields at the top level are required.
 
 - `namespace` - Cluster namespace that tests are run in
 - `image_registry_username` - quay.io username

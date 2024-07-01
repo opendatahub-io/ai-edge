@@ -1,18 +1,18 @@
 {
-  "namespace": "",
-  "image_registry_username": "",
+  "namespace": "my-test-namespace",
+  "image_registry_username": "username+myrobot",
   "image_registry_password": "",
-  "target_image_tags": [],
+  "target_image_tags": ["quay.io/username/repo:latest"],
 
   "git_fetch": {
     "enabled": false,
-    "container_file_repo": "",
-    "container_file_revision": "",
-    "container_relative_path": "",
-    "model_repo": "",
-    "model_relative_path": "",
-    "model_revision": "",
-    "model_dir": "",
+    "container_file_repo": "https://github.com/opendatahub-io/ai-edge.git",
+    "container_file_revision": "main",
+    "container_relative_path": "path/to/containerfile/containerfile.openvino.mlserver.mlflow",
+    "model_repo": "https://github.com/opendatahub-io/ai-edge.git",
+    "model_relative_path": "path/to/model",
+    "model_revision": "main",
+    "model_dir": "model_dir_name",
     "self_signed_cert": ""
   },
 
@@ -20,18 +20,18 @@
     "enabled": false,
     "aws_secret": "",
     "aws_access": "",
-    "region": "",
-    "endpoint": "",
-    "bucket_name": "",
+    "region": "us-east-2",
+    "endpoint": "https://s3.us-west-2.amazonaws.com",
+    "bucket_name": "mybucket",
     "self_signed_cert": ""
   },
 
   "gitops": {
     "enabled": false,
-    "token": "",
-    "username": "",
-    "repo": "",
-    "api_server": "",
-    "branch": ""
+    "token": "github_pat_AJSHD12312312jbjj1h231",
+    "username": "githubusername",
+    "repo": "https://github.com/jackdelahunt/ai-edge",
+    "api_server": "api.github.com",
+    "branch": "main"
   }
 }
