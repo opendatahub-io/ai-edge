@@ -1,6 +1,7 @@
 package support
 
 import (
+	"fmt"
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 	v1 "k8s.io/api/core/v1"
 	"os"
@@ -60,4 +61,14 @@ func ReadFileAsPipelineRun(path string) (pipelinev1.PipelineRun, error) {
 	}
 
 	return pipelineRun, nil
+}
+
+func GetResultValueFromPipelineRun(resultName string, pipelineRun *pipelinev1.PipelineRun) (pipelinev1.ResultValue, error) {
+	for _, result := range pipelineRun.Status.Results {
+		if result.Name == resultName {
+			return result.Value, nil
+		}
+	}
+
+	return pipelinev1.ResultValue{}, fmt.Errorf("no result with name %v in pipeline run %v", resultName, pipelineRun.Name)
 }
