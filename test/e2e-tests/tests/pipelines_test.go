@@ -3,7 +3,6 @@ package tests
 import (
 	"fmt"
 	"github.com/opendatahub-io/ai-edge/test/e2e-tests/support"
-	v1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
@@ -22,15 +21,13 @@ const (
 )
 
 var (
-	TestStartTime time.Time
+	MLOpsTensorflowHousingCreatePipelineRunName string = ""
+	MLOpsBikeRentalsCreatePipelineRunName       string = ""
 )
 
 // init is called before any test is run, and it is called once.
 // This is used to build then apply the kustomize config for each pipeline
 func init() {
-
-	TestStartTime = time.Now() // used to track when pipeline runs were created
-
 	ctx := CreateContext()
 
 	config, err := support.GetConfig()
@@ -83,12 +80,14 @@ func Test_MLOpsPipeline_S3Fetch(t *testing.T) {
 	support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(config.S3FetchConfig.BucketName), &pipelineRun)
 	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
 
-	_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+	createdRun, err := config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	err = WaitForAllPipelineRunsToComplete(ctx, config)
+	MLOpsBikeRentalsCreatePipelineRunName = createdRun.Name
+
+	err = WaitForAllPipelineRunsToComplete(ctx, createdRun.Name, config)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -124,18 +123,21 @@ func Test_MLOpsPipeline_GitFetch(t *testing.T) {
 	support.SetPipelineRunParam("git-model-revision", support.NewStringParamValue(config.GitFetchConfig.ModelRevision), &pipelineRun)
 	support.SetPipelineRunParam("model-dir", support.NewStringParamValue(config.GitFetchConfig.ModelDir), &pipelineRun)
 
-	_, err = config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+	createdRun, err := config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 
-	err = WaitForAllPipelineRunsToComplete(ctx, config)
+	// saved so gitops test knows which pipeline run to get the results from
+	MLOpsTensorflowHousingCreatePipelineRunName = createdRun.Name
+
+	err = WaitForAllPipelineRunsToComplete(ctx, createdRun.Name, config)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
 }
 
-func Test_GitOpsUpdatePipeline(t *testing.T) {
+func Test_GitOpsUpdatePipeline_S3Fetch(t *testing.T) {
 	ctx := CreateContext()
 
 	config, err := support.GetConfig()
@@ -147,8 +149,8 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 		t.Skipf("skipping %v, Gitops pipeline not configured", t.Name())
 	}
 
-	if !config.GitFetchConfig.Enabled && !config.S3FetchConfig.Enabled {
-		t.Skipf("skipping %v, neither git_fetch or s3_fetch was not enabled", t.Name())
+	if !config.S3FetchConfig.Enabled {
+		t.Skipf("skipping %v, s3_fetch was not enabled", t.Name())
 	}
 
 	clients, err := support.CreateClients(config.Namespace)
@@ -161,70 +163,115 @@ func Test_GitOpsUpdatePipeline(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	pipelineRunFilesAndLabels := []struct {
-		pipelineRun string
-		label       string
-	}{
-		{pipelineRun: GitOpsUpdateTensorflowHousingPipelineRunRelativePath, label: "model-name=tensorflow-housing"},
-		{pipelineRun: GitOpsUpdateBikeRentalsPipelineRunRelativePath, label: "model-name=bike-rentals-auto-ml"},
+	pipelineRun, err := support.ReadFileAsPipelineRun(GitOpsUpdateBikeRentalsPipelineRunRelativePath)
+	if err != nil {
+		t.Fatal(err.Error())
 	}
 
-	for _, p := range pipelineRunFilesAndLabels {
-		pipelineRun, err := support.ReadFileAsPipelineRun(p.pipelineRun)
-		if err != nil {
-			t.Fatal(err.Error())
-		}
+	support.SetPipelineRunParam("gitServer", support.NewStringParamValue(gitURL.Server), &pipelineRun)
+	support.SetPipelineRunParam("gitApiServer", support.NewStringParamValue(config.GitOpsConfig.ApiServer), &pipelineRun)
+	support.SetPipelineRunParam("gitOrgName", support.NewStringParamValue(gitURL.OrgName), &pipelineRun)
+	support.SetPipelineRunParam("gitRepoName", support.NewStringParamValue(gitURL.RepoName), &pipelineRun)
+	support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(config.GitOpsConfig.Branch), &pipelineRun)
 
-		support.SetPipelineRunParam("gitServer", support.NewStringParamValue(gitURL.Server), &pipelineRun)
-		support.SetPipelineRunParam("gitApiServer", support.NewStringParamValue(config.GitOpsConfig.ApiServer), &pipelineRun)
-		support.SetPipelineRunParam("gitOrgName", support.NewStringParamValue(gitURL.OrgName), &pipelineRun)
-		support.SetPipelineRunParam("gitRepoName", support.NewStringParamValue(gitURL.RepoName), &pipelineRun)
-		support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(config.GitOpsConfig.Branch), &pipelineRun)
-
-		// we need to get the results from the pipeline run created by the ml ops pipeline, we also need
-		// to get the correct one that is for this model. Using the correct label and ensuring it was
-		// created after the tests have started then we can ensure we are getting the correct one
-		completedPipelineRuns, err := config.Clients.PipelineRun.List(ctx, metav1.ListOptions{
-			LabelSelector: p.label,
-		})
-		if err != nil {
-			t.Fatal(err.Error())
-		}
-
-		var targetPipelineRun *v1.PipelineRun
-		for i := 0; i < len(completedPipelineRuns.Items); i += 1 {
-			if completedPipelineRuns.Items[i].CreationTimestamp.After(TestStartTime) {
-				targetPipelineRun = &completedPipelineRuns.Items[i]
-			}
-		}
-
-		if targetPipelineRun == nil {
-			t.Fatal(fmt.Errorf("no pipeline run found with label %v that was created during testing", p.label))
-		}
-
-		imageDigest, err := support.GetResultValueFromPipelineRun("buildah-sha", targetPipelineRun)
-		if err != nil {
-			t.Fatal(err.Error())
-		}
-
-		imageTagReferences, err := support.GetResultValueFromPipelineRun("target-image-tag-references", targetPipelineRun)
-		if err != nil {
-			t.Fatal(err.Error())
-		}
-
-		// there may be edge cases here where this fails
-		registryRepo := strings.Split(imageTagReferences.StringVal, " ")[0]
-
-		support.SetPipelineRunParam("image-digest", support.NewStringParamValue(imageDigest.StringVal), &pipelineRun)
-		support.SetPipelineRunParam("image-registry-repo", support.NewStringParamValue(registryRepo), &pipelineRun)
-
-		_, err = clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
-		if err != nil {
-			t.Fatal(err.Error())
-		}
+	// we need to get the results from the pipeline run created by the ml ops pipeline
+	mlopsPipelineRun, err := config.Clients.PipelineRun.Get(ctx, MLOpsBikeRentalsCreatePipelineRunName, metav1.GetOptions{})
+	if err != nil {
+		t.Fatal(err.Error())
 	}
 
-	err = WaitForAllPipelineRunsToComplete(ctx, config)
+	imageDigest, err := support.GetResultValueFromPipelineRun("buildah-sha", mlopsPipelineRun)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	imageTagReferences, err := support.GetResultValueFromPipelineRun("target-image-tag-references", mlopsPipelineRun)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// there may be edge cases here where this fails
+	registryRepo := strings.Split(imageTagReferences.StringVal, " ")[0]
+
+	support.SetPipelineRunParam("image-digest", support.NewStringParamValue(imageDigest.StringVal), &pipelineRun)
+	support.SetPipelineRunParam("image-registry-repo", support.NewStringParamValue(registryRepo), &pipelineRun)
+
+	createdRun, err := clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = WaitForAllPipelineRunsToComplete(ctx, createdRun.Name, config)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+}
+
+func Test_GitOpsUpdatePipeline_GitFetch(t *testing.T) {
+	ctx := CreateContext()
+
+	config, err := support.GetConfig()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	if !config.GitOpsConfig.Enabled {
+		t.Skipf("skipping %v, Gitops pipeline not configured", t.Name())
+	}
+
+	if !config.GitFetchConfig.Enabled {
+		t.Skipf("skipping %v, git_fetch was not enabled", t.Name())
+	}
+
+	clients, err := support.CreateClients(config.Namespace)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	gitURL, err := support.ParseGitURL(config.GitOpsConfig.Repo)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	pipelineRun, err := support.ReadFileAsPipelineRun(GitOpsUpdateTensorflowHousingPipelineRunRelativePath)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	support.SetPipelineRunParam("gitServer", support.NewStringParamValue(gitURL.Server), &pipelineRun)
+	support.SetPipelineRunParam("gitApiServer", support.NewStringParamValue(config.GitOpsConfig.ApiServer), &pipelineRun)
+	support.SetPipelineRunParam("gitOrgName", support.NewStringParamValue(gitURL.OrgName), &pipelineRun)
+	support.SetPipelineRunParam("gitRepoName", support.NewStringParamValue(gitURL.RepoName), &pipelineRun)
+	support.SetPipelineRunParam("gitRepoBranchBase", support.NewStringParamValue(config.GitOpsConfig.Branch), &pipelineRun)
+
+	// we need to get the results from the pipeline run created by the ml ops pipeline
+	mlopsPipelineRun, err := config.Clients.PipelineRun.Get(ctx, MLOpsTensorflowHousingCreatePipelineRunName, metav1.GetOptions{})
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	imageDigest, err := support.GetResultValueFromPipelineRun("buildah-sha", mlopsPipelineRun)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	imageTagReferences, err := support.GetResultValueFromPipelineRun("target-image-tag-references", mlopsPipelineRun)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	// there may be edge cases here where this fails
+	registryRepo := strings.Split(imageTagReferences.StringVal, " ")[0]
+
+	support.SetPipelineRunParam("image-digest", support.NewStringParamValue(imageDigest.StringVal), &pipelineRun)
+	support.SetPipelineRunParam("image-registry-repo", support.NewStringParamValue(registryRepo), &pipelineRun)
+
+	createdRun, err := clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+
+	err = WaitForAllPipelineRunsToComplete(ctx, createdRun.Name, config)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -234,36 +281,38 @@ func CreateContext() context.Context {
 	return context.Background()
 }
 
-func WaitForAllPipelineRunsToComplete(ctx context.Context, config *support.Config) error {
+func WaitForAllPipelineRunsToComplete(ctx context.Context, pipelineRunName string, config *support.Config) error {
 	callback := func() (bool, error) {
-		list, err := config.Clients.PipelineRun.List(ctx, metav1.ListOptions{})
+		pipelineRun, err := config.Clients.PipelineRun.Get(ctx, pipelineRunName, metav1.GetOptions{})
 		if err != nil {
 			return false, err
 		}
 
-		pipelineStillRunning := false
+		// conditions may be empty when pipeline run is first created
+		// this means it is counted as still running
+		if len(pipelineRun.Status.Conditions) == 0 {
+			return false, nil
+		}
 
-		for _, pipelineRun := range list.Items {
-			// conditions may be empty when pipeline run is first created
-			// this means it is counted as still running
-			if len(pipelineRun.Status.Conditions) == 0 {
-				pipelineStillRunning = true
-				break
-			}
-
-			for _, condition := range pipelineRun.Status.Conditions {
-				if condition.Reason == "Failed" {
-					return false, fmt.Errorf("pipelineRun \"%v\" failed with message \"%v\"", pipelineRun.Name, condition.Message)
-
-				} else if condition.Reason == "Running" {
-					pipelineStillRunning = true
-					break
-				}
+		for _, condition := range pipelineRun.Status.Conditions {
+			switch condition.Reason {
+			case "Cancelled":
+				return true, fmt.Errorf("pipelineRun \"%v\" was cancelled while running", pipelineRun.Name)
+			case "Failed":
+				return true, fmt.Errorf("pipelineRun \"%v\" failed with message \"%v\"", pipelineRun.Name, condition.Message)
+			case "Running":
+				return false, nil
+			case "Completed":
+				return true, nil
+			case "Succeeded":
+				return true, nil
+			default:
+				panic(fmt.Sprintf("unknown status condition while waiting for \"%v\" pipeline run to finish: %v", pipelineRunName, condition.Reason))
 			}
 		}
 
-		return !pipelineStillRunning, nil
+		return false, nil
 	}
 
-	return support.WaitFor(18*time.Minute, 10*time.Second, callback)
+	return support.WaitFor(30*time.Minute, 10*time.Second, callback)
 }
