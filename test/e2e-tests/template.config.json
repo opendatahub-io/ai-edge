@@ -3,12 +3,12 @@
   "image_registry_username": "username+myrobot",
   "image_registry_password": "",
   "target_image_tags": ["quay.io/username/repo:latest"],
+  "git_container_file_repo": "https://github.com/opendatahub-io/ai-edge.git",
+  "git_container_file_revision": "main",
+  "container_relative_path": "path/to/containerfile/containerfile.openvino.mlserver.mlflow",
 
   "git_fetch": {
-    "enabled": false,
-    "container_file_repo": "https://github.com/opendatahub-io/ai-edge.git",
-    "container_file_revision": "main",
-    "container_relative_path": "path/to/containerfile/containerfile.openvino.mlserver.mlflow",
+    "enabled": true,
     "model_repo": "https://github.com/opendatahub-io/ai-edge.git",
     "model_relative_path": "path/to/model",
     "model_revision": "main",
@@ -17,7 +17,7 @@
   },
 
   "s3_fetch": {
-    "enabled": false,
+    "enabled": true,
     "aws_secret": "",
     "aws_access": "",
     "region": "us-east-2",

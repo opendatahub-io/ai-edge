@@ -79,6 +79,9 @@ func Test_MLOpsPipeline_S3Fetch(t *testing.T) {
 
 	support.SetPipelineRunParam("s3-bucket-name", support.NewStringParamValue(config.S3FetchConfig.BucketName), &pipelineRun)
 	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
+	support.SetPipelineRunParam("git-containerfile-repo", support.NewStringParamValue(config.GitContainerFileRepo), &pipelineRun)
+	support.SetPipelineRunParam("git-containerfile-revision", support.NewStringParamValue(config.GitContainerFileRevision), &pipelineRun)
+	support.SetPipelineRunParam("containerRelativePath", support.NewStringParamValue(config.ContainerRelativePath), &pipelineRun)
 
 	createdRun, err := config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 	if err != nil {
@@ -115,9 +118,9 @@ func Test_MLOpsPipeline_GitFetch(t *testing.T) {
 	}
 
 	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
-	support.SetPipelineRunParam("git-containerfile-repo", support.NewStringParamValue(config.GitFetchConfig.ContainerFileRepo), &pipelineRun)
-	support.SetPipelineRunParam("git-containerfile-revision", support.NewStringParamValue(config.GitFetchConfig.ContainerFileRevision), &pipelineRun)
-	support.SetPipelineRunParam("containerRelativePath", support.NewStringParamValue(config.GitFetchConfig.ContainerRelativePath), &pipelineRun)
+	support.SetPipelineRunParam("git-containerfile-repo", support.NewStringParamValue(config.GitContainerFileRepo), &pipelineRun)
+	support.SetPipelineRunParam("git-containerfile-revision", support.NewStringParamValue(config.GitContainerFileRevision), &pipelineRun)
+	support.SetPipelineRunParam("containerRelativePath", support.NewStringParamValue(config.ContainerRelativePath), &pipelineRun)
 	support.SetPipelineRunParam("git-model-repo", support.NewStringParamValue(config.GitFetchConfig.ModelRepo), &pipelineRun)
 	support.SetPipelineRunParam("modelRelativePath", support.NewStringParamValue(config.GitFetchConfig.ModelRelativePath), &pipelineRun)
 	support.SetPipelineRunParam("git-model-revision", support.NewStringParamValue(config.GitFetchConfig.ModelRevision), &pipelineRun)
