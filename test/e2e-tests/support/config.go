@@ -18,10 +18,13 @@ var (
 )
 
 type Config struct {
-	Namespace             string   `json:"namespace"`
-	ImageRegistryUsername string   `json:"image_registry_username"`
-	ImageRegistryPassword string   `json:"image_registry_password"`
-	TargetImageTags       []string `json:"target_image_tags"`
+	Namespace                string   `json:"namespace"`
+	ImageRegistryUsername    string   `json:"image_registry_username"`
+	ImageRegistryPassword    string   `json:"image_registry_password"`
+	TargetImageTags          []string `json:"target_image_tags"`
+	GitContainerFileRepo     string   `json:"git_container_file_repo"`
+	GitContainerFileRevision string   `json:"git_container_file_revision"`
+	ContainerRelativePath    string   `json:"container_relative_path"`
 
 	GitFetchConfig GitFetchConfig `json:"git_fetch"`
 	S3FetchConfig  S3FetchConfig  `json:"s3_fetch"`
@@ -31,15 +34,12 @@ type Config struct {
 }
 
 type GitFetchConfig struct {
-	Enabled               bool   `json:"enabled"`
-	ContainerFileRepo     string `json:"container_file_repo"`
-	ContainerFileRevision string `json:"container_file_revision"`
-	ContainerRelativePath string `json:"container_relative_path"`
-	ModelRepo             string `json:"model_repo"`
-	ModelRelativePath     string `json:"model_relative_path"`
-	ModelRevision         string `json:"model_revision"`
-	ModelDir              string `json:"model_dir"`
-	SelfSignedCert        string `json:"self_signed_cert"`
+	Enabled           bool   `json:"enabled"`
+	ModelRepo         string `json:"model_repo"`
+	ModelRelativePath string `json:"model_relative_path"`
+	ModelRevision     string `json:"model_revision"`
+	ModelDir          string `json:"model_dir"`
+	SelfSignedCert    string `json:"self_signed_cert"`
 }
 
 type S3FetchConfig struct {
