@@ -1,0 +1,87 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: retrieve-build-image-info
+spec:
+  description: Return information about the built image
+  params:
+  - name: namespace
+    type: string
+  - name: model-name
+    type: string
+  - name: model-version
+    type: string
+  - name: buildah-sha
+    type: string
+  - name: pipeline-run-uid
+    type: string
+  - name: candidate-image-tag-reference
+    type: string
+  - name: target-image-tag-references
+    type: array
+  workspaces:
+  - name: images-url
+  steps:
+  - name: get-image-sha
+    image: registry.access.redhat.com/ubi9/skopeo
+    args:
+      - "$(params.target-image-tag-references[*])"
+    script: |
+      #!/usr/bin/env bash
+
+      set -Eeuo pipefail
+
+      echo -n "$(params.model-name)" | tee $(results.model-name.path) ;
+      echo ;
+      echo -n "$(params.model-version)" | tee $(results.model-version.path) ;
+      echo ;
+      export DOCKER_IMAGE_REF=$(skopeo inspect --format '{{.Name}}@{{.Digest}}' docker://$(params.candidate-image-tag-reference)) ;
+      if [[ $DOCKER_IMAGE_REF != *"$(params.buildah-sha)"* ]]; then
+        echo "Candidate image tag does not contain the correct manifest digest after push"
+        exit 1 ;
+      fi
+      echo -n $DOCKER_IMAGE_REF | tee $(results.image-digest-reference.path) ;
+      echo ;
+      echo $(($(skopeo inspect --format '{{range .LayersData}}+{{.Size}}{{end}}' docker://$DOCKER_IMAGE_REF))) | tee $(results.image-size-bytes.path) ;
+      echo ;
+      skopeo inspect --format '{{.Created}}' docker://$DOCKER_IMAGE_REF | tee $(results.image-creation-time.path) ;
+      echo ;
+      skopeo inspect --format '{{index .Labels "io.buildah.version"}}' docker://$DOCKER_IMAGE_REF | tee $(results.buildah-version.path) ;
+      echo ;
+      echo -n "$@" | tee $(results.target-image-tag-references.path) ;
+  - name: build-urls-txt
+    image: registry.access.redhat.com/ubi9/ubi-micro
+    args:
+      - "$(params.target-image-tag-references[*])"
+    script: |
+      #!/usr/bin/env bash
+
+      set -Eeuo pipefail
+
+      # The skopeo-copy task looks for this file in its workspace if the source and destination parameters are
+      # empty. This is what allows pushing to more than one tag from the single taskrun.
+      export URLTXT=$(workspaces.images-url.path)/url.txt
+      export SOURCE_IMAGE_REF=$(cat $(results.image-digest-reference.path))
+
+      rm -f ${URLTXT}
+      for target in "$@"; do
+        echo "docker://${SOURCE_IMAGE_REF} docker://${target}" >> "${URLTXT}"
+      done
+
+      echo "Contents of ${URLTXT}:"
+      cat ${URLTXT}
+  results:
+  - name: model-name
+    description: The name of the model
+  - name: model-version
+    description: The version of the model
+  - name: image-size-bytes
+    description: The size of the image in bytes
+  - name: image-creation-time
+    description: The date and time the image was created at
+  - name: buildah-version
+    description: The version of buildah used to build the image
+  - name: image-digest-reference
+    description: The fully qualified image digest reference of the image
+  - name: target-image-tag-references
+    description: The fully qualified image reference that the image was pushed to (e.g. registry.example.com/my-org/ai-model:1.0-1)
