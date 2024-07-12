@@ -5,3 +5,4 @@ commonLabels:
   app.kubernetes.io/part-of: rhoai-edge-pipelines
 resources:
 - tasks/
+- s3-fetch-pipeline.yaml

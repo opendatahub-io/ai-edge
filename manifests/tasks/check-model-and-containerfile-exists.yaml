@@ -10,9 +10,9 @@ spec:
   - name: current-namespace 
     default: "default"
     type: string
-  - name: containerfilePath
+  - name: containerfile-path
     type: string
-  - name: modelRelativePath
+  - name: model-relative-path
     type: string
   results:
   - name: model-files-size
@@ -28,11 +28,11 @@ spec:
       set -Eeuo pipefail
 
       # Check model files exist
-      if [ -n "$(params.modelRelativePath)" ]; then
-        ls -l model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)/ ;
+      if [ -n "$(params.model-relative-path)" ]; then
+        ls -l model_dir-$(params.model-name)/$(params.model-relative-path)/$(params.model-name)/ ;
 
-        du -s model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)/ | cut -f1 | tee $(results.model-files-size.path) ;
-        ls -p model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)/ | tee $(results.model-files-list.path) ;
+        du -s model_dir-$(params.model-name)/$(params.model-relative-path)/$(params.model-name)/ | cut -f1 | tee $(results.model-files-size.path) ;
+        ls -p model_dir-$(params.model-name)/$(params.model-relative-path)/$(params.model-name)/ | tee $(results.model-files-list.path) ;
       else
         ls -l model_dir-$(params.model-name)/$(params.model-name)/
 
@@ -41,7 +41,7 @@ spec:
       fi
 
       # Check containerfile exists
-      cat $(params.containerfilePath)
+      cat $(params.containerfile-path)
     workingDir: $(workspaces.workspace.path)
   workspaces:
   - description: The workspace for the downloaded model.
