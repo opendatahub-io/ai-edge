@@ -5,3 +5,5 @@ commonLabels:
   app.kubernetes.io/part-of: rhoai-edge-pipelines
 resources:
 - tasks/
+- pipelines/
+- https://raw.githubusercontent.com/tektoncd/catalog/main/task/github-open-pr/0.2/github-open-pr.yaml

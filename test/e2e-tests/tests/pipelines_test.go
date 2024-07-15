@@ -11,13 +11,11 @@ import (
 )
 
 const (
-	AIEdgeE2EPipelineDirectoryRelativePath            = "../../../pipelines/tekton/aiedge-e2e"
-	AIEdgeE2EBikeRentalsPipelineRunRelativePath       = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.bike-rentals.pipelinerun.yaml"
-	AIEdgeE2ETensorflowHousingPipelineRunRelativePath = AIEdgeE2EPipelineDirectoryRelativePath + "/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
+	AIEdgeE2EBikeRentalsPipelineRunRelativePath       = support.AIEdgeE2EDirectoryRelativePath + "/aiedge-e2e.bike-rentals.pipelinerun.yaml"
+	AIEdgeE2ETensorflowHousingPipelineRunRelativePath = support.AIEdgeE2EDirectoryRelativePath + "/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
 
-	GitOpsUpdatePipelineDirectoryRelativePath            = "../../../pipelines/tekton/gitops-update-pipeline"
-	GitOpsUpdateBikeRentalsPipelineRunRelativePath       = GitOpsUpdatePipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml"
-	GitOpsUpdateTensorflowHousingPipelineRunRelativePath = GitOpsUpdatePipelineDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml"
+	GitOpsUpdateBikeRentalsPipelineRunRelativePath       = support.GitOpsUpdateDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml"
+	GitOpsUpdateTensorflowHousingPipelineRunRelativePath = support.GitOpsUpdateDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml"
 )
 
 var (
@@ -38,20 +36,6 @@ func init() {
 	err = support.RunSetup(ctx, config)
 	if err != nil {
 		panic(err.Error())
-	}
-
-	kustomizePaths := []string{AIEdgeE2EPipelineDirectoryRelativePath, GitOpsUpdatePipelineDirectoryRelativePath}
-
-	for _, path := range kustomizePaths {
-		resourceMap, err := support.KustomizeBuild(path)
-		if err != nil {
-			panic(fmt.Sprintf("error while building kustomize : %v", err.Error()))
-		}
-
-		err = support.CreateObjectsFromResourceMap(ctx, config.Clients, resourceMap, config.Namespace)
-		if err != nil {
-			panic(fmt.Errorf("error while creating objects from kustomize resources : %v", err.Error()))
-		}
 	}
 
 }
