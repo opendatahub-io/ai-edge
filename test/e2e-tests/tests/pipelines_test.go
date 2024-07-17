@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	AIEdgeE2EBikeRentalsPipelineRunRelativePath       = support.AIEdgeE2EDirectoryRelativePath + "/aiedge-e2e.bike-rentals.pipelinerun.yaml"
+	S3FetchBikeRentalsPipelineRunRelativePath         = support.AIEdgeE2EDirectoryRelativePath + "/s3-fetch.pipelinerun.yaml"
 	AIEdgeE2ETensorflowHousingPipelineRunRelativePath = support.AIEdgeE2EDirectoryRelativePath + "/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
 
 	GitOpsUpdateBikeRentalsPipelineRunRelativePath       = support.GitOpsUpdateDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml"
@@ -40,7 +40,7 @@ func init() {
 
 }
 
-func Test_MLOpsPipeline_S3Fetch(t *testing.T) {
+func Test_S3Fetch_Pipeline(t *testing.T) {
 	ctx := CreateContext()
 
 	config, err := support.GetConfig()
@@ -52,7 +52,7 @@ func Test_MLOpsPipeline_S3Fetch(t *testing.T) {
 		t.Skipf("skipping %v, S3 is not enabled by the given configuration", t.Name())
 	}
 
-	pipelineRun, err := support.ReadFileAsPipelineRun(AIEdgeE2EBikeRentalsPipelineRunRelativePath)
+	pipelineRun, err := support.ReadFileAsPipelineRun(S3FetchBikeRentalsPipelineRunRelativePath)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -65,7 +65,7 @@ func Test_MLOpsPipeline_S3Fetch(t *testing.T) {
 	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)
 	support.SetPipelineRunParam("git-containerfile-repo", support.NewStringParamValue(config.GitContainerFileRepo), &pipelineRun)
 	support.SetPipelineRunParam("git-containerfile-revision", support.NewStringParamValue(config.GitContainerFileRevision), &pipelineRun)
-	support.SetPipelineRunParam("containerRelativePath", support.NewStringParamValue(config.ContainerRelativePath), &pipelineRun)
+	support.SetPipelineRunParam("container-relative-path", support.NewStringParamValue(config.ContainerRelativePath), &pipelineRun)
 
 	createdRun, err := config.Clients.PipelineRun.Create(ctx, &pipelineRun, metav1.CreateOptions{})
 	if err != nil {
