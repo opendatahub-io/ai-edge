@@ -11,33 +11,44 @@ import (
 	"strings"
 )
 
+const (
+	S3CredentialsTemplatePath            = "../../../pipelines/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template"
+	ImageRegistryCredentialsTemplatePath = "../../../pipelines/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template"
+	GitCredentialsTemplatePath           = "../../../pipelines/tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml.template"
+
+	ManifestsDirectory = "../../../manifests"
+
+	AIEdgeE2EDirectoryRelativePath    = "../../../pipelines/tekton/aiedge-e2e"
+	GitOpsUpdateDirectoryRelativePath = "../../../pipelines/tekton/gitops-update-pipeline"
+
+	TestDataDirectoryRelativePath = "../../../pipelines/tekton/aiedge-e2e/test-data/"
+)
+
 func RunSetup(ctx context.Context, config *Config) error {
 	// image registry is always needed, read the file,
 	// replace values and then apply
-	{
-		bytes, err := os.ReadFile(ImageRegistryCredentialsTemplatePath)
-		if err != nil {
-			return err
-		}
+	bytes, err := os.ReadFile(ImageRegistryCredentialsTemplatePath)
+	if err != nil {
+		return err
+	}
 
-		secret := applyconfigv1.SecretApplyConfiguration{}
-		err = yaml.Unmarshal(bytes, &secret)
-		if err != nil {
-			return err
-		}
+	secret := applyconfigv1.SecretApplyConfiguration{}
+	err = yaml.Unmarshal(bytes, &secret)
+	if err != nil {
+		return err
+	}
 
-		secret.StringData["username"] = config.ImageRegistryUsername
-		secret.StringData["password"] = config.ImageRegistryPassword
+	secret.StringData["username"] = config.ImageRegistryUsername
+	secret.StringData["password"] = config.ImageRegistryPassword
 
-		_, err = config.Clients.Kubernetes.CoreV1().Secrets(config.Namespace).Apply(ctx, &secret, metav1.ApplyOptions{FieldManager: "Apply"})
-		if err != nil {
-			return err
-		}
+	_, err = config.Clients.Kubernetes.CoreV1().Secrets(config.Namespace).Apply(ctx, &secret, metav1.ApplyOptions{FieldManager: "Apply"})
+	if err != nil {
+		return err
+	}
 
-		err = LinkSecretToServiceAccount(ctx, config, "pipeline", *secret.Name)
-		if err != nil {
-			return err
-		}
+	err = LinkSecretToServiceAccount(ctx, config, "pipeline", *secret.Name)
+	if err != nil {
+		return err
 	}
 
 	// S3 config has been set, load the credential template file
@@ -88,6 +99,28 @@ func RunSetup(ctx context.Context, config *Config) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	// apply pipelines, this is not based on config we just applt them all
+	resourceMap, err := KustomizeBuild(ManifestsDirectory)
+	if err != nil {
+		panic(fmt.Sprintf("error while building kustomize : %v", err.Error()))
+	}
+
+	err = CreateObjectsFromResourceMap(ctx, config.Clients, resourceMap, config.Namespace)
+	if err != nil {
+		panic(fmt.Errorf("error while creating objects from kustomize resources : %v", err.Error()))
+	}
+
+	// apple the test data
+	testDataResourceMap, err := KustomizeBuild(TestDataDirectoryRelativePath)
+	if err != nil {
+		panic(fmt.Sprintf("error while building test data with kustomize : %v", err.Error()))
+	}
+
+	err = CreateObjectsFromResourceMap(ctx, config.Clients, testDataResourceMap, config.Namespace)
+	if err != nil {
+		panic(fmt.Errorf("error while creating objects from kustomize test data resources : %v", err.Error()))
 	}
 
 	return nil

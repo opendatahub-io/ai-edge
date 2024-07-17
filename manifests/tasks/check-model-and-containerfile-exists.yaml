@@ -1,0 +1,48 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: check-model-and-containerfile-exists
+spec:
+  description: This Task can be used to check if the model files and containerfile are present
+  params:
+  - name: model-name
+    type: string
+  - name: current-namespace 
+    default: "default"
+    type: string
+  - name: containerfilePath
+    type: string
+  - name: modelRelativePath
+    type: string
+  results:
+  - name: model-files-size
+    description: Total size of the model files
+  - name: model-files-list
+    description: Space separated list of model files
+  steps:
+  - name: check-model-and-containerfile
+    image: registry.access.redhat.com/ubi9/ubi-micro
+    script: |
+      #!/usr/bin/env bash
+
+      set -Eeuo pipefail
+
+      # Check model files exist
+      if [ -n "$(params.modelRelativePath)" ]; then
+        ls -l model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)/ ;
+
+        du -s model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)/ | cut -f1 | tee $(results.model-files-size.path) ;
+        ls -p model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)/ | tee $(results.model-files-list.path) ;
+      else
+        ls -l model_dir-$(params.model-name)/$(params.model-name)/
+
+        du -s model_dir-$(params.model-name)/$(params.model-name)/ | cut -f1 | tee $(results.model-files-size.path) ;
+        ls -p model_dir-$(params.model-name)/$(params.model-name)/ | tee $(results.model-files-list.path) ;
+      fi
+
+      # Check containerfile exists
+      cat $(params.containerfilePath)
+    workingDir: $(workspaces.workspace.path)
+  workspaces:
+  - description: The workspace for the downloaded model.
+    name: workspace

@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: test-model-rest-svc
+spec:
+  params:
+  - name: model-name
+    type: string
+  - name: model-version
+    default: "1"
+    type: string
+  - name: test-endpoint
+    type: string
+  steps:
+    - name: call-rest
+      image: registry.access.redhat.com/ubi9/ubi
+      script: |
+        #!/usr/bin/env bash
+        set -xe
+        echo "Test inference REST web service"
+        echo "Data:"
+        cat $(workspaces.test-data.path)/data.json
+        echo "Expected response:"
+        cat $(workspaces.test-data.path)/output.json
+
+        echo "\nCall service:"
+
+        #  call service
+        curl -v -X POST -H "Content-Type:application/json" --data @$(workspaces.test-data.path)/data.json -o /tmp/output.json http://$(params.model-name)-$(params.model-version):8080/$(params.test-endpoint)
+
+        # Check response:
+        echo "Check response:"
+        cat /tmp/output.json
+        test "$( python3 -m json.tool --no-indent $(workspaces.test-data.path)/output.json )" = "$( python3 -m json.tool --no-indent /tmp/output.json )"
+
+  workspaces:
+  - description: The workspace for test data.
+    name: test-data

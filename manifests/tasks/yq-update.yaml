@@ -1,0 +1,51 @@
+# Adapted from:
+# https://github.com/tektoncd/catalog/blob/main/task/yq/0.4/yq.yaml
+#
+# If we decide to pass image details to pipeline rather than determining them
+# from existing PipelineRuns, then we could use that task directly.
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: yq-update
+spec:
+  description: >-
+    This task is used by the GitOps update Pipeline, to allow modifying files with yq
+  workspaces:
+    - name: source
+      description: A workspace that contains the files which needs to be altered.
+  params:
+    - name: SCRIPT
+      type: string
+      description: The yq script to execute. Can be multiple lines for complex tasks.
+      default: ""
+    - name: image
+      type: string
+      description: The yq image to use.
+      default: docker.io/mikefarah/yq:4.27.5@sha256:2be3626ed633fbe1fc33ee9343a1256a6be53334412b2251b9a859f8c145bb53
+    - name: git-repo-path
+      type: string
+      description: The path of the git repo directory inside the source workspace. SCRIPT will be run inside it.
+      default: ""
+    - name: env-image-name
+      type: string
+      description: The image name to be made available as the environment variable IMAGE_NAME within the task script.
+      default: ""
+    - name: env-image-digest
+      type: string
+      description: The image tag to be made available as the environment variable IMAGE_DIGEST within the task script.
+      default: ""
+  results:
+    - name: yq
+      description: The result from your yq script. You can write to it using `$(results.yq.path)`.
+  steps:
+    - name: yq-script
+      image: $(params.image)
+      workingDir: $(workspaces.source.path)/$(params.git-repo-path)
+      script: |
+        /usr/bin/env sh
+        set -e
+
+        export IMAGE_NAME="$(params.env-image-name)"
+        export IMAGE_DIGEST="$(params.env-image-digest)"
+
+        $(params.SCRIPT)

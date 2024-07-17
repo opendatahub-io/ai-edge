@@ -1,0 +1,30 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: copy-model-from-pvc
+spec:
+  description: This Task can be used to copy a model from another pvc
+  params:
+  - name: model-name
+    type: string
+  steps:
+  - name: copy-model-from-pvc
+    image: quay.io/opendatahub/kserve-storage-initializer:v0.11
+    script: |
+      SOURCE_PATH="$(workspaces.source-workspace.path)/model_dir-$(params.model-name)/$(params.model-name)"
+
+      DEST_PATH="$(workspaces.destination-workspace.path)/model_dir-$(params.model-name)/$(params.model-name)"
+
+      echo "Copying model file $SOURCE_PATH"
+      echo "to $DEST_PATH"
+
+      DIR_PATH="$(dirname $(workspaces.destination-workspace.path)/model_dir-$(params.model-name)/$(params.model-name))"
+
+      mkdir -p $DIR_PATH
+
+      cp -r $SOURCE_PATH $DEST_PATH
+  workspaces:
+  - description: The workspace the model is being copied from
+    name: source-workspace
+  - description: The workspace the model is being copied to
+    name: destination-workspace

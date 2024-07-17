@@ -1,0 +1,9 @@
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+resources:
+- check-model-and-containerfile-exists.yaml
+- kserve-download-model.yaml
+- test-model-rest-svc-task.yaml
+- retrieve-build-image-info.task.yaml
+- copy-model-from-pvc.yaml
+- yq-update.yaml
