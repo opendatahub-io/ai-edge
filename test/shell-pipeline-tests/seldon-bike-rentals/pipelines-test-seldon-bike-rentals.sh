@@ -37,8 +37,8 @@ oc apply -k "$AIEDGE_E2E_PIPELINE_DIR_PATH"/test-data
 oc apply -k "$PIPELINES_DIR"/
 
 ## prepare parameters
-AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/aiedge-e2e.pipelinerun-overridden.yaml
-cp "$AIEDGE_E2E_PIPELINE_DIR_PATH"/aiedge-e2e.bike-rentals.pipelinerun.yaml "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
+AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/s3-fetch.pipelinerun-overridden.yaml
+cp "$AIEDGE_E2E_PIPELINE_DIR_PATH"/s3-fetch.pipelinerun.yaml "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 sed -i "s|value: rhoai-edge-models|value: rhoai-edge-models-ci|" "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 sed -i "s|value: \"delete\"|value: \"keep\"|" "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 usePRBranchInPipelineRunIfPRCheck "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
@@ -47,7 +47,7 @@ usePRBranchInPipelineRunIfPRCheck "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 oc create -f "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 sleep 5 # Just to have the startTime field available
 
-PIPELINE_RUN_NAME=$(oc get pipelinerun --sort-by={.status.startTime} -o=custom-columns=NAME:.metadata.name | grep "aiedge-e2e-.*" | tail -n 1)
+PIPELINE_RUN_NAME=$(oc get pipelinerun --sort-by={.status.startTime} -o=custom-columns=NAME:.metadata.name | grep "s3-fetch-.*" | tail -n 1)
 
 if [[ $PIPELINE_RUN_NAME == "" ]]; then
   echo "Could not find any pipeline run"
