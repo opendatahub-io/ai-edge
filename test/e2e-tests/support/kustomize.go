@@ -7,6 +7,7 @@ import (
 	pipepinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/kustomize/api/krusty"
 	"sigs.k8s.io/kustomize/api/resmap"
 	"sigs.k8s.io/kustomize/api/resource"
@@ -54,12 +55,14 @@ func CreateObjectsFromResourceMap(ctx context.Context, clients *Clients, resourc
 					return err
 				}
 
-				_, err = clients.Kubernetes.CoreV1().ConfigMaps(namespace).Get(ctx, configMap.Namespace, metav1.GetOptions{})
-				if err == nil {
-					return nil
+				yaml, err := rsc.AsYAML()
+				if err != nil {
+					return err
 				}
 
-				_, err = clients.Kubernetes.CoreV1().ConfigMaps(namespace).Create(ctx, &configMap, metav1.CreateOptions{})
+				_, err = clients.Kubernetes.CoreV1().ConfigMaps(namespace).Patch(ctx, configMap.Name, types.ApplyPatchType, yaml, metav1.PatchOptions{
+					FieldManager: "Apply",
+				})
 				if err != nil {
 					return err
 				}
