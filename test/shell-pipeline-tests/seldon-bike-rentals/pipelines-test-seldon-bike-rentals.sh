@@ -37,8 +37,8 @@ oc apply -k "$AIEDGE_E2E_PIPELINE_DIR_PATH"/test-data
 oc apply -k "$PIPELINES_DIR"/
 
 ## prepare parameters
-AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/s3-fetch.pipelinerun-overridden.yaml
-cp "$AIEDGE_E2E_PIPELINE_DIR_PATH"/s3-fetch.pipelinerun.yaml "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
+AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/s3-fetch.bike-rentals.pipelinerun-overridden.yaml
+cp "$AIEDGE_E2E_PIPELINE_DIR_PATH"/s3-fetch.bike-rentals.pipelinerun.yaml "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 sed -i "s|value: rhoai-edge-models|value: rhoai-edge-models-ci|" "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 sed -i "s|value: \"delete\"|value: \"keep\"|" "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 usePRBranchInPipelineRunIfPRCheck "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"

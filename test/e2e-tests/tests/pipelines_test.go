@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	S3FetchBikeRentalsPipelineRunRelativePath         = support.AIEdgeE2EDirectoryRelativePath + "/s3-fetch.pipelinerun.yaml"
+	S3FetchBikeRentalsPipelineRunRelativePath         = support.AIEdgeE2EDirectoryRelativePath + "/s3-fetch.bike-rentals.pipelinerun.yaml"
 	AIEdgeE2ETensorflowHousingPipelineRunRelativePath = support.AIEdgeE2EDirectoryRelativePath + "/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
 
 	GitOpsUpdateBikeRentalsPipelineRunRelativePath       = support.GitOpsUpdateDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml"
