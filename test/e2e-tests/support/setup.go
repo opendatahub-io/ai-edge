@@ -112,7 +112,7 @@ func RunSetup(ctx context.Context, config *Config) error {
 		panic(fmt.Errorf("error while creating objects from kustomize resources : %v", err.Error()))
 	}
 
-	// apple the test data
+	// apply the test data
 	testDataResourceMap, err := KustomizeBuild(TestDataDirectoryRelativePath)
 	if err != nil {
 		panic(fmt.Sprintf("error while building test data with kustomize : %v", err.Error()))
