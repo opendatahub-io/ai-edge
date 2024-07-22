@@ -1,0 +1,28 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: cleanup-git-fetch 
+spec:
+  description: Moves model to the subdirectory, this means the location of the model is the same no matter the fetch method
+  params:
+  - name: model-name
+    type: string
+  - name: subdirectory
+    type: string
+  - name: src-model-relative-path
+    type: string
+  steps:
+  - name: copy-model-to-subdirectory
+    image: registry.access.redhat.com/ubi9/ubi
+    script: |
+      #!/usr/bin/env bash
+
+      set -Eeuo pipefail
+
+      mv $(workspaces.workspace.path)/$(params.subdirectory)/$(params.src-model-relative-path)/$(params.model-name) $(workspaces.workspace.path)/
+      rm -rf $(workspaces.workspace.path)/$(params.subdirectory)
+      mkdir $(workspaces.workspace.path)/$(params.subdirectory)
+      mv $(workspaces.workspace.path)/$(params.model-name) $(workspaces.workspace.path)/$(params.subdirectory)/$(params.model-name)
+  workspaces:
+  - description: The workspace for the downloaded model.
+    name: workspace

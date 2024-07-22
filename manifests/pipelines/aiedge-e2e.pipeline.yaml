@@ -136,7 +136,22 @@ spec:
     - input: "$(params.fetch-model)"
       operator: in
       values: ["git"]
-  # Use kserve-download-model container image to fetch from S3 storage
+  - name: cleanup-git-fetch
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: subdirectory
+      value: model_dir-$(params.model-name)
+    - name: src-model-relative-path
+      value: pipelines/models
+    runAfter:
+    - fetch-model-git
+    workspaces:
+    - name: workspace
+      workspace: build-workspace-pv
+    taskRef:
+      kind: Task
+      name: cleanup-git-fetch
   - name: fetch-model-s3
     params:
     - name: model-name
@@ -169,7 +184,7 @@ spec:
       value: /containerfile_repo/
     runAfter:
     - fetch-model-s3
-    - fetch-model-git
+    - cleanup-git-fetch
     taskRef:
       kind: ClusterTask
       name: git-clone
@@ -209,7 +224,7 @@ spec:
     - name: DOCKERFILE
       value: containerfile_repo/$(params.containerfileRelativePath)
     - name: CONTEXT
-      value: model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)
+      value: model_dir-$(params.model-name)/$(params.model-name)
     - name: TLSVERIFY
       value: "true"
     - name: FORMAT

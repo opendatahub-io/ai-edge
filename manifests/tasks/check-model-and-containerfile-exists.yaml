@@ -27,18 +27,10 @@ spec:
 
       set -Eeuo pipefail
 
-      # Check model files exist
-      if [ -n "$(params.modelRelativePath)" ]; then
-        ls -l model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)/ ;
+      ls -l model_dir-$(params.model-name)/$(params.model-name)/
 
-        du -s model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)/ | cut -f1 | tee $(results.model-files-size.path) ;
-        ls -p model_dir-$(params.model-name)/$(params.modelRelativePath)/$(params.model-name)/ | tee $(results.model-files-list.path) ;
-      else
-        ls -l model_dir-$(params.model-name)/$(params.model-name)/
-
-        du -s model_dir-$(params.model-name)/$(params.model-name)/ | cut -f1 | tee $(results.model-files-size.path) ;
-        ls -p model_dir-$(params.model-name)/$(params.model-name)/ | tee $(results.model-files-list.path) ;
-      fi
+      du -s model_dir-$(params.model-name)/$(params.model-name)/ | cut -f1 | tee $(results.model-files-size.path) ;
+      ls -p model_dir-$(params.model-name)/$(params.model-name)/ | tee $(results.model-files-list.path) ;
 
       # Check containerfile exists
       cat $(params.containerfilePath)
