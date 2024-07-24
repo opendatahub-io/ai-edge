@@ -71,6 +71,10 @@ lightgbm-mushrooms/
 - A clone of this repository
 
 ## AI Edge End to End Pipeline
+[//]: # (Change to S3 Fetch/Git Pipeline once the split is done describing the differences)
+
+> [!IMPORTANT]
+> This pipeline is currently being split into 2 pipelines, which will differ just in the fetch stage (S3 or Git), otherwise they are identical.
 
 ### Description
 End to end pipeline that supports a workflow to Fetch -> Build -> Test -> Push an immutable model container image to an image registry
@@ -107,6 +111,7 @@ Create a copy of the file(s) below to include the required credentials for acces
 * Image Registry - [credentials-image-registry.secret.yaml.template](tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template) to include the username and password with write access to the image repository.
   This is needed only in case you noted username and password of the robot account. In case you directly downloaded and applied a Kubernetes Secret, this file can be skipped.
     ```bash
+    # From the root folder where this README is located
     $ cp tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template credentials-s3.secret.yaml
     $ cp tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template credentials-image-registry.secret.yaml
 
@@ -122,8 +127,8 @@ Create a copy of the file(s) below to include the required credentials for acces
 To verify that that model container is working successfully, the pipeline invokes a Task `test-model-rest-svc` which will send data to a testing container with the model inferencing endpoint and verify that expected output is returned.
 The Task expects a workspace `test-data` with files `data.json`, the jsondata payload for your model, and `output.json`, the expected json output for that input payload.
 
-The example PipelineRun files ([OpenVino example](tekton/aiedge-e2e/aiedge-e2e.tensorflow-housing.pipelinerun.yaml),
-[Seldon example](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml)) demonstrate that approach, referencing the ConfigMap defined in
+The example PipelineRun files ([OpenVino example using Git](tekton/aiedge-e2e/example-pipelineruns/aiedge-e2e.tensorflow-housing.pipelinerun.yaml),
+[Seldon example using S3](tekton/aiedge-e2e/example-pipelineruns/s3-fetch.bike-rentals.pipelinerun.yaml)) demonstrate that approach, referencing the ConfigMap defined in
 [tensorflow-housing-test-data-cm.yaml](tekton/aiedge-e2e/test-data/tensorflow-housing-test-data-cm.yaml) and
 [bike-rentals-test-data-cm.yaml](tekton/aiedge-e2e/test-data/bike-rentals-test-data-cm.yaml), respectively.
 
@@ -132,23 +137,25 @@ If using your models, you will want to adjust these accordingly.
 ### Deploy the Pipeline
 From the user's Data Science Projects namespace where the Pipeline will be running
 
-1. Deploy the Tekton Tasks and Pipeline to the namespace
+1. Deploy the Tekton Tasks and Pipelines to the namespace
 ```bash
-# From the folder where this README is located
-oc apply -k tekton/aiedge-e2e/
+# From the repository's root folder
+oc apply -k manifests/
 ```
 
 ### Run the Pipeline
 
-Update the `s3-bucket-name` parameter value in your PipelineRun file to match your S3 bucket name.
-In [this example PipelineRun file](tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml) it's set to a default of `rhoai-edge-models`.
+Update the `s3-bucket-name` parameter value in your S3 Fetch PipelineRun file to match your S3 bucket name.
+In [this example PipelineRun file](tekton/aiedge-e2e/example-pipelineruns/s3-fetch.bike-rentals.pipelinerun.yaml) it's set to a default of `rhoai-edge-models`.
 
 #### For Git fetch
 
 Update the `git-model-repo` parameter with the repository url, the `modelRelativePath` parameter to the model files path and the `git-revision` parameter for the version/branch of the repository in your PipelineRun file.
-[This example PipelineRun file](tekton/aiedge-e2e/aiedge-e2e.tensorflow-housing.pipelinerun.yaml) can be used as an example.
+[This example PipelineRun file](tekton/aiedge-e2e/example-pipelineruns/aiedge-e2e.tensorflow-housing.pipelinerun.yaml) can be used as an example.
 
 #### Other parameters
+
+[//]: # (TODO Revisit after the split is done)
 You may also want to change other parameters like:
 * `model-name`
 * `containerfileRelativePath` - to try a different Containerfile
@@ -161,9 +168,9 @@ Be sure to also use the correct config map with the test data.
 #### Create a new PipelineRun
 ```bash
 # From the root folder where this README is located
-oc create -f tekton/aiedge-e2e/aiedge-e2e.bike-rentals.pipelinerun.yaml
+oc create -f tekton/aiedge-e2e/example-pipelineruns/s3-fetch.bike-rentals.pipelinerun.yaml
 # and/or
-oc create -f tekton/aiedge-e2e/aiedge-e2e.tensorflow-housing.pipelinerun.yaml
+oc create -f tekton/aiedge-e2e/example-pipelineruns/aiedge-e2e.tensorflow-housing.pipelinerun.yaml
 ```
 
 > [!IMPORTANT]
@@ -239,7 +246,7 @@ in your Git server.
   [`gitops-update-pipelinerun-tensorflow-housing.yaml`](tekton/gitops-update-pipeline/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml)
   to match location of your repository and the target branch for the pull request.
   The defaults assume `https://github.com/username/ai-edge-gitops` and `main`.
-- Create a copy of the [`example-git-credentials-secret.yaml.template`](tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml.template) and update it with your repository information and credentials.
+- Create a copy of the [`example-git-credentials-secret.yaml.template`](tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template) and update it with your repository information and credentials.
   For GitHub, the token can be generated at Settings > Developer Settings > Personal access tokens > Fine-grained tokens
   and it should have Read access to metadata and Read and Write access to code and pull requests permissions to the repository you use.
 
@@ -249,9 +256,11 @@ Update the `image-registry-repo` and `image-digest` parameters corresponding to 
 Then execute the following commands to create the Pipeline and start a PipelineRun.
 
 ```bash
-oc apply -k tekton/gitops-update-pipeline/
+# From the repository's root folder
+oc apply -k manifests/
 
-cp tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml.template example-git-credentials-secret.yaml
+# From the root folder where this README is located
+cp tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template example-git-credentials-secret.yaml
 # Edit the credentials and add the credentials to the server
 oc apply -f example-git-credentials-secret.yaml
 

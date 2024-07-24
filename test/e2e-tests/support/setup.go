@@ -14,7 +14,7 @@ import (
 const (
 	S3CredentialsTemplatePath            = "../../../pipelines/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template"
 	ImageRegistryCredentialsTemplatePath = "../../../pipelines/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template"
-	GitCredentialsTemplatePath           = "../../../pipelines/tekton/gitops-update-pipeline/example-pipelineruns/example-git-credentials-secret.yaml.template"
+	GitCredentialsTemplatePath           = "../../../pipelines/tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template"
 
 	ManifestsDirectory = "../../../manifests"
 

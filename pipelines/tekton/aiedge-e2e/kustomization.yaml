@@ -1,9 +1,0 @@
-kind: Kustomization
-apiVersion: kustomize.config.k8s.io/v1beta1
-commonLabels:
-  app: rhoai-edge-pipelines
-  app.kubernetes.io/part-of: rhoai-edge-pipelines
-resources:
-- tasks/
-- test-data/
-- aiedge-e2e.pipeline.yaml

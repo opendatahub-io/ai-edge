@@ -6,4 +6,3 @@ commonLabels:
 resources:
 - tasks/
 - pipelines/
-- https://raw.githubusercontent.com/tektoncd/catalog/main/task/github-open-pr/0.2/github-open-pr.yaml
