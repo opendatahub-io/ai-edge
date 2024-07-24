@@ -12,6 +12,8 @@ spec:
     type: string
   - name: s3-bucket-name
     type: string
+  - name: model-relative-path
+    tpye: string
   results:
   - name: s3-url
     description: The S3 URL used to download the model
@@ -21,7 +23,12 @@ spec:
     script: |
       mkdir -p $(workspaces.workspace.path)/model_dir-$(params.model-name)/
 
-      export S3_URL="s3://$(params.s3-bucket-name)/$(params.model-name)"
+      if [ -n "$(params.model-relative-path)" ]; then
+        export S3_URL="s3://$(params.s3-bucket-name)/$(params.model-relative-path)/$(params.model-name)"
+        else
+        export S3_URL="s3://$(params.s3-bucket-name)/$(params.model-name)"
+      fi
+
       echo -n $S3_URL | tee $(results.s3-url.path) ;
 
       if [ -n "$(workspaces.ssl-ca-directory.path)" ]; then
