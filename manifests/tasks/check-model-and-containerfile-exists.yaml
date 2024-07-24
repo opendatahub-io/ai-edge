@@ -12,8 +12,6 @@ spec:
     type: string
   - name: containerfilePath
     type: string
-  - name: modelRelativePath
-    type: string
   results:
   - name: model-files-size
     description: Total size of the model files

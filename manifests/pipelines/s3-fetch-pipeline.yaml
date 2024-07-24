@@ -141,8 +141,6 @@ spec:
     params:
     - name: model-name
       value: $(params.model-name)
-    - name: modelRelativePath
-      value: $(params.model-relative-path)
     - name: containerfilePath
       value: containerfile_repo/$(params.containerfile-relative-path)
     - name: current-namespace
