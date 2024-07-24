@@ -25,7 +25,7 @@ spec:
 
       if [ -n "$(params.model-relative-path)" ]; then
         export S3_URL="s3://$(params.s3-bucket-name)/$(params.model-relative-path)/$(params.model-name)"
-        else
+      else
         export S3_URL="s3://$(params.s3-bucket-name)/$(params.model-name)"
       fi
 

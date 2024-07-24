@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: cleanup-git-fetch 
+  name: move-model-to-root-dir
 spec:
   description: Moves model to the subdirectory, this means the location of the model is the same no matter the fetch method
   params:
