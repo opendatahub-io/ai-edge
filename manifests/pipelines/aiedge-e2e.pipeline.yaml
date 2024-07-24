@@ -30,7 +30,7 @@ spec:
     description: "Location of the model within the context of the source location.  Leave blank if the model files are at the root of the source location."
   - name: model-dir
     type: string
-    description: Directory below <modelRelativePath>/<model-name>/ to be used as MODEL_DIR in image build.
+    description: Directory below <model-name>/ to be used as MODEL_DIR in image build.
     default: "."
   - name: fetch-model
     type: string
@@ -136,14 +136,14 @@ spec:
     - input: "$(params.fetch-model)"
       operator: in
       values: ["git"]
-  - name: cleanup-git-fetch
+  - name: move-model-to-root-dir
     params:
     - name: model-name
       value: $(params.model-name)
     - name: subdirectory
       value: model_dir-$(params.model-name)
     - name: src-model-relative-path
-      value: pipelines/models
+      value: $()
     runAfter:
     - fetch-model-git
     workspaces:
@@ -151,7 +151,7 @@ spec:
       workspace: build-workspace-pv
     taskRef:
       kind: Task
-      name: cleanup-git-fetch
+      name: move-model-to-root-dir
   - name: fetch-model-s3
     params:
     - name: model-name
@@ -186,7 +186,7 @@ spec:
       value: /containerfile_repo/
     runAfter:
     - fetch-model-s3
-    - cleanup-git-fetch
+    - move-model-to-root-dir
     taskRef:
       kind: ClusterTask
       name: git-clone
