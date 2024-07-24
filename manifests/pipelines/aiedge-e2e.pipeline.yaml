@@ -143,7 +143,7 @@ spec:
     - name: subdirectory
       value: model_dir-$(params.model-name)
     - name: src-model-relative-path
-      value: $(params.model-relative-path)
+      value: $(params.modelRelativePath)
     runAfter:
     - fetch-model-git
     workspaces:
