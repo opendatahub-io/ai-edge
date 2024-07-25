@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 REPO_ROOT_DIR=$(dirname ${BASH_SOURCE[0]})/../../..
-PIPELINES_DIR="$REPO_ROOT_DIR/manifests"
+PIPELINES_DIR="$REPO_ROOT_DIR/pipelines"
+MANIFESTS_DIR="$REPO_ROOT_DIR/manifests"
 
 source "$REPO_ROOT_DIR"/test/shell-pipeline-tests/common.sh
 
@@ -13,7 +14,7 @@ waitForOpResult 60 "True" "N/A" "oc get tektonconfig -n openshift-operators conf
 waitForOpResult 10 "pipeline" "N/A" "oc get serviceaccount -o=custom-columns=NAME:.metadata.name | grep pipeline"
 
 ##### AIEDGE E2E PIPELINE
-AIEDGE_E2E_PIPELINE_DIR_PATH="$REPO_ROOT_DIR"/pipelines/tekton/aiedge-e2e
+AIEDGE_E2E_PIPELINE_DIR_PATH="$PIPELINES_DIR"/tekton/aiedge-e2e
 
 AWS_SECRET_PATH_TEMPLATE="$AIEDGE_E2E_PIPELINE_DIR_PATH"/templates/credentials-s3.secret.yaml.template
 AWS_SECRET_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/templates/credentials-s3.secret.yaml
@@ -34,11 +35,11 @@ oc secret link pipeline credentials-image-registry
 oc apply -k "$AIEDGE_E2E_PIPELINE_DIR_PATH"/test-data
 
 ## oc apply -k pipelines
-oc apply -k "$PIPELINES_DIR"/
+oc apply -k "$MANIFESTS_DIR"/
 
 ## prepare parameters
-AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/aiedge-e2e.pipelinerun-overridden.yaml
-cp "$AIEDGE_E2E_PIPELINE_DIR_PATH"/aiedge-e2e.tensorflow-housing.pipelinerun.yaml "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
+AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/example-pipelineruns/aiedge-e2e.pipelinerun-overridden.yaml
+cp "$AIEDGE_E2E_PIPELINE_DIR_PATH"/example-pipelineruns/aiedge-e2e.tensorflow-housing.pipelinerun.yaml "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 sed -i "s|value: \"delete\"|value: \"keep\"|" "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 usePRBranchInPipelineRunIfPRCheck "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
 
@@ -68,17 +69,14 @@ fi
 
 
 ##### GITOPS UPDATE PIPELINE
-GITOPS_UPDATE_PIPELINE_DIR_PATH="$REPO_ROOT_DIR"/pipelines/tekton/gitops-update-pipeline
+GITOPS_UPDATE_PIPELINE_DIR_PATH="$PIPELINES_DIR"/tekton/gitops-update-pipeline
 
-GIT_CREDENTIALS_SECRET_PATH_TEMPLATE="$GITOPS_UPDATE_PIPELINE_DIR_PATH"/example-pipelineruns/example-git-credentials-secret.yaml.template
-GIT_CREDENTIALS_SECRET_PATH="$GITOPS_UPDATE_PIPELINE_DIR_PATH"/example-pipelineruns/example-git-credentials-secret.yaml
+GIT_CREDENTIALS_SECRET_PATH_TEMPLATE="$GITOPS_UPDATE_PIPELINE_DIR_PATH"/templates/example-git-credentials-secret.yaml.template
+GIT_CREDENTIALS_SECRET_PATH="$GITOPS_UPDATE_PIPELINE_DIR_PATH"/templates/example-git-credentials-secret.yaml
 
 createGitCredentialsSecret "$GIT_CREDENTIALS_SECRET_PATH_TEMPLATE" "$GIT_CREDENTIALS_SECRET_PATH"
 
 oc create -f "$GIT_CREDENTIALS_SECRET_PATH"
-
-## oc apply -k pipelines
-## oc apply -k "$GITOPS_UPDATE_PIPELINE_DIR_PATH"/
 
 ## prepare parameters
 GITOPS_UPDATE_PIPELINERUN_PATH="$GITOPS_UPDATE_PIPELINE_DIR_PATH"/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml
