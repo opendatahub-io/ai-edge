@@ -7,9 +7,6 @@ spec:
   params:
   - name: model-name
     type: string
-  - name: current-namespace 
-    default: "default"
-    type: string
   - name: containerfilePath
     type: string
   results:

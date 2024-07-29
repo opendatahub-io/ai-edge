@@ -7,9 +7,6 @@ spec:
   params:
   - name: model-name
     type: string
-  - name: current-namespace
-    default: "default"
-    type: string
   - name: s3-bucket-name
     type: string
   - name: model-relative-path
