@@ -21,14 +21,14 @@ The structure of the `config.json` is in four sections, the top level fields, `g
 - `image_registry_username` - quay.io username
 - `image_registry_password` - quay.io password
 - `target_image_tags` - JSON array of image tags that the final image will be pushed to. E.g. '["quay.io/user/model-name:e2e-test"]'
+- `git_container_file_repo` - Git repo containing the container file
+- `git_container_file_revision` - Git branch in the container file repo
+- `container_relative_path` - Relative path from the root of the container file repo to where the container file is
 
 After the top level fields each sub object is used for a type of test. Setting `enabled` to `true` in each of these will tell the test suite to use those values in that object and to run those tests.
 
 These are all the fields in `git_fetch`
 
-- `container_file_repo` - Git repo containing the container file
-- `container_file_revision` - Git branch in the container file repo
-- `container_file_relative_path` - Relative path from the root of the cotainer file repo to where the container file is
 - `model_repo` - Git repo of the model
 - `model_relative_path` - Relative path from the root of the model repo to where the model is 
 - `model_revision` - Branch of the model repo
