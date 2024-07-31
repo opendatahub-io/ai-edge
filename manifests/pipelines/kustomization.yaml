@@ -1,6 +1,7 @@
 kind: Kustomization
 apiVersion: kustomize.config.k8s.io/v1beta1
 resources:
-- aiedge-e2e.pipeline.yaml
-- gitops-update-pipeline.yaml
 - s3-fetch-pipeline.yaml
+- git-fetch-pipeline.yaml
+- gitops-update-pipeline.yaml
+

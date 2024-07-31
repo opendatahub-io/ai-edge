@@ -2,17 +2,18 @@ package tests
 
 import (
 	"fmt"
-	"github.com/opendatahub-io/ai-edge/test/e2e-tests/support"
-	"golang.org/x/net/context"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/opendatahub-io/ai-edge/test/e2e-tests/support"
+	"golang.org/x/net/context"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
-	S3FetchBikeRentalsPipelineRunRelativePath         = support.AIEdgeE2EDirectoryRelativePath + "/example-pipelineruns/s3-fetch.bike-rentals.pipelinerun.yaml"
-	AIEdgeE2ETensorflowHousingPipelineRunRelativePath = support.AIEdgeE2EDirectoryRelativePath + "/example-pipelineruns/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
+	S3FetchBikeRentalsPipelineRunRelativePath        = support.AIEdgeE2EDirectoryRelativePath + "/example-pipelineruns/s3-fetch.bike-rentals.pipelinerun.yaml"
+	GitFetchTensorflowHousingPipelineRunRelativePath = support.AIEdgeE2EDirectoryRelativePath + "/example-pipelineruns/aiedge-e2e.tensorflow-housing.pipelinerun.yaml"
 
 	GitOpsUpdateBikeRentalsPipelineRunRelativePath       = support.GitOpsUpdateDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-bike-rentals.yaml"
 	GitOpsUpdateTensorflowHousingPipelineRunRelativePath = support.GitOpsUpdateDirectoryRelativePath + "/example-pipelineruns/gitops-update-pipelinerun-tensorflow-housing.yaml"
@@ -80,7 +81,7 @@ func Test_S3Fetch_Pipeline(t *testing.T) {
 	}
 }
 
-func Test_MLOpsPipeline_GitFetch(t *testing.T) {
+func Test_GitFetch_Pipeline(t *testing.T) {
 	ctx := CreateContext()
 
 	config, err := support.GetConfig()
@@ -92,7 +93,7 @@ func Test_MLOpsPipeline_GitFetch(t *testing.T) {
 		t.Skipf("skipping %v, Git is not enabled by the given configuration", t.Name())
 	}
 
-	pipelineRun, err := support.ReadFileAsPipelineRun(AIEdgeE2ETensorflowHousingPipelineRunRelativePath)
+	pipelineRun, err := support.ReadFileAsPipelineRun(GitFetchTensorflowHousingPipelineRunRelativePath)
 	if err != nil {
 		t.Fatal(err.Error())
 	}

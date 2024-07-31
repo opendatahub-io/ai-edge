@@ -1,0 +1,360 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: git-fetch
+spec:
+  params:
+  - name: model-name
+    type: string
+    description: Name of the directory where the model files are stored
+  - default: "1"
+    name: model-version
+    type: string
+    description: Version of the model
+  - name: git-containerfile-repo
+    type: string
+    description: Git repository where the Containerfile is stored
+  - name: git-containerfile-revision
+    type: string
+    description: Git revision to checkout when cloning the repository with the Containerfile
+    default: "main"
+  - name: containerfileRelativePath
+    type: string
+    description: Path to the Containerfile in the git repository for model server imagebuild
+  - name: modelRelativePath
+    type: string
+    description: "Location of the model within the context of the source location.  Leave blank if the model files are at the root of the source location."
+  - name: model-dir
+    type: string
+    description: Directory below <model-name>/ to be used as MODEL_DIR in image build.
+    default: "."
+  - name: git-model-repo
+    type: string
+    description: The git repo url where the model files are stored
+    default: ""
+  - name: git-model-revision
+    type: string
+    description: The Git ref to use when cloning the git repo with the saved model
+    default: "main"
+  - name: test-endpoint
+    type: string
+    description: The inferencing endpoint for the model to use for testing
+  - default: $(context.pipelineRun.namespace)
+    name: target-namespace
+    type: string
+  - name: candidate-image-tag-reference
+    type: string
+    description: "A fully qualified image tag reference to be used for the candidate image build. E.g. registry.example.com/my-org/ai-model:1.0-1-candidate"
+    default: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)-candidate
+  - name: target-image-tag-references
+    type: array
+    description: "An array of fully qualified image tag references to be used for the final image push. E.g. registry.example.com/my-org/ai-model:1.0-1"
+  - name: upon-end
+    type: string
+    description: "Action to perform on the k8s deployment created to test the model container image. Valid values in [delete, keep, stop]"
+    default: delete
+  results:
+  - name: git-model-fetched-commit
+    description: The commit hash of the git repo where the model files were fetched from
+    value: $(tasks.fetch-model-git.results.commit)
+  - name: git-model-fetched-url
+    description: The url of the git repo where the model files were fetched from
+    value: $(tasks.fetch-model-git.results.url)
+  - name: git-model-fetched-commit-epoch
+    description: The commit timestamp of the git repo where the model files were fetched from
+    value: $(tasks.fetch-model-git.results.committer-date)
+  - name: git-containerfile-fetched-commit
+    description: The commit hash of the git repo where the containerfile was fetched from
+    value: $(tasks.git-clone-containerfile-repo.results.commit)
+  - name: git-containerfile-fetched-url
+    description: The url of the git repo where the containerfile was fetched from
+    value: $(tasks.git-clone-containerfile-repo.results.url)
+  - name: git-containerfile-fetched-commit-epoch
+    description: The commit timestamp of the git repo where the containerfile was fetched from
+    value: $(tasks.git-clone-containerfile-repo.results.committer-date)
+  - name: model-files-size
+    description: The size of the model files
+    value: $(tasks.check-model-and-containerfile-exists.results.model-files-size)
+  - name: model-files-list
+    description: The list of model files
+    value: $(tasks.check-model-and-containerfile-exists.results.model-files-list)
+  - name: candidate-image-tag-reference
+    description: The tag where the candidate model container image was pushed to
+    value: $(tasks.build-container-image.results.IMAGE_URL)
+  - name: target-image-tag-references
+    description: The fully qualified image reference that the image was pushed to (e.g. registry.example.com/my-org/ai-model:1.0-1)
+    value: $(tasks.retrieve-build-image-info.results.target-image-tag-references)
+  - name: image-digest-reference
+    description: The fully qualified image digest reference of the image
+    value: $(tasks.retrieve-build-image-info.results.image-digest-reference)
+  - name: image-size-bytes
+    description: The size of the model container image in bytes
+    value: $(tasks.retrieve-build-image-info.results.image-size-bytes)
+  - name: buildah-sha
+    description: The SHA digest of the model container image
+    value: $(tasks.build-container-image.results.IMAGE_DIGEST)
+  - name: model-name
+    description: The model name
+    value: $(tasks.retrieve-build-image-info.results.model-name)
+  - name: model-version
+    description: The model version
+    value: $(tasks.retrieve-build-image-info.results.model-version)
+  - name: image-creation-time
+    description: The date and time the image was created at
+    value: $(tasks.retrieve-build-image-info.results.image-creation-time)
+  - name: buildah-version
+    description: The buildah version used to build the model container image
+    value: $(tasks.retrieve-build-image-info.results.buildah-version)
+  tasks:
+  - name: fetch-model-git
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    params:
+    - name: url
+      value: $(params.git-model-repo)
+    - name: revision
+      value: $(params.git-model-revision)
+    - name: subdirectory
+      value: /model_dir-$(params.model-name)/
+    workspaces:
+    - name: output
+      workspace: build-workspace-pv
+    - name: ssl-ca-directory
+      workspace: git-ssl-cert
+  - name: move-model-to-root-dir
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: subdirectory
+      value: model_dir-$(params.model-name)
+    - name: src-model-relative-path
+      value: $(params.modelRelativePath)
+    runAfter:
+    - fetch-model-git
+    workspaces:
+    - name: workspace
+      workspace: build-workspace-pv
+    taskRef:
+      kind: Task
+      name: move-model-to-root-dir
+  - name: git-clone-containerfile-repo
+    params:
+    - name: url
+      value: $(params.git-containerfile-repo)
+    - name: revision
+      value: $(params.git-containerfile-revision)
+    - name: subdirectory
+      value: /containerfile_repo/
+    runAfter:
+    - move-model-to-root-dir
+    taskRef:
+      kind: ClusterTask
+      name: git-clone
+    workspaces:
+    - name: output
+      workspace: build-workspace-pv
+    - name: basic-auth
+      workspace: git-basic-auth
+    - name: ssl-ca-directory
+      workspace: git-ssl-cert
+  - name: check-model-and-containerfile-exists
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: containerfilePath
+      value: containerfile_repo/$(params.containerfileRelativePath)
+    - name: current-namespace
+      value: $(context.pipelineRun.namespace)
+    runAfter:
+    - git-clone-containerfile-repo
+    taskRef:
+      kind: Task
+      name: check-model-and-containerfile-exists
+    workspaces:
+    - name: workspace
+      workspace: build-workspace-pv
+  - name: build-container-image
+    params:
+    - name: IMAGE
+      value: $(params.candidate-image-tag-reference)
+    - name: BUILDER_IMAGE
+      value: registry.redhat.io/ubi9/buildah:latest
+    - name: STORAGE_DRIVER
+      value: vfs
+    - name: DOCKERFILE
+      value: containerfile_repo/$(params.containerfileRelativePath)
+    - name: CONTEXT
+      value: model_dir-$(params.model-name)/$(params.model-name)
+    - name: TLSVERIFY
+      value: "true"
+    - name: FORMAT
+      value: oci
+    - name: BUILD_EXTRA_ARGS
+      value: "--build-arg MODEL_NAME=$(params.model-name) --build-arg MODEL_DIR=$(params.model-dir)"
+    - name: SKIP_PUSH
+      value: "false"
+    runAfter:
+    - check-model-and-containerfile-exists
+    taskRef:
+      kind: ClusterTask
+      name: buildah
+    workspaces:
+    - name: source
+      workspace: build-workspace-pv
+  - name: test-container-deploy
+    params:
+    - name: SCRIPT
+      value: |
+        cat <<EOF | oc apply -f -
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: $(params.model-name)-$(params.model-version)
+            model-name: $(params.model-name)
+          name: $(params.model-name)-$(params.model-version)
+          namespace: $(params.target-namespace)
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: $(params.model-name)-$(params.model-version)
+          strategy: {}
+          template:
+            metadata:
+              creationTimestamp: null
+              labels:
+                app: $(params.model-name)-$(params.model-version)
+            spec:
+              containers:
+              - image: $(params.candidate-image-tag-reference)
+                name: $(params.model-name)-$(params.model-version)
+                livenessProbe:
+                  failureThreshold: 10
+                  httpGet:
+                    path: /v2/health/live
+                    port: 8080
+                    scheme: HTTP
+                  periodSeconds: 5
+                  successThreshold: 1
+                readinessProbe:
+                  failureThreshold: 10
+                  httpGet:
+                    path: /v2/models/$(params.model-name)/ready
+                    port: 8080
+                    scheme: HTTP
+                  periodSeconds: 5
+                  successThreshold: 1
+                ports:
+                - containerPort: 8080
+                resources: {}
+        status: {}
+        EOF
+        oc wait deployment -n $(params.target-namespace) $(params.model-name)-$(params.model-version) --for condition=Available=True --timeout=120s
+        oc wait pod -n $(params.target-namespace) -l app=$(params.model-name)-$(params.model-version) --for condition=Ready=True --timeout=120s
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+    runAfter:
+      - build-container-image
+  - name: create-default-service
+    params:
+    - name: SCRIPT
+      value: oc expose deployment  $(params.model-name)-$(params.model-version) --port=8080
+        --target-port=8080 --selector='app=$(params.model-name)-$(params.model-version)'
+        --dry-run=client -o yaml |  oc apply -f -
+    - name: VERSION
+      value: latest
+    runAfter:
+    - test-container-deploy
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+  - name: test-model-rest-svc
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: model-version
+      value: $(params.model-version)
+    - name: test-endpoint
+      value: $(params.test-endpoint)
+    runAfter:
+    - create-default-service
+    taskRef:
+      kind: Task
+      name: test-model-rest-svc
+    workspaces:
+    - name: test-data
+      workspace: test-data
+  - name: stop-deployment
+    params:
+    - name: SCRIPT
+      value: |
+        if [ "$(params.upon-end)" == "stop" ]; then
+          oc scale deployment.apps/$(params.model-name)-$(params.model-version) --replicas=0
+        elif [ "$(params.upon-end)" == "delete" ]; then
+          oc delete all --selector=app=$(params.model-name)-$(params.model-version)
+        elif [ "$(params.upon-end)" == "keep" ]; then
+          echo "Keeping the deployment running."
+        else
+          echo "Invalid value for upon-end parameter."
+          exit 1
+        fi
+    - name: VERSION
+      value: latest
+    runAfter:
+    - test-model-rest-svc
+    taskRef:
+      kind: ClusterTask
+      name: openshift-client
+  - name: retrieve-build-image-info
+    taskRef:
+      kind: Task
+      name: retrieve-build-image-info
+    params:
+    - name: model-name
+      value: $(params.model-name)
+    - name: model-version
+      value: $(params.model-version)
+    - name: namespace
+      value: $(params.target-namespace)
+    - name: buildah-sha
+      value: $(tasks.build-container-image.results.IMAGE_DIGEST)
+    - name: pipeline-run-uid
+      value: $(context.pipelineRun.uid)
+    - name: candidate-image-tag-reference
+      value: $(params.candidate-image-tag-reference)
+    - name: target-image-tag-references
+      value: ["$(params.target-image-tag-references[*])"]
+    runAfter:
+    - test-model-rest-svc
+    - stop-deployment
+    workspaces:
+    - name: images-url
+      workspace: build-workspace-pv
+  - name: skopeo-copy
+    params:
+    - name: srcTLSverify
+      value: "true"
+    - name: destTLSverify
+      value: "true"
+    runAfter:
+    - retrieve-build-image-info
+    taskRef:
+      kind: ClusterTask
+      name: skopeo-copy
+    workspaces:
+    - name: images-url
+      workspace: build-workspace-pv
+  workspaces:
+  - name: build-workspace-pv
+  - name: s3-secret
+  - name: git-basic-auth
+    optional: true
+  - name: test-data
+  - name: git-ssl-cert
+    optional: true
+  - name: s3-ssl-cert
+    optional: true

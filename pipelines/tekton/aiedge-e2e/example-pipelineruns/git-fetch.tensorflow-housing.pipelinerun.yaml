@@ -2,9 +2,9 @@ apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
   labels:
-    tekton.dev/pipeline: aiedge-e2e
+    tekton.dev/pipeline: git-fetch
     model-name: tensorflow-housing
-  generateName: aiedge-e2e-tensorflow-housing-
+  generateName: git-fetch-tensorflow-housing-
 spec:
   params:
   - name: model-name
@@ -41,7 +41,7 @@ spec:
   - name: upon-end
     value: "delete"
   pipelineRef:
-    name: aiedge-e2e
+    name: git-fetch
   serviceAccountName: pipeline
   timeout: 1h0m0s
   workspaces:
