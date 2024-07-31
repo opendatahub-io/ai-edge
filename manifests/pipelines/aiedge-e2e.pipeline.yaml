@@ -156,8 +156,6 @@ spec:
     params:
     - name: model-name
       value: $(params.model-name)
-    - name: current-namespace
-      value: $(context.pipelineRun.namespace)
     - name: s3-bucket-name
       value: $(params.s3-bucket-name)
     - name: model-relative-path
@@ -203,8 +201,6 @@ spec:
       value: $(params.model-name)
     - name: containerfilePath
       value: containerfile_repo/$(params.containerfileRelativePath)
-    - name: current-namespace
-      value: $(context.pipelineRun.namespace)
     runAfter:
     - git-clone-containerfile-repo
     taskRef:

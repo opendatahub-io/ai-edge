@@ -4,8 +4,6 @@ metadata:
   name: gitops-update-pipeline
 spec:
   params:
-    - name: model-name
-      type: string
     - name: image-registry-repo
       type: string
     - name: image-digest

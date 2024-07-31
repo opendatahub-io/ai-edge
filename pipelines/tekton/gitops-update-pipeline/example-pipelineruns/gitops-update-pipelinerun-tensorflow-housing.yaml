@@ -6,8 +6,6 @@ metadata:
     tekton.dev/pipeline: gitops-update-pipeline
 spec:
   params:
-  - name: model-name
-    value: tensorflow-housing
   - name: image-registry-repo
     value: quay.io/rhoai-edge/tensorflow-housing
   - name: image-digest

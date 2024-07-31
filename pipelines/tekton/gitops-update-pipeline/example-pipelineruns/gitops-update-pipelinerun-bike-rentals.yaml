@@ -6,8 +6,6 @@ metadata:
     tekton.dev/pipeline: gitops-update-pipeline
 spec:
   params:
-  - name: model-name
-    value: bike-rentals-auto-ml
   - name: image-registry-repo
     value: quay.io/rhoai-edge/bike-rentals-auto-ml
   - name: image-digest
