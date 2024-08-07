@@ -350,11 +350,8 @@ spec:
       workspace: build-workspace-pv
   workspaces:
   - name: build-workspace-pv
-  - name: s3-secret
   - name: git-basic-auth
     optional: true
   - name: test-data
   - name: git-ssl-cert
-    optional: true
-  - name: s3-ssl-cert
     optional: true
