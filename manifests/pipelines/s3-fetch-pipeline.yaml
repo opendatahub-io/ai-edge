@@ -204,7 +204,7 @@ spec:
                 app: $(params.model-name)-$(params.model-version)
             spec:
               containers:
-              - image: $(params.candidate-image-tag-reference)
+              - image: $(params.candidate-image-tag-reference)@$(tasks.build-container-image.results.IMAGE_DIGEST)
                 name: $(params.model-name)-$(params.model-version)
                 livenessProbe:
                   failureThreshold: 10
