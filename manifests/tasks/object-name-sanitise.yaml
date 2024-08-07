@@ -12,12 +12,12 @@ spec:
     description: Total size of the model files
   steps:
   - name: sanitise-input-string
-    image: registry.access.redhat.com/ubi9/ubi-micro
+    image: registry.access.redhat.com/ubi9/ubi-minimal
     script: |
       #!/usr/bin/env bash
 
       set -Eeuo pipefail
 
-      echo $(params.input-string) | sed 's/[^a-z0-9.-]/-/g; s/-*$//' | tee $(results.output-string.path);
+      echo $(params.input-string) | sed 's/[^a-z0-9.-]/-/g; s/-*$//; s/\n*$//; s/ *$//' | tr -d "\n"  > $(results.output-string.path);
 
-    workingDir: $(workspaces.workspace.path)
+    workingDir: /

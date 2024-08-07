@@ -149,6 +149,15 @@ spec:
     workspaces:
     - name: workspace
       workspace: build-workspace-pv
+  - name: sanitise-model-name
+    params:
+    - name: input-string
+      value: $(params.model-name)
+    runAfter:
+    - check-model-and-containerfile-exists
+    taskRef:
+      kind: Task
+      name: object-name-sanitise
   - name: build-container-image
     params:
     - name: IMAGE
@@ -170,7 +179,7 @@ spec:
     - name: SKIP_PUSH
       value: "false"
     runAfter:
-    - check-model-and-containerfile-exists
+    - sanitise-model-name
     taskRef:
       kind: ClusterTask
       name: buildah
@@ -189,7 +198,7 @@ spec:
           labels:
             app: $(params.model-name)-$(params.model-version)
             model-name: $(params.model-name)
-          name: $(params.model-name)-$(params.model-version)
+          name: "$(tasks.sanitise-model-name.results.output-string)-$(params.model-version)"
           namespace: $(params.target-namespace)
         spec:
           replicas: 1
@@ -205,7 +214,7 @@ spec:
             spec:
               containers:
               - image: $(params.candidate-image-tag-reference)@$(tasks.build-container-image.results.IMAGE_DIGEST)
-                name: $(params.model-name)-$(params.model-version)
+                name: "$(tasks.sanitise-model-name.results.output-string)-$(params.model-version)"
                 livenessProbe:
                   failureThreshold: 10
                   httpGet:
@@ -227,7 +236,7 @@ spec:
                 resources: {}
         status: {}
         EOF
-        oc wait deployment -n $(params.target-namespace) $(params.model-name)-$(params.model-version) --for condition=Available=True --timeout=120s
+        oc wait deployment -n $(params.target-namespace) $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --for condition=Available=True --timeout=120s
         oc wait pod -n $(params.target-namespace) -l app=$(params.model-name)-$(params.model-version) --for condition=Ready=True --timeout=120s
     taskRef:
       kind: ClusterTask
@@ -237,7 +246,7 @@ spec:
   - name: create-default-service
     params:
     - name: SCRIPT
-      value: oc expose deployment  $(params.model-name)-$(params.model-version) --port=8080
+      value: oc expose deployment  $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --port=8080
         --target-port=8080 --selector='app=$(params.model-name)-$(params.model-version)'
         --dry-run=client -o yaml |  oc apply -f -
     - name: VERSION
@@ -250,7 +259,7 @@ spec:
   - name: test-model-rest-svc
     params:
     - name: model-name
-      value: $(params.model-name)
+      value: $(tasks.sanitise-model-name.results.output-string)
     - name: model-version
       value: $(params.model-version)
     - name: test-endpoint
@@ -268,7 +277,7 @@ spec:
     - name: SCRIPT
       value: |
         if [ "$(params.upon-end)" == "stop" ]; then
-          oc scale deployment.apps/$(params.model-name)-$(params.model-version) --replicas=0
+          oc scale deployment.apps/$(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --replicas=0
         elif [ "$(params.upon-end)" == "delete" ]; then
           oc delete all --selector=app=$(params.model-name)-$(params.model-version)
         elif [ "$(params.upon-end)" == "keep" ]; then
