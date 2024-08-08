@@ -4,10 +4,7 @@ metadata:
   name: test-model-rest-svc
 spec:
   params:
-  - name: model-name
-    type: string
-  - name: model-version
-    default: "1"
+  - name: deployment-name
     type: string
   - name: test-endpoint
     type: string
@@ -26,7 +23,7 @@ spec:
         echo "\nCall service:"
 
         #  call service
-        curl -v -X POST -H "Content-Type:application/json" --data @$(workspaces.test-data.path)/data.json -o /tmp/output.json http://$(params.model-name)-$(params.model-version):8080/$(params.test-endpoint)
+        curl -v -X POST -H "Content-Type:application/json" --data @$(workspaces.test-data.path)/data.json -o /tmp/output.json http://$(params.deployment-name):8080/$(params.test-endpoint)
 
         # Check response:
         echo "Check response:"

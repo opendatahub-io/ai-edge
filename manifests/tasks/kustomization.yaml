@@ -8,5 +8,5 @@ resources:
 - copy-model-from-pvc.yaml
 - yq-update.yaml
 - move-model-to-root-dir.yaml
-- object-name-sanitise.yaml
+- sanitise-object-name.yaml
 - https://raw.githubusercontent.com/tektoncd/catalog/main/task/github-open-pr/0.2/github-open-pr.yaml

@@ -157,7 +157,7 @@ spec:
     - check-model-and-containerfile-exists
     taskRef:
       kind: Task
-      name: object-name-sanitise
+      name: sanitise-object-name
   - name: build-container-image
     params:
     - name: IMAGE
@@ -258,10 +258,8 @@ spec:
       name: openshift-client
   - name: test-model-rest-svc
     params:
-    - name: model-name
-      value: $(tasks.sanitise-model-name.results.output-string)
-    - name: model-version
-      value: $(params.model-version)
+    - name: deployment-name
+      value: $(tasks.sanitise-model-name.results.output-string)-$(params.model-version)
     - name: test-endpoint
       value: $(params.test-endpoint)
     runAfter:

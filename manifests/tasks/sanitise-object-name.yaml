@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: sanitise-object-name
+spec:
+  description: This Task can be used to sanitise a string that will be used for naming a k8s object. This task converts the string to a value that can be used for an object name. Any non-alphanumeric characters that are converted to "-" 
+  params:
+  - name: input-string
+    type: string
+  results:
+  - name: output-string
+    description: Sanitised output string
+  steps:
+  - name: sanitise-input-string
+    image: registry.access.redhat.com/ubi9/ubi-minimal
+    script: |
+      #!/usr/bin/env bash
+
+      set -Eeuo pipefail
+
+      echo $(params.input-string) | sed 's/[^a-z0-9.-]/-/g; s/-*$//' | tr -d "\n"  > $(results.output-string.path);
+
+    workingDir: /
