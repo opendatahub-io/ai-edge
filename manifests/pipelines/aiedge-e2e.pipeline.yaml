@@ -318,7 +318,7 @@ spec:
       name: openshift-client
   - name: test-model-rest-svc
     params:
-    - name: deployment-name
+    - name: service-name
       value: $(tasks.sanitise-model-name.results.output-string)-$(params.model-version)
     - name: test-endpoint
       value: $(params.test-endpoint)

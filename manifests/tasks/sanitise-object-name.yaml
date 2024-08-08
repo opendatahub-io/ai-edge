@@ -19,5 +19,3 @@ spec:
       set -Eeuo pipefail
 
       echo $(params.input-string) | sed 's/[^a-z0-9.-]/-/g; s/-*$//' | tr -d "\n"  > $(results.output-string.path);
-
-    workingDir: /
