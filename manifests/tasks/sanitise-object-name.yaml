@@ -18,4 +18,16 @@ spec:
 
       set -Eeuo pipefail
 
-      echo $(params.input-string) | sed 's/[^a-z0-9.-]/-/g; s/-*$//' | tr -d "\n"  > $(results.output-string.path);
+      # convert any upercase cahracters to lowercase
+      STRING=`tr 'A-Z' 'a-z' <<< $(params.input-string)`
+
+      # replace all non-alphanumeric characters that are not - or . with -
+      STRING=`sed 's/[^a-z0-9.-]/-/g' <<< $STRING`
+
+      # trim - and . from either end of the string
+      STRING=`sed 's/^[.-]*//; s/[.-]*$//' <<< $STRING`
+
+      # remove line ending at the end of the string
+      STRING=`tr -d "\n" <<< $STRING`
+
+      echo -n $STRING | tee $(results.output-string.path);
