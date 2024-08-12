@@ -18,7 +18,7 @@ spec:
     type: string
     description: Git revision to checkout when cloning the repository with the Containerfile
     default: "main"
-  - name: containerfileRelativePath
+  - name: containerfile-relative-path
     type: string
     description: Path to the Containerfile in the git repository for model server imagebuild
   - name: modelRelativePath
@@ -163,7 +163,7 @@ spec:
     - name: model-name
       value: $(params.model-name)
     - name: containerfilePath
-      value: containerfile_repo/$(params.containerfileRelativePath)
+      value: containerfile_repo/$(params.containerfile-relative-path)
     - name: current-namespace
       value: $(context.pipelineRun.namespace)
     runAfter:
@@ -183,7 +183,7 @@ spec:
     - name: STORAGE_DRIVER
       value: vfs
     - name: DOCKERFILE
-      value: containerfile_repo/$(params.containerfileRelativePath)
+      value: containerfile_repo/$(params.containerfile-relative-path)
     - name: CONTEXT
       value: model_dir-$(params.model-name)/$(params.model-name)
     - name: TLSVERIFY
