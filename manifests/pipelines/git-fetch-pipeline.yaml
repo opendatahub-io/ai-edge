@@ -122,6 +122,8 @@ spec:
       workspace: build-workspace-pv
     - name: ssl-ca-directory
       workspace: git-ssl-cert
+    - name: basic-auth
+      workspace: git-secret
   - name: move-model-to-root-dir
     params:
     - name: model-name
@@ -355,6 +357,8 @@ spec:
       workspace: build-workspace-pv
   workspaces:
   - name: build-workspace-pv
+  - name: git-secret
+    optional: true
   - name: git-basic-auth
     optional: true
   - name: test-data

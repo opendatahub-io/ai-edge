@@ -33,6 +33,8 @@ These are all the fields in `git_fetch`
 - `model_relative_path` - Relative path from the root of the model repo to where the model is 
 - `model_revision` - Branch of the model repo
 - `model_dir` - Sub-directory of the model in the model folder 
+- `username` - (optional) Used for when git repo is private. This is the username associated with the private repo, when set the `token` field must also be set
+- `token` - (optional) Used for when git repo is private. This is the token associated with the user who is the owner of the private repo, when set the `username` field must also be set, [see info here](../../pipelines/README.md#git-repository-and-credentials)
 - `self_signed_cert` - (optional) path to a self signed cert to connect to access the repo
 
 These are all the fields in `s3_fetch`

@@ -35,6 +35,8 @@ type GitFetchConfig struct {
 	ModelRelativePath string `json:"model_relative_path"`
 	ModelRevision     string `json:"model_revision"`
 	ModelDir          string `json:"model_dir"`
+	Username          string `json:"username"`
+	Token             string `json:"token"`
 	SelfSignedCert    string `json:"self_signed_cert"`
 }
 
