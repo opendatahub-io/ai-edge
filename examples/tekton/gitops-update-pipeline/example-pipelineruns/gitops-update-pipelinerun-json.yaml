@@ -25,7 +25,7 @@ spec:
   - name: yq-script
     value: |
       yq eval -i -o=json -I=4 "(.spec.template.spec.containers[] | select(.name == \"model\").image) = \"${IMAGE_NAME}@${IMAGE_DIGEST}\"" \
-        pipelines/tekton/gitops-update-pipeline/test/json/my-deployment.json
+        examples/tekton/gitops-update-pipeline/test/json/my-deployment.json
   pipelineRef:
     name: gitops-update-pipeline
   serviceAccountName: pipeline

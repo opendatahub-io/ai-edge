@@ -46,7 +46,7 @@ The main objective currently is to showcase that a user can:
 
 > [!NOTE]
 > Developing and training a model is currently out of scope of this repository as this repository already
-contains example models in the [pipelines/models/](pipelines/models/) directory. You can read more about developing
+contains example models in the [examples/models/](examples/models/) directory. You can read more about developing
 > and training a model in the [Developing and training a model](#developing-and-training-a-model) section.
 
 
@@ -94,8 +94,8 @@ The proof of concept is built to provide two main workflows as shown in the diag
 
 ### Workflow 1: Building an Inference Application Container Image
 
-In [pipelines/README.md](pipelines/README.md) we show how to take the trained models,
-store them in a S3 bucket,
+In [manifests/README.md](manifests/README.md) we show how to take the trained models,
+stored in an S3 bucket or Git repository,
 build container image(s) with the model and serving runtime using OpenShift Pipelines,
 push the container image(s) to an image registry accessible by the near edge cluster(s),
 and update a clone of this repository with a pull request,
@@ -223,7 +223,7 @@ name>-<application name>` to see more information.
 ### Developing and training a model
 
 This step is out of scope of this Proof of Concept repository,
-as this repository already contains trained models in the [pipelines/models/](pipelines/models/) directory.
+as this repository already contains trained models in the [examples/models/](examples/models/) directory.
 
 If you wish to develop and train different models,
 Jupyter notebooks provided by [Open Data Hub](https://opendatahub.io/) (ODH)
@@ -236,7 +236,7 @@ so you might want to start with the pre-built models first.
 
 ### Using local models in pipelines
 
-In `pipelines/model-upload/` you can upload a local
+In `examples/model-upload/` you can upload a local
 model file to be used in our pipelines. This is done by uploading a model to a PVC
 and copying that model to our pipeline's workspace for use while it is running.
 
@@ -255,10 +255,10 @@ You can set the `SIZE` and `PVC` values aswell
 make MODEL_PATH="PATH_TO_A_FILE" NAME=my-model SIZE=1G PVC=my-new-PVC create
 ```
 
-You can then use the [copy-model-from-pvc](pipelines/tekton/aiedge-e2e/tasks/copy-model-from-pvc.yaml) task to copy the
+You can then use the [copy-model-from-pvc](manifests/tasks/copy-model-from-pvc.yaml) task to copy the
 model from the `model-workspace`, which can be set to the PVC created in the last step, to the `build-workspace-pv`
 workspace, which is then used by the `buildah` task in the pipeline.
-[copy-model-from-pvc](pipelines/tekton/aiedge-e2e/tasks/copy-model-from-pvc.yaml) task is not included in the pipeline
+[copy-model-from-pvc](manifests/tasks/copy-model-from-pvc.yaml) task is not included in the pipeline
 by default, you have to add it yourself.
 
 ## Contributing

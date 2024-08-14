@@ -46,7 +46,7 @@ These are all the fields in `s3_fetch`
 
 These are all the fields in `gitops`
 
-- `token` - Auth token used by the git ops pipeline to make a pull request, [see info here](../../pipelines/README.md#git-repository-and-credentials)
+- `token` - Auth token used by the git ops pipeline to make a pull request, [see info here](../../manifests/README.md#git-repository-and-credentials)
 - `username` - Username linked to the `GIT_TOKEN`
 - `repo` - Git repo URL used to make a pull request in the git ops pipeline (https://github.com/org/repo)
 - `api_server` - Git API server (api.github.com)

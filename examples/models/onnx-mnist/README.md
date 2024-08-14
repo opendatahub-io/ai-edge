@@ -10,7 +10,7 @@ The model is trained in CNTK following the tutorial CNTK 103D: Convolutional Neu
 Note that the specific architecture used is the model with alternating convolution and max pooling layers (found under the "Solution" section at the end of the tutorial).
 ## Test
 ### Run OVMS with the model inside
-Execute the following command from the [pipelines](../../) folder:
+Execute the following command from the [examples](../../) folder:
 ```
 podman run -d --rm -v ${PWD}/models:/model:Z -p 8080:8080 quay.io/opendatahub/openvino_model_server:stable --model_name onnx-mnist --model_path /model/onnx-mnist --rest_port 8080
 ```

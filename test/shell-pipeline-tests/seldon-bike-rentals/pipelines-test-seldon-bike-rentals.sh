@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 REPO_ROOT_DIR=$(dirname ${BASH_SOURCE[0]})/../../..
-PIPELINES_DIR="$REPO_ROOT_DIR/pipelines"
+EXAMPLES_DIR="$REPO_ROOT_DIR/examples"
 MANIFESTS_DIR="$REPO_ROOT_DIR/manifests"
 
 source "$REPO_ROOT_DIR"/test/shell-pipeline-tests/common.sh
@@ -14,7 +14,7 @@ waitForOpResult 60 "True" "N/A" "oc get tektonconfig -n openshift-operators conf
 waitForOpResult 10 "pipeline" "N/A" "oc get serviceaccount -o=custom-columns=NAME:.metadata.name | grep pipeline"
 
 ##### AIEDGE E2E PIPELINE
-AIEDGE_E2E_PIPELINE_DIR_PATH="$PIPELINES_DIR"/tekton/aiedge-e2e
+AIEDGE_E2E_PIPELINE_DIR_PATH="$EXAMPLES_DIR"/tekton/aiedge-e2e
 
 AWS_SECRET_PATH_TEMPLATE="$AIEDGE_E2E_PIPELINE_DIR_PATH"/templates/credentials-s3.secret.yaml.template
 AWS_SECRET_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/templates/credentials-s3.secret.yaml
@@ -34,7 +34,7 @@ oc secret link pipeline credentials-image-registry
 ## apply test data directory
 oc apply -k "$AIEDGE_E2E_PIPELINE_DIR_PATH"/test-data
 
-## oc apply -k pipelines
+## oc apply -k manifests
 oc apply -k "$MANIFESTS_DIR"/
 
 ## prepare parameters

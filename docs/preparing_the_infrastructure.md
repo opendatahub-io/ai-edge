@@ -3,7 +3,7 @@
 ## Prerequisites
 The following accounts are required to run the proof of concept
 
-- A GitHub account or [Gitea installation](gitea/README.md).
+- A GitHub account or [Gitea installation](../gitea/README.md).
 - An AWS account with access to [Amazon S3](https://s3.console.aws.amazon.com/).
 - A [Quay](https://www.quay.io) Registry account.
 
@@ -58,7 +58,7 @@ continue with the installation of the components in the next sections.
 ## Installation of Red Hat OpenShift Pipelines
 
 Building an inference service container image with a trained model can be done using Red Hat OpenShift Pipelines. Follow
-the instructions in [pipelines/README.md](../pipelines/README.md) to install Red Hat OpenShift Pipelines and configure
+the instructions in [manifests/README.md](../manifests/README.md) to install Red Hat OpenShift Pipelines and configure
 the core cluster to use it to build the inference service container images.
 
 ## Installation of Red Hat Advanced Cluster Management for Kubernetes (ACM)
