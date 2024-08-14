@@ -21,13 +21,21 @@ spec:
   - name: containerfile-relative-path
     type: string
     description: Path to the Containerfile in the git repository for model server imagebuild
-  - name: modelRelativePath
+  - name: model-relative-path
     type: string
     description: "Location of the model within the context of the source location.  Leave blank if the model files are at the root of the source location."
   - name: model-dir
     type: string
-    description: Directory below <model-name>/ to be used as MODEL_DIR in image build.
+    description: Directory below <model-relative-path>/<model-name>/ to be used as MODEL_DIR in image build.
     default: "."
+  - name: git-model-repo
+    type: string
+    description: The git repo url where the model files are stored
+    default: ""
+  - name: git-model-revision
+    type: string
+    description: The Git ref to use when cloning the git repo with the saved model
+    default: "main"
   - name: test-endpoint
     type: string
     description: The inferencing endpoint for the model to use for testing
@@ -46,6 +54,15 @@ spec:
     description: "Action to perform on the k8s deployment created to test the model container image. Valid values in [delete, keep, stop]"
     default: delete
   results:
+  - name: git-model-fetched-commit
+    description: The commit hash of the git repo where the model files were fetched from
+    value: $(tasks.fetch-model-git.results.commit)
+  - name: git-model-fetched-url
+    description: The url of the git repo where the model files were fetched from
+    value: $(tasks.fetch-model-git.results.url)
+  - name: git-model-fetched-commit-epoch
+    description: The commit timestamp of the git repo where the model files were fetched from
+    value: $(tasks.fetch-model-git.results.committer-date)
   - name: git-containerfile-fetched-commit
     description: The commit hash of the git repo where the containerfile was fetched from
     value: $(tasks.git-clone-containerfile-repo.results.commit)
@@ -112,9 +129,12 @@ spec:
     - name: subdirectory
       value: model_dir-$(params.model-name)
     - name: src-model-relative-path
-      value: $(params.modelRelativePath)
+      value: $(params.model-relative-path)
     runAfter:
     - fetch-model-git
+    taskRef:
+      kind: Task
+      name: move-model-to-root-dir
     workspaces:
     - name: workspace
       workspace: build-workspace-pv

@@ -19,7 +19,7 @@ spec:
     value: pipelines/containerfiles/Containerfile.openvino.mlserver.mlflow
   - name: git-model-repo
     value: https://github.com/opendatahub-io/ai-edge.git
-  - name: modelRelativePath
+  - name: model-relative-path
     value: pipelines/models
   - name: model-dir
     value: "tf2model"
