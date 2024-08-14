@@ -62,8 +62,8 @@ PIPELINE_RUN_RESULT=$?
 saveArtifacts "$PIPELINE_RUN_NAME"
 
 if [[ $PIPELINE_RUN_RESULT != 0 ]]; then
-  echo "The pipeline failed"
+  echo "The s3-fetch pipeline failed"
   exit 1
 else
-  echo "The pipeline finished successfully"
+  echo "The s3-fetch pipeline finished successfully"
 fi

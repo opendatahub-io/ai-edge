@@ -246,7 +246,7 @@ spec:
   - name: create-default-service
     params:
     - name: SCRIPT
-      value: oc expose deployment  $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --port=8080
+      value: oc expose deployment $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --port=8080
         --target-port=8080 --selector='app=$(params.model-name)-$(params.model-version)'
         --dry-run=client -o yaml |  oc apply -f -
     - name: VERSION

@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: aiedge-e2e
+  name: git-fetch
 spec:
   params:
   - name: model-name
@@ -11,10 +11,6 @@ spec:
     name: model-version
     type: string
     description: Version of the model
-  - name: s3-bucket-name
-    type: string
-    description: "[S3 ONLY] S3 bucket name where the model is stored"
-    default: ""
   - name: git-containerfile-repo
     type: string
     description: Git repository where the Containerfile is stored
@@ -22,19 +18,16 @@ spec:
     type: string
     description: Git revision to checkout when cloning the repository with the Containerfile
     default: "main"
-  - name: containerfileRelativePath
+  - name: containerfile-relative-path
     type: string
     description: Path to the Containerfile in the git repository for model server imagebuild
-  - name: modelRelativePath
+  - name: model-relative-path
     type: string
     description: "Location of the model within the context of the source location.  Leave blank if the model files are at the root of the source location."
   - name: model-dir
     type: string
-    description: Directory below <model-name>/ to be used as MODEL_DIR in image build.
+    description: Directory below <model-relative-path>/<model-name>/ to be used as MODEL_DIR in image build.
     default: "."
-  - name: fetch-model
-    type: string
-    description: "Fetch the model from Git or S3. Valid values in [s3, git]"
   - name: git-model-repo
     type: string
     description: The git repo url where the model files are stored
@@ -61,9 +54,6 @@ spec:
     description: "Action to perform on the k8s deployment created to test the model container image. Valid values in [delete, keep, stop]"
     default: delete
   results:
-  - name: s3-model-fetched-url
-    description: The S3 URL used to download the model
-    value: $(tasks.fetch-model-s3.results.s3-url)
   - name: git-model-fetched-commit
     description: The commit hash of the git repo where the model files were fetched from
     value: $(tasks.fetch-model-git.results.commit)
@@ -132,10 +122,6 @@ spec:
       workspace: build-workspace-pv
     - name: ssl-ca-directory
       workspace: git-ssl-cert
-    when:
-    - input: "$(params.fetch-model)"
-      operator: in
-      values: ["git"]
   - name: move-model-to-root-dir
     params:
     - name: model-name
@@ -143,37 +129,15 @@ spec:
     - name: subdirectory
       value: model_dir-$(params.model-name)
     - name: src-model-relative-path
-      value: $(params.modelRelativePath)
+      value: $(params.model-relative-path)
     runAfter:
     - fetch-model-git
-    workspaces:
-    - name: workspace
-      workspace: build-workspace-pv
     taskRef:
       kind: Task
       name: move-model-to-root-dir
-  - name: fetch-model-s3
-    params:
-    - name: model-name
-      value: $(params.model-name)
-    - name: s3-bucket-name
-      value: $(params.s3-bucket-name)
-    - name: model-relative-path
-      value: $(params.modelRelativePath)
-    taskRef:
-      kind: Task
-      name: kserve-download-model
     workspaces:
     - name: workspace
       workspace: build-workspace-pv
-    - name: s3-secret
-      workspace: s3-secret
-    - name: ssl-ca-directory
-      workspace: s3-ssl-cert
-    when:
-    - input: "$(params.fetch-model)"
-      operator: in
-      values: ["s3"]
   - name: git-clone-containerfile-repo
     params:
     - name: url
@@ -183,7 +147,6 @@ spec:
     - name: subdirectory
       value: /containerfile_repo/
     runAfter:
-    - fetch-model-s3
     - move-model-to-root-dir
     taskRef:
       kind: ClusterTask
@@ -200,7 +163,7 @@ spec:
     - name: model-name
       value: $(params.model-name)
     - name: containerfilePath
-      value: containerfile_repo/$(params.containerfileRelativePath)
+      value: containerfile_repo/$(params.containerfile-relative-path)
     runAfter:
     - git-clone-containerfile-repo
     taskRef:
@@ -227,7 +190,7 @@ spec:
     - name: STORAGE_DRIVER
       value: vfs
     - name: DOCKERFILE
-      value: containerfile_repo/$(params.containerfileRelativePath)
+      value: containerfile_repo/$(params.containerfile-relative-path)
     - name: CONTEXT
       value: model_dir-$(params.model-name)/$(params.model-name)
     - name: TLSVERIFY
@@ -306,7 +269,7 @@ spec:
   - name: create-default-service
     params:
     - name: SCRIPT
-      value: oc expose deployment  $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --port=8080
+      value: oc expose deployment $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --port=8080
         --target-port=8080 --selector='app=$(params.model-name)-$(params.model-version)'
         --dry-run=client -o yaml |  oc apply -f -
     - name: VERSION
@@ -392,11 +355,8 @@ spec:
       workspace: build-workspace-pv
   workspaces:
   - name: build-workspace-pv
-  - name: s3-secret
   - name: git-basic-auth
     optional: true
   - name: test-data
   - name: git-ssl-cert
-    optional: true
-  - name: s3-ssl-cert
     optional: true

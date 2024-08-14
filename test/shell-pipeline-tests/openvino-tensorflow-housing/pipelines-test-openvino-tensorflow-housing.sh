@@ -38,16 +38,16 @@ oc apply -k "$AIEDGE_E2E_PIPELINE_DIR_PATH"/test-data
 oc apply -k "$MANIFESTS_DIR"/
 
 ## prepare parameters
-AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/example-pipelineruns/aiedge-e2e.pipelinerun-overridden.yaml
-cp "$AIEDGE_E2E_PIPELINE_DIR_PATH"/example-pipelineruns/aiedge-e2e.tensorflow-housing.pipelinerun.yaml "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
-sed -i "s|value: \"delete\"|value: \"keep\"|" "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
-usePRBranchInPipelineRunIfPRCheck "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
+GIT_FETCH_PIPELINE_OVERRIDDEN_PATH="$AIEDGE_E2E_PIPELINE_DIR_PATH"/example-pipelineruns/git-fetch.tensorflow-housing.pipelinerun-overridden.yaml
+cp "$AIEDGE_E2E_PIPELINE_DIR_PATH"/example-pipelineruns/git-fetch.tensorflow-housing.pipelinerun.yaml "$GIT_FETCH_PIPELINE_OVERRIDDEN_PATH"
+sed -i "s|value: \"delete\"|value: \"keep\"|" "$GIT_FETCH_PIPELINE_OVERRIDDEN_PATH"
+usePRBranchInPipelineRunIfPRCheck "$GIT_FETCH_PIPELINE_OVERRIDDEN_PATH"
 
 ## oc create pipeline run
-oc create -f "$AIEDGE_E2E_PIPELINE_OVERRIDDEN_PATH"
+oc create -f "$GIT_FETCH_PIPELINE_OVERRIDDEN_PATH"
 sleep 5 # Just to have the startTime field available
 
-PIPELINE_RUN_NAME=$(oc get pipelinerun --sort-by={.status.startTime} -o=custom-columns=NAME:.metadata.name | grep "aiedge-e2e-.*" | tail -n 1)
+PIPELINE_RUN_NAME=$(oc get pipelinerun --sort-by={.status.startTime} -o=custom-columns=NAME:.metadata.name | grep "git-fetch-.*" | tail -n 1)
 
 if [[ $PIPELINE_RUN_NAME == "" ]]; then
   echo "Could not find any pipeline run"
@@ -61,10 +61,10 @@ PIPELINE_RUN_RESULT=$?
 saveArtifacts "$PIPELINE_RUN_NAME"
 
 if [[ $PIPELINE_RUN_RESULT != 0 ]]; then
-  echo "The aiedge-e2e pipeline failed"
+  echo "The git-fetch pipeline failed"
   exit 1
 else
-  echo "The aiedge-e2e pipeline finished successfully"
+  echo "The git-fetch pipeline finished successfully"
 fi
 
 
