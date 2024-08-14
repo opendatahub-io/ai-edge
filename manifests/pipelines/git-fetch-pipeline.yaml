@@ -28,14 +28,6 @@ spec:
     type: string
     description: Directory below <model-name>/ to be used as MODEL_DIR in image build.
     default: "."
-  - name: git-model-repo
-    type: string
-    description: The git repo url where the model files are stored
-    default: ""
-  - name: git-model-revision
-    type: string
-    description: The Git ref to use when cloning the git repo with the saved model
-    default: "main"
   - name: test-endpoint
     type: string
     description: The inferencing endpoint for the model to use for testing
@@ -54,15 +46,6 @@ spec:
     description: "Action to perform on the k8s deployment created to test the model container image. Valid values in [delete, keep, stop]"
     default: delete
   results:
-  - name: git-model-fetched-commit
-    description: The commit hash of the git repo where the model files were fetched from
-    value: $(tasks.fetch-model-git.results.commit)
-  - name: git-model-fetched-url
-    description: The url of the git repo where the model files were fetched from
-    value: $(tasks.fetch-model-git.results.url)
-  - name: git-model-fetched-commit-epoch
-    description: The commit timestamp of the git repo where the model files were fetched from
-    value: $(tasks.fetch-model-git.results.committer-date)
   - name: git-containerfile-fetched-commit
     description: The commit hash of the git repo where the containerfile was fetched from
     value: $(tasks.git-clone-containerfile-repo.results.commit)
@@ -135,9 +118,6 @@ spec:
     workspaces:
     - name: workspace
       workspace: build-workspace-pv
-    taskRef:
-      kind: Task
-      name: move-model-to-root-dir
   - name: git-clone-containerfile-repo
     params:
     - name: url
@@ -164,8 +144,6 @@ spec:
       value: $(params.model-name)
     - name: containerfilePath
       value: containerfile_repo/$(params.containerfile-relative-path)
-    - name: current-namespace
-      value: $(context.pipelineRun.namespace)
     runAfter:
     - git-clone-containerfile-repo
     taskRef:
@@ -174,6 +152,15 @@ spec:
     workspaces:
     - name: workspace
       workspace: build-workspace-pv
+  - name: sanitise-model-name
+    params:
+    - name: input-string
+      value: $(params.model-name)
+    runAfter:
+    - check-model-and-containerfile-exists
+    taskRef:
+      kind: Task
+      name: sanitise-object-name
   - name: build-container-image
     params:
     - name: IMAGE
@@ -195,7 +182,7 @@ spec:
     - name: SKIP_PUSH
       value: "false"
     runAfter:
-    - check-model-and-containerfile-exists
+    - sanitise-model-name
     taskRef:
       kind: ClusterTask
       name: buildah
@@ -214,7 +201,7 @@ spec:
           labels:
             app: $(params.model-name)-$(params.model-version)
             model-name: $(params.model-name)
-          name: $(params.model-name)-$(params.model-version)
+          name: "$(tasks.sanitise-model-name.results.output-string)-$(params.model-version)"
           namespace: $(params.target-namespace)
         spec:
           replicas: 1
@@ -229,8 +216,8 @@ spec:
                 app: $(params.model-name)-$(params.model-version)
             spec:
               containers:
-              - image: $(params.candidate-image-tag-reference)
-                name: $(params.model-name)-$(params.model-version)
+              - image: $(params.candidate-image-tag-reference)@$(tasks.build-container-image.results.IMAGE_DIGEST)
+                name: "$(tasks.sanitise-model-name.results.output-string)-$(params.model-version)"
                 livenessProbe:
                   failureThreshold: 10
                   httpGet:
@@ -252,7 +239,7 @@ spec:
                 resources: {}
         status: {}
         EOF
-        oc wait deployment -n $(params.target-namespace) $(params.model-name)-$(params.model-version) --for condition=Available=True --timeout=120s
+        oc wait deployment -n $(params.target-namespace) $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --for condition=Available=True --timeout=120s
         oc wait pod -n $(params.target-namespace) -l app=$(params.model-name)-$(params.model-version) --for condition=Ready=True --timeout=120s
     taskRef:
       kind: ClusterTask
@@ -262,7 +249,7 @@ spec:
   - name: create-default-service
     params:
     - name: SCRIPT
-      value: oc expose deployment  $(params.model-name)-$(params.model-version) --port=8080
+      value: oc expose deployment $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --port=8080
         --target-port=8080 --selector='app=$(params.model-name)-$(params.model-version)'
         --dry-run=client -o yaml |  oc apply -f -
     - name: VERSION
@@ -274,10 +261,8 @@ spec:
       name: openshift-client
   - name: test-model-rest-svc
     params:
-    - name: model-name
-      value: $(params.model-name)
-    - name: model-version
-      value: $(params.model-version)
+    - name: service-name
+      value: $(tasks.sanitise-model-name.results.output-string)-$(params.model-version)
     - name: test-endpoint
       value: $(params.test-endpoint)
     runAfter:
@@ -293,7 +278,7 @@ spec:
     - name: SCRIPT
       value: |
         if [ "$(params.upon-end)" == "stop" ]; then
-          oc scale deployment.apps/$(params.model-name)-$(params.model-version) --replicas=0
+          oc scale deployment.apps/$(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --replicas=0
         elif [ "$(params.upon-end)" == "delete" ]; then
           oc delete all --selector=app=$(params.model-name)-$(params.model-version)
         elif [ "$(params.upon-end)" == "keep" ]; then
