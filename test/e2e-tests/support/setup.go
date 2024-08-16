@@ -13,9 +13,10 @@ import (
 )
 
 const (
+	GitCredentialsTemplatePath           = "../../../examples/tekton/aiedge-e2e/templates/credentials-git.secret.yaml.template"
 	S3CredentialsTemplatePath            = "../../../examples/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template"
 	ImageRegistryCredentialsTemplatePath = "../../../examples/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template"
-	GitCredentialsTemplatePath           = "../../../examples/tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template"
+	GitOpsCredentialsTemplatePath           = "../../../examples/tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template"
 
 	SelfSignedCertTemplatePath = "../../../examples/tekton/aiedge-e2e/templates/self-signed-cert.configmap.yaml.template"
 
@@ -88,10 +89,33 @@ func RunSetup(ctx context.Context, config *Config) error {
 		}
 	}
 
-	// Git config has been set, load the credential template file
+	// Git fetch config has been set, load the credential template file
 	// and fill in the values in the config, then apply
 	if config.GitFetchConfig.Enabled {
 		bytes, err := os.ReadFile(GitCredentialsTemplatePath)
+		if err != nil {
+			return err
+		}
+
+		secret := applyconfigv1.SecretApplyConfiguration{}
+		err = yaml.Unmarshal(bytes, &secret)
+		if err != nil {
+			return err
+		}
+
+		secret.StringData["token"] = config.GitFetchConfig.Token
+		secret.StringData[".git-credentials"] = fmt.Sprintf("https://%v:%v@github.com", config.GitFetchConfig.Username, config.GitFetchConfig.Token)
+
+		_, err = config.Clients.Kubernetes.CoreV1().Secrets(config.Namespace).Apply(ctx, &secret, metav1.ApplyOptions{FieldManager: "Apply"})
+		if err != nil {
+			return err
+		}
+	}
+
+	// Git ops config has been set, load the credential template file
+	// and fill in the values in the config, then apply
+	if config.GitOpsConfig.Enabled {
+		bytes, err := os.ReadFile(GitOpsCredentialsTemplatePath)
 		if err != nil {
 			return err
 		}

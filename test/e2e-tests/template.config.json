@@ -13,6 +13,8 @@
     "model_relative_path": "path/to/model",
     "model_revision": "main",
     "model_dir": "model_dir_name",
+    "username": "",
+    "token": "",
     "self_signed_cert": ""
   },
 
