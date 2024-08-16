@@ -3,14 +3,17 @@ kind: Task
 metadata:
   name: kserve-download-model
 spec:
-  description: This Task can be used to a download a model
+  description: This task is used to download a model folder from an S3 bucket. Credentials to allow the download of the model are stored in the `s3-secret` workspace.
   params:
   - name: model-name
     type: string
+    description: The name of the folder that contains the model files 
   - name: s3-bucket-name
     type: string
+    description: The name of the S3 bucket to be downloaded from
   - name: model-relative-path
     type: string
+    description: The path from the root of the S3 bucket to the folder in which the model folder is located. Passing in an empty value means the model is stored at the root of the bucket
   results:
   - name: s3-url
     description: The S3 URL used to download the model
@@ -37,12 +40,12 @@ spec:
       $S3_URL \
       $(workspaces.workspace.path)/model_dir-$(params.model-name)/$(params.model-name)
   workspaces:
-  - description: The workspace for the downloaded model.
+  - description: The workspace for the downloaded model
     name: workspace
-  - description: The S3 secret.
-    name: s3-secret
-  - description: |
+  - name: s3-secret
+    description: The workspace containing the S3 credentials needed to download the model
+  - name: ssl-ca-directory
+    description: |
       A workspace containing CA certificates, this will be used by the model download script to
       verify the peer with when fetching over HTTPS.
-    name: ssl-ca-directory
     optional: true

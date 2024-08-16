@@ -3,11 +3,14 @@ kind: Task
 metadata:
   name: test-model-rest-svc
 spec:
+  description: This task will send data to a testing container with the model inferencing endpoint and verify that expected output is returned. The `test-data` workspace is required to store the required test data used for the test
   params:
   - name: service-name
     type: string
+    description: The name of the service to be tested against
   - name: test-endpoint
     type: string
+    description: The endpoint of the service that will be tested against 
   steps:
     - name: call-rest
       image: registry.access.redhat.com/ubi9/ubi
@@ -31,5 +34,5 @@ spec:
         test "$( python3 -m json.tool --no-indent $(workspaces.test-data.path)/output.json )" = "$( python3 -m json.tool --no-indent /tmp/output.json )"
 
   workspaces:
-  - description: The workspace for test data.
+  - description: A workspace that contains test data to be used. The files expected arre data.json, the jsondata payload for your model, and output.json, the expected json output for that input payload
     name: test-data

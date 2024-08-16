@@ -3,14 +3,17 @@ kind: Task
 metadata:
   name: move-model-to-root-dir
 spec:
-  description: Moves model to the subdirectory, this means the location of the model is the same no matter the fetch method
+  description: Used when using the git fetch method. This task moves the model folder which can be in any location in a cloned repo to the same directory as the git repo orignialy cloned. The cloned repo is then deleted from the workspace. This task can be used to match the behaviour of each fetch method to ensure the location of the model is consistant between tasks
   params:
   - name: model-name
     type: string
+    description: The name of the model folder that contians the model files
   - name: subdirectory
     type: string
+    description: The relative path from the workspace to the location of the git repo cloned
   - name: src-model-relative-path
     type: string
+    description: The relative path from the root of the git repo to the folder containing the model folder
   steps:
   - name: copy-model-to-subdirectory
     image: registry.access.redhat.com/ubi9/ubi
@@ -24,5 +27,5 @@ spec:
       mkdir $(workspaces.workspace.path)/$(params.subdirectory)
       mv $(workspaces.workspace.path)/$(params.model-name) $(workspaces.workspace.path)/$(params.subdirectory)/$(params.model-name)
   workspaces:
-  - description: The workspace for the downloaded model.
+  - description: The workspace for the downloaded model
     name: workspace

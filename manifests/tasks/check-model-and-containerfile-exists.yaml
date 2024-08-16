@@ -3,17 +3,19 @@ kind: Task
 metadata:
   name: check-model-and-containerfile-exists
 spec:
-  description: This Task can be used to check if the model files and containerfile are present
+  description: This Task can be used to check if the model files fetched exist and the containerfile cloned from git is also present
   params:
   - name: model-name
     type: string
+    description: The name of the model to be checked
   - name: containerfilePath
     type: string
+    description: A path from the root of the orignial git repo cloned to the containerfile to be checked
   results:
   - name: model-files-size
-    description: Total size of the model files
+    description: Total size of the model files in MB
   - name: model-files-list
-    description: Space separated list of model files
+    description: Space separated list of files that are within the model folder
   steps:
   - name: check-model-and-containerfile
     image: registry.access.redhat.com/ubi9/ubi-micro
@@ -31,5 +33,5 @@ spec:
       cat $(params.containerfilePath)
     workingDir: $(workspaces.workspace.path)
   workspaces:
-  - description: The workspace for the downloaded model.
+  - description: The workspace that contains the downloaded model
     name: workspace
