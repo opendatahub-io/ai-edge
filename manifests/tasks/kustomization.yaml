@@ -3,8 +3,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 resources:
 - check-model-and-containerfile-exists/check-model-and-containerfile-exists.yaml
 - kserve-download-model/kserve-download-model.yaml
-- test-model-rest-svc-task/test-model-rest-svc-task.yaml
-- retrieve-build-image-info.task/retrieve-build-image-info.task.yaml
+- test-model-rest-svc/test-model-rest-svc.yaml
+- retrieve-build-image-info/retrieve-build-image-info.yaml
 - copy-model-from-pvc/copy-model-from-pvc.yaml
 - yq-update/yq-update.yaml
 - move-model-to-root-dir/move-model-to-root-dir.yaml
