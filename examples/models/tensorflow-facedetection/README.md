@@ -4,7 +4,7 @@ Face detector based on SqueezeNet light (half-channels) as a backbone with a sin
 
 ## Test
 ### Run OVMS with the model inside
-Execute the following command from the [pipelines](../../) folder:
+Execute the following command from the [examples](../../) folder:
 ```
 podman run -d --rm -v ${PWD}/models:/model:Z -p 9000:9000 quay.io/opendatahub/openvino_model_server:stable --model_name face-detection --model_path /model/tensorflow-facedetection --port 9000 --shape auto
 ```

@@ -4,8 +4,8 @@ This directory contains 2 shell pipeline tests:
 * seldon-bike-rentals - Seldon.io image using the bike rentals model
 * openvino-tensorflow-housing - OpenVino image using the Tensorflow housing model
 
-Both tests currently run the full [aiedge-e2e](../../pipelines/tekton/aiedge-e2e) pipeline which includes fetch, build,
-test and push of the image. [GitOps pipeline](../../pipelines/tekton/gitops-update-pipeline) tests will be added as well in the future.
+First test runs the [S3 Fetch](../../manifests/pipelines/s3-fetch-pipeline.yaml) pipeline, while the second one
+runs both [Git Fetch](../../manifests/pipelines/git-fetch-pipeline.yaml) and [GitOps pipeline](../../manifests/pipelines/gitops-update-pipeline.yaml)
 
 Scripts are primarily run in the OpenShift CI environment, so they make use of
 OpenShift CI secrets. You need to configure these if you want to run it locally, see the next section.

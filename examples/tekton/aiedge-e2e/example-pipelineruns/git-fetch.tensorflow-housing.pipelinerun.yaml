@@ -2,31 +2,31 @@ apiVersion: tekton.dev/v1beta1
 kind: PipelineRun
 metadata:
   labels:
-    tekton.dev/pipeline: s3-fetch
-    model-name: bike-rentals-auto-ml
-  generateName: s3-fetch-bike-rentals-auto-ml-
+    tekton.dev/pipeline: git-fetch
+    model-name: tensorflow-housing
+  generateName: git-fetch-tensorflow-housing-
 spec:
   params:
   - name: model-name
-    value: bike-rentals-auto-ml
+    value: tensorflow-housing
   - name: model-version
     value: "1"
-  - name: s3-bucket-name
-    value: rhoai-edge-models
   - name: git-containerfile-repo
     value: https://github.com/opendatahub-io/ai-edge.git
   - name: git-containerfile-revision
     value: "main"
   - name: containerfile-relative-path
-    value: pipelines/containerfiles/Containerfile.seldonio.mlserver.mlflow
+    value: examples/containerfiles/Containerfile.openvino.mlserver.mlflow
   - name: git-model-repo
     value: https://github.com/opendatahub-io/ai-edge.git
   - name: model-relative-path
-    value: ""
+    value: examples/models
+  - name: model-dir
+    value: "tf2model"
   - name: git-model-revision
     value: "main"
   - name: test-endpoint
-    value: "invocations"
+    value: "v1/models/tensorflow-housing/versions/1:predict"
   - name: candidate-image-tag-reference
     value: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.model-name):$(params.model-version)-candidate
   - name: target-image-tag-references
@@ -37,7 +37,7 @@ spec:
   - name: upon-end
     value: "delete"
   pipelineRef:
-    name: s3-fetch
+    name: git-fetch
   serviceAccountName: pipeline
   timeout: 1h0m0s
   workspaces:
@@ -51,9 +51,6 @@ spec:
         resources:
           requests:
             storage: 1Gi
-  - name: s3-secret
-    secret:
-        secretName: credentials-s3
   - configMap:
-      name: bike-rentals-test-data
+      name: tensorflow-housing-test-data
     name: test-data

@@ -12,16 +12,16 @@ import (
 )
 
 const (
-	S3CredentialsTemplatePath            = "../../../pipelines/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template"
-	ImageRegistryCredentialsTemplatePath = "../../../pipelines/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template"
-	GitCredentialsTemplatePath           = "../../../pipelines/tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template"
+	S3CredentialsTemplatePath            = "../../../examples/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template"
+	ImageRegistryCredentialsTemplatePath = "../../../examples/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template"
+	GitCredentialsTemplatePath           = "../../../examples/tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template"
 
 	ManifestsDirectory = "../../../manifests"
 
-	AIEdgeE2EDirectoryRelativePath    = "../../../pipelines/tekton/aiedge-e2e"
-	GitOpsUpdateDirectoryRelativePath = "../../../pipelines/tekton/gitops-update-pipeline"
+	AIEdgeE2EDirectoryRelativePath    = "../../../examples/tekton/aiedge-e2e"
+	GitOpsUpdateDirectoryRelativePath = "../../../examples/tekton/gitops-update-pipeline"
 
-	TestDataDirectoryRelativePath = "../../../pipelines/tekton/aiedge-e2e/test-data/"
+	TestDataDirectoryRelativePath = "../../../examples/tekton/aiedge-e2e/test-data/"
 )
 
 func RunSetup(ctx context.Context, config *Config) error {

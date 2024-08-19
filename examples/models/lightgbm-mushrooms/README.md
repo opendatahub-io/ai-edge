@@ -8,7 +8,7 @@ This model was trained using the [Mushroom Classification](https://www.kaggle.co
 
 ## Test
 ### Run Seldon MLServer with Mushrooms model
-Execute the following command from the [pipelines](../../) folder:
+Execute the following command from the [examples](../../) folder:
 ```
 podman run -d --rm -v ${PWD}/models:/opt/models:Z -p 8080:8080 -p 8081:8081 -p 8082:8082 -ti seldonio/mlserver:1.3.5-lightgbm mlserver start /opt/models/lightgbm-mushrooms
 ```

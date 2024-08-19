@@ -7,7 +7,7 @@ RUN microdnf --nodocs --setopt=keepcache=0 install -y jq httpd-tools && \
 
 LABEL org.opencontainers.image.licenses="MIT"
 LABEL org.opencontainers.image.title="ab-jq"
-LABEL org.opencontainers.image.source="https://github.com/opendatahub-io/ai-edge/blob/main/pipelines/containerfiles/Containerfile.ab-jq"
+LABEL org.opencontainers.image.source="https://github.com/opendatahub-io/ai-edge/blob/main/examples/containerfiles/Containerfile.ab-jq"
 LABEL org.opencontainers.image.url="https://quay.io/repository/rhoai-edge/ab-jq"
 
 CMD [ "bash" ]
