@@ -108,8 +108,14 @@ spec:
   tasks:
   - name: fetch-model-git
     taskRef:
-      kind: ClusterTask
-      name: git-clone
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/tektoncd/catalog.git
+        - name: revision
+          value: main
+        - name: pathInRepo
+          value: task/git-clone/0.9/git-clone.yaml
     params:
     - name: url
       value: $(params.git-model-repo)
@@ -141,6 +147,15 @@ spec:
     - name: workspace
       workspace: build-workspace-pv
   - name: git-clone-containerfile-repo
+    taskRef:
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/tektoncd/catalog.git
+        - name: revision
+          value: main
+        - name: pathInRepo
+          value: task/git-clone/0.9/git-clone.yaml  
     params:
     - name: url
       value: $(params.git-containerfile-repo)
@@ -150,9 +165,6 @@ spec:
       value: /containerfile_repo/
     runAfter:
     - move-model-to-root-dir
-    taskRef:
-      kind: ClusterTask
-      name: git-clone
     workspaces:
     - name: output
       workspace: build-workspace-pv
@@ -264,8 +276,14 @@ spec:
         oc wait deployment -n $(params.target-namespace) $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --for condition=Available=True --timeout=120s
         oc wait pod -n $(params.target-namespace) -l app=$(params.model-name)-$(params.model-version) --for condition=Ready=True --timeout=120s
     taskRef:
-      kind: ClusterTask
-      name: openshift-client
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/tektoncd/catalog.git
+        - name: revision
+          value: main
+        - name: pathInRepo
+          value: task/openshift-client/0.2/openshift-client.yaml
     runAfter:
       - build-container-image
   - name: create-default-service
@@ -279,8 +297,14 @@ spec:
     runAfter:
     - test-container-deploy
     taskRef:
-      kind: ClusterTask
-      name: openshift-client
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/tektoncd/catalog.git
+        - name: revision
+          value: main
+        - name: pathInRepo
+          value: task/openshift-client/0.2/openshift-client.yaml
   - name: test-model-rest-svc
     params:
     - name: service-name
@@ -314,8 +338,14 @@ spec:
     runAfter:
     - test-model-rest-svc
     taskRef:
-      kind: ClusterTask
-      name: openshift-client
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/tektoncd/catalog.git
+        - name: revision
+          value: main
+        - name: pathInRepo
+          value: task/openshift-client/0.2/openshift-client.yaml
   - name: retrieve-build-image-info
     taskRef:
       kind: Task
@@ -350,8 +380,14 @@ spec:
     runAfter:
     - retrieve-build-image-info
     taskRef:
-      kind: ClusterTask
-      name: skopeo-copy
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/tektoncd/catalog.git
+        - name: revision
+          value: main
+        - name: pathInRepo
+          value: task/skopeo-copy/0.3/skopeo-copy.yaml
     workspaces:
     - name: images-url
       workspace: build-workspace-pv
