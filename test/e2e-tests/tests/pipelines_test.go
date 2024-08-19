@@ -86,7 +86,7 @@ func Test_GitFetch_Pipeline(t *testing.T) {
 
 	config, err := support.GetConfig()
 	if err != nil {
-		panic(err.Error())
+		t.Fatal(err.Error())
 	}
 
 	if !config.GitFetchConfig.Enabled {
@@ -107,7 +107,7 @@ func Test_GitFetch_Pipeline(t *testing.T) {
 	support.SetPipelineRunParam("git-containerfile-revision", support.NewStringParamValue(config.GitContainerFileRevision), &pipelineRun)
 	support.SetPipelineRunParam("containerfile-relative-path", support.NewStringParamValue(config.ContainerRelativePath), &pipelineRun)
 	support.SetPipelineRunParam("git-model-repo", support.NewStringParamValue(config.GitFetchConfig.ModelRepo), &pipelineRun)
-	support.SetPipelineRunParam("modelRelativePath", support.NewStringParamValue(config.GitFetchConfig.ModelRelativePath), &pipelineRun)
+	support.SetPipelineRunParam("model-relative-path", support.NewStringParamValue(config.GitFetchConfig.ModelRelativePath), &pipelineRun)
 	support.SetPipelineRunParam("git-model-revision", support.NewStringParamValue(config.GitFetchConfig.ModelRevision), &pipelineRun)
 	support.SetPipelineRunParam("model-dir", support.NewStringParamValue(config.GitFetchConfig.ModelDir), &pipelineRun)
 
