@@ -3,12 +3,13 @@ package support
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	applyconfigv1 "k8s.io/client-go/applyconfigurations/core/v1"
-	"os"
 	"sigs.k8s.io/yaml"
-	"strings"
 )
 
 const (
@@ -16,7 +17,7 @@ const (
 	ImageRegistryCredentialsTemplatePath = "../../../examples/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template"
 	GitCredentialsTemplatePath           = "../../../examples/tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template"
 
-	SelfSignedCertTemplatePath = "../../../pipelines/tekton/aiedge-e2e/templates/self-signed-cert.configmap.yaml.template"
+	SelfSignedCertTemplatePath = "../../../examples/tekton/aiedge-e2e/templates/self-signed-cert.configmap.yaml.template"
 
 	ManifestsDirectory = "../../../manifests"
 
