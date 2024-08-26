@@ -34,5 +34,5 @@ spec:
         test "$( python3 -m json.tool --no-indent $(workspaces.test-data.path)/output.json )" = "$( python3 -m json.tool --no-indent /tmp/output.json )"
 
   workspaces:
-  - description: A workspace that contains test data to be used. The files expected arre data.json, the jsondata payload for your model, and output.json, the expected json output for that input payload
+  - description: A workspace that contains test data to be used. The files expected are data.json, the jsondata payload for your model, and output.json, the expected json output for that input payload
     name: test-data

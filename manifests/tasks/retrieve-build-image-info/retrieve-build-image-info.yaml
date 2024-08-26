@@ -3,7 +3,7 @@ kind: Task
 metadata:
   name: retrieve-build-image-info
 spec:
-  description: This tasks return more detailed info about a model that has just been built
+  description: This task returns more detailed info about a model that has just been built and builds a url.txt file with all image tags to be pushed to
   params:
   - name: namespace
     type: string
@@ -28,6 +28,7 @@ spec:
     description: The image tag references used for the final built image
   workspaces:
   - name: images-url
+    description: workspace where url.txt file is created
   steps:
   - name: get-image-sha
     image: registry.access.redhat.com/ubi9/skopeo

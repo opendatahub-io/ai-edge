@@ -9,7 +9,7 @@ metadata:
   name: yq-update
 spec:
   description: >-
-    This task is used by the GitOps update Pipeline, to allow modifying files with yq
+    This task is used by the GitOps Update Pipeline, to allow modifying files with yq
   workspaces:
     - name: source
       description: A workspace that contains the files which needs to be altered.
@@ -32,7 +32,7 @@ spec:
       default: ""
     - name: env-image-digest
       type: string
-      description: The image tag to be made available as the environment variable IMAGE_DIGEST within the task script.
+      description: The image digest to be made available as the environment variable IMAGE_DIGEST within the task script.
       default: ""
   results:
     - name: yq

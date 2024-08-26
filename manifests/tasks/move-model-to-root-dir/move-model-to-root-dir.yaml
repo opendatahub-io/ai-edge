@@ -7,7 +7,7 @@ spec:
   params:
   - name: model-name
     type: string
-    description: The name of the model folder that contians the model files
+    description: The name of the model folder that contains the model files
   - name: subdirectory
     type: string
     description: The relative path from the workspace to the location of the git repo cloned
