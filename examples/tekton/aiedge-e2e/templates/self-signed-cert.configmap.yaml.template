@@ -1,0 +1,6 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: self-signed-cert
+data:
+  ca-bundle.crt: "{{SELF_SIGNED_CERT}}"

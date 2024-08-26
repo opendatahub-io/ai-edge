@@ -3,18 +3,21 @@ package support
 import (
 	"context"
 	"fmt"
+	"os"
+	"strings"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	applyconfigv1 "k8s.io/client-go/applyconfigurations/core/v1"
-	"os"
 	"sigs.k8s.io/yaml"
-	"strings"
 )
 
 const (
 	S3CredentialsTemplatePath            = "../../../examples/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template"
 	ImageRegistryCredentialsTemplatePath = "../../../examples/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template"
 	GitCredentialsTemplatePath           = "../../../examples/tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template"
+
+	SelfSignedCertTemplatePath = "../../../examples/tekton/aiedge-e2e/templates/self-signed-cert.configmap.yaml.template"
 
 	ManifestsDirectory = "../../../manifests"
 
@@ -76,6 +79,13 @@ func RunSetup(ctx context.Context, config *Config) error {
 		if err != nil {
 			return err
 		}
+
+		if config.S3FetchConfig.SelfSignedCert != "" {
+			err = applySelfSignedCertConfigMap(ctx, "s3-self-signed-cert", config.GitFetchConfig.SelfSignedCert)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	// Git config has been set, load the credential template file
@@ -99,9 +109,16 @@ func RunSetup(ctx context.Context, config *Config) error {
 		if err != nil {
 			return err
 		}
+
+		if config.GitFetchConfig.SelfSignedCert != "" {
+			err = applySelfSignedCertConfigMap(ctx, "git-self-signed-cert", config.GitFetchConfig.SelfSignedCert)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
-	// apply pipelines, this is not based on config we just applt them all
+	// apply pipelines, this is not based on config we just apply them all
 	resourceMap, err := KustomizeBuild(ManifestsDirectory)
 	if err != nil {
 		panic(fmt.Sprintf("error while building kustomize : %v", err.Error()))
@@ -141,6 +158,36 @@ func LinkSecretToServiceAccount(ctx context.Context, config *Config, serviceAcco
 	serviceAccount.Secrets = append(serviceAccount.Secrets, corev1.ObjectReference{Name: secretName})
 
 	_, err = config.Clients.Kubernetes.CoreV1().ServiceAccounts(config.Namespace).Update(ctx, serviceAccount, metav1.UpdateOptions{})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func applySelfSignedCertConfigMap(ctx context.Context, configMapName string, certPath string) error {
+	templateBytes, err := os.ReadFile(SelfSignedCertTemplatePath)
+	if err != nil {
+		return err
+	}
+
+	certBytes, err := os.ReadFile(certPath)
+	if err != nil {
+		return err
+	}
+
+	configMap := applyconfigv1.ConfigMapApplyConfiguration{}
+	err = yaml.Unmarshal(templateBytes, &configMap)
+	if err != nil {
+		return err
+	}
+
+	configMap.Name = &configMapName
+	configMap.Data = map[string]string{
+		"ca-bundle.crt": string(certBytes),
+	}
+
+	_, err = config.Clients.Kubernetes.CoreV1().ConfigMaps(config.Namespace).Apply(ctx, &configMap, metav1.ApplyOptions{FieldManager: "Apply"})
 	if err != nil {
 		return err
 	}
