@@ -3,10 +3,11 @@ kind: Task
 metadata:
   name: copy-model-from-pvc
 spec:
-  description: This Task can be used to copy a model from another pvc
+  description: This Task can be used to copy a model from one pvc to another. The model is copied from the `source-workspace` to the `destination-workspace`. The relative path from the workspace will be the same after the copy
   params:
   - name: model-name
     type: string
+    description: The name of the model folder to be copied
   steps:
   - name: copy-model-from-pvc
     image: quay.io/opendatahub/kserve-storage-initializer:v0.11

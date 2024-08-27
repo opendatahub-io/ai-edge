@@ -3,10 +3,11 @@ kind: Task
 metadata:
   name: sanitise-object-name
 spec:
-  description: This Task can be used to sanitise a string that will be used for naming a k8s object. This task converts the string to a value that can be used for an object name. Any non-alphanumeric characters that are converted to "-" 
+  description: This Task can be used to sanitise a string that will be used for naming a k8s object. This task converts the string to a value that can be used for an object name. It converts any uppercase character to lowercase, and converts any non-alphanumeric character that is not `-` or `.` to `-` and then trims these characters from either side of the string
   params:
   - name: input-string
     type: string
+    description: The string to be sanitised
   results:
   - name: output-string
     description: Sanitised output string

@@ -3,24 +3,32 @@ kind: Task
 metadata:
   name: retrieve-build-image-info
 spec:
-  description: Return information about the built image
+  description: This task returns more detailed info about a model that has just been built and builds a url.txt file with all image tags to be pushed to
   params:
   - name: namespace
     type: string
+    description: The namespace where the model was built
   - name: model-name
     type: string
+    description: The name of the model
   - name: model-version
     type: string
+    description: The version of the model built
   - name: buildah-sha
     type: string
+    description: The built image digest
   - name: pipeline-run-uid
     type: string
+    description: The pipeline run id that was run to build the model
   - name: candidate-image-tag-reference
     type: string
+    description: The image tag references used when testing the image
   - name: target-image-tag-references
     type: array
+    description: The image tag references used for the final built image
   workspaces:
   - name: images-url
+    description: workspace where url.txt file is created
   steps:
   - name: get-image-sha
     image: registry.access.redhat.com/ubi9/skopeo
