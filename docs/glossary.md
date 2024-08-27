@@ -12,7 +12,7 @@
 
 ## Model Server
 
-- A Model Server is responsible for hosting models as a service to "to return predictions based on data inputs that you provide through API calls."[^2]
+- A Model Server is responsible for hosting models as a service "to return predictions based on data inputs that you provide through API calls."[^2]
 - For any workflows under opendatahub-io/ai-edge, we will be focusing on using the Model Servers and serving runtimes supported by Open Data Hub
 
 ## Inference Application Container
@@ -30,7 +30,7 @@
 
 ## GitOps
 
-- GitOps is an established configuration management pattern to store the configuration of your infrastructure configuration and workflow automation in a Git repository for reproducibility and version control.
+- GitOps is an established configuration management pattern to store the configuration of your infrastructure and workflow automation in a Git repository for reproducibility and version control.
 - "GitOps uses Git repositories as a single source of truth to deliver infrastructure as code."[^1]
 
 [^1]: [What is GitOps](https://www.redhat.com/en/topics/devops/what-is-gitops)
