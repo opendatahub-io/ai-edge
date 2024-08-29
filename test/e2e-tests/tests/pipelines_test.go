@@ -58,6 +58,11 @@ func Test_S3Fetch_Pipeline(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
+	// validation on them both being set is done in setup
+	if config.GitToken != "" || config.GitUsername != "" {
+		support.MountSecretAsWorkspaceToPipelineRun("credentials-git", "git-basic-auth", &pipelineRun)
+	}
+
 	if config.S3FetchConfig.SelfSignedCert != "" {
 		support.MountConfigMapAsWorkspaceToPipelineRun("s3-self-signed-cert", "s3-ssl-cert", &pipelineRun)
 	}
