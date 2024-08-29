@@ -102,12 +102,9 @@ func Test_GitFetch_Pipeline(t *testing.T) {
 		support.MountConfigMapAsWorkspaceToPipelineRun("git-self-signed-cert", "git-ssl-cert", &pipelineRun)
 	}
 
-	if config.GitFetchConfig.Token != "" || config.GitFetchConfig.Username != "" {
-		if config.GitFetchConfig.Token == "" || config.GitFetchConfig.Username == "" {
-			t.Fatal(fmt.Errorf("both `git_fetch.token` and `git_fetch.username` must be set when using git credentials"))
-		}
-
-		support.MountSecretAsWorkspaceToPipelineRun("credentials-git", "git-secret", &pipelineRun)
+	// validation on them both being set is done in setup
+	if config.GitToken != "" || config.GitUsername != "" {
+		support.MountSecretAsWorkspaceToPipelineRun("credentials-git", "git-basic-auth", &pipelineRun)
 	}
 
 	support.SetPipelineRunParam("target-image-tag-references", support.NewArrayParamValue(config.TargetImageTags), &pipelineRun)

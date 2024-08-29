@@ -55,6 +55,32 @@ func RunSetup(ctx context.Context, config *Config) error {
 		return err
 	}
 
+	// if git credentials are passed then create the secret
+	// needed as a workspace fot the pipelines
+	if config.GitUsername != "" || config.GitToken != "" {
+		if config.GitToken == "" || config.GitUsername == "" {
+			return fmt.Errorf("both `git_username` and `git_token` must both be set when using git credentials")
+		}
+
+		bytes, err := os.ReadFile(GitCredentialsTemplatePath)
+		if err != nil {
+			return err
+		}
+
+		secret := applyconfigv1.SecretApplyConfiguration{}
+		err = yaml.Unmarshal(bytes, &secret)
+		if err != nil {
+			return err
+		}
+
+		secret.StringData[".git-credentials"] = fmt.Sprintf("https://%v:%v@github.com", config.GitUsername, config.GitToken)
+
+		_, err = config.Clients.Kubernetes.CoreV1().Secrets(config.Namespace).Apply(ctx, &secret, metav1.ApplyOptions{FieldManager: "Apply"})
+		if err != nil {
+			return err
+		}
+	}
+
 	// S3 config has been set, load the credential template file
 	// and fill in the values in the config, then apply
 	if config.S3FetchConfig.Enabled {
@@ -92,23 +118,6 @@ func RunSetup(ctx context.Context, config *Config) error {
 	// Git fetch config has been set, load the credential template file
 	// and fill in the values in the config, then apply
 	if config.GitFetchConfig.Enabled {
-		bytes, err := os.ReadFile(GitCredentialsTemplatePath)
-		if err != nil {
-			return err
-		}
-
-		secret := applyconfigv1.SecretApplyConfiguration{}
-		err = yaml.Unmarshal(bytes, &secret)
-		if err != nil {
-			return err
-		}
-
-		secret.StringData[".git-credentials"] = fmt.Sprintf("https://%v:%v@github.com", config.GitFetchConfig.Username, config.GitFetchConfig.Token)
-
-		_, err = config.Clients.Kubernetes.CoreV1().Secrets(config.Namespace).Apply(ctx, &secret, metav1.ApplyOptions{FieldManager: "Apply"})
-		if err != nil {
-			return err
-		}
 
 		if config.GitFetchConfig.SelfSignedCert != "" {
 			err = applySelfSignedCertConfigMap(ctx, "git-self-signed-cert", config.GitFetchConfig.SelfSignedCert)

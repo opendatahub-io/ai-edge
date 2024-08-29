@@ -21,6 +21,8 @@ type Config struct {
 	GitContainerFileRepo     string   `json:"git_container_file_repo"`
 	GitContainerFileRevision string   `json:"git_container_file_revision"`
 	ContainerRelativePath    string   `json:"container_relative_path"`
+	GitUsername              string   `json:"git_username"`
+	GitToken                 string   `json:"git_token"`
 
 	GitFetchConfig GitFetchConfig `json:"git_fetch"`
 	S3FetchConfig  S3FetchConfig  `json:"s3_fetch"`
@@ -35,8 +37,6 @@ type GitFetchConfig struct {
 	ModelRelativePath string `json:"model_relative_path"`
 	ModelRevision     string `json:"model_revision"`
 	ModelDir          string `json:"model_dir"`
-	Username          string `json:"username"`
-	Token             string `json:"token"`
 	SelfSignedCert    string `json:"self_signed_cert"`
 }
 
