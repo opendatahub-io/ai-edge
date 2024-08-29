@@ -8,25 +8,25 @@
 ## Near Edge
 
 - This is a non-core distributed environment to run and serve AI/ML inference workloads in moderate yet constrained compute resources and network.
-- For the purpose of this repository, the near edge environment is represented by separate OpenShift clusters disconnected from the core, the internet or both but may be managed from a core OpenShift cluster.
+- For the purpose of this repository, the near edge environment is represented by separate OpenShift clusters which may be disconnected from the core, the internet or both but may be managed from a core OpenShift cluster.
 
 ## Model Server
 
 - A Model Server is responsible for hosting models as a service "to return predictions based on data inputs that you provide through API calls."[^2]
-- For any workflows under opendatahub-io/ai-edge, we will be focusing on using the Model Servers and serving runtimes supported by Open Data Hub
+- For any workflows under opendatahub-io/ai-edge, we will be focusing on using the Model Servers and serving runtimes supported by Open Data Hub.
 
 ## Inference Application Container
 
-- OCI compliant container image[^3] with the models included during the build process
-- Support for container images where the model and model serving runtimes are stored together
+- OCI compliant container image[^3] with the models included during the build process.
+- Support for container images where the model and model serving runtimes are stored together.
 
 ## Model Registry
 
-- A centralized repository for the models and their metadata and managing the model lifecycle and versions. Currently our pipelines only support S3 and Git as the source where models can be stored. 
+- A centralized repository for the models and their metadata and managing the model lifecycle and versions. Currently our pipelines do not support any Model Registry; only S3 and Git can be used as directly referenced sources where models can be stored.
 
 ## OCI Distribution Registry
 
-- Open Container Initiative (OCI) compliant container registry where the model and other artifacts are stored and versioned ready to be deployed on production or staging environments.
+- Open Container Initiative (OCI) compliant container registry where the Inference Application Container images and other artifacts are stored and versioned ready to be deployed on production or staging environments.
 
 ## GitOps
 
