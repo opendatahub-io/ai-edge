@@ -16,7 +16,7 @@ const (
 	GitCredentialsTemplatePath           = "../../../examples/tekton/aiedge-e2e/templates/credentials-git.secret.yaml.template"
 	S3CredentialsTemplatePath            = "../../../examples/tekton/aiedge-e2e/templates/credentials-s3.secret.yaml.template"
 	ImageRegistryCredentialsTemplatePath = "../../../examples/tekton/aiedge-e2e/templates/credentials-image-registry.secret.yaml.template"
-	GitOpsCredentialsTemplatePath           = "../../../examples/tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template"
+	GitOpsCredentialsTemplatePath        = "../../../examples/tekton/gitops-update-pipeline/templates/example-git-credentials-secret.yaml.template"
 
 	SelfSignedCertTemplatePath = "../../../examples/tekton/aiedge-e2e/templates/self-signed-cert.configmap.yaml.template"
 
@@ -103,12 +103,18 @@ func RunSetup(ctx context.Context, config *Config) error {
 			return err
 		}
 
-		secret.StringData["token"] = config.GitFetchConfig.Token
 		secret.StringData[".git-credentials"] = fmt.Sprintf("https://%v:%v@github.com", config.GitFetchConfig.Username, config.GitFetchConfig.Token)
 
 		_, err = config.Clients.Kubernetes.CoreV1().Secrets(config.Namespace).Apply(ctx, &secret, metav1.ApplyOptions{FieldManager: "Apply"})
 		if err != nil {
 			return err
+		}
+
+		if config.GitFetchConfig.SelfSignedCert != "" {
+			err = applySelfSignedCertConfigMap(ctx, "git-self-signed-cert", config.GitFetchConfig.SelfSignedCert)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -132,13 +138,6 @@ func RunSetup(ctx context.Context, config *Config) error {
 		_, err = config.Clients.Kubernetes.CoreV1().Secrets(config.Namespace).Apply(ctx, &secret, metav1.ApplyOptions{FieldManager: "Apply"})
 		if err != nil {
 			return err
-		}
-
-		if config.GitFetchConfig.SelfSignedCert != "" {
-			err = applySelfSignedCertConfigMap(ctx, "git-self-signed-cert", config.GitFetchConfig.SelfSignedCert)
-			if err != nil {
-				return err
-			}
 		}
 	}
 

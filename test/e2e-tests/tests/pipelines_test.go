@@ -103,7 +103,7 @@ func Test_GitFetch_Pipeline(t *testing.T) {
 	}
 
 	if config.GitFetchConfig.Token != "" || config.GitFetchConfig.Username != "" {
-		if !(config.GitFetchConfig.Token != "" && config.GitFetchConfig.Username != "") {
+		if config.GitFetchConfig.Token == "" || config.GitFetchConfig.Username == "" {
 			t.Fatal(fmt.Errorf("both `git_fetch.token` and `git_fetch.username` must be set when using git credentials"))
 		}
 
