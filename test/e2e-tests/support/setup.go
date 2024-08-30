@@ -56,7 +56,7 @@ func RunSetup(ctx context.Context, config *Config) error {
 	}
 
 	// if git credentials are passed then create the secret
-	// needed as a workspace fot the pipelines
+	// needed as a workspace for the pipelines
 	if config.GitUsername != "" || config.GitToken != "" {
 		if config.GitToken == "" || config.GitUsername == "" {
 			return fmt.Errorf("both `git_username` and `git_token` must both be set when using git credentials")
