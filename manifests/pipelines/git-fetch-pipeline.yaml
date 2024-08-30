@@ -56,22 +56,22 @@ spec:
   results:
   - name: git-model-fetched-commit
     description: The commit hash of the git repo where the model files were fetched from
-    value: $(tasks.fetch-model-git.results.commit)
+    value: $(tasks.fetch-model-git.results.COMMIT)
   - name: git-model-fetched-url
     description: The url of the git repo where the model files were fetched from
-    value: $(tasks.fetch-model-git.results.url)
+    value: $(tasks.fetch-model-git.results.URL)
   - name: git-model-fetched-commit-epoch
     description: The commit timestamp of the git repo where the model files were fetched from
-    value: $(tasks.fetch-model-git.results.committer-date)
+    value: $(tasks.fetch-model-git.results.COMMITTER_DATE)
   - name: git-containerfile-fetched-commit
     description: The commit hash of the git repo where the containerfile was fetched from
-    value: $(tasks.git-clone-containerfile-repo.results.commit)
+    value: $(tasks.git-clone-containerfile-repo.results.COMMIT)
   - name: git-containerfile-fetched-url
     description: The url of the git repo where the containerfile was fetched from
-    value: $(tasks.git-clone-containerfile-repo.results.url)
+    value: $(tasks.git-clone-containerfile-repo.results.URL)
   - name: git-containerfile-fetched-commit-epoch
     description: The commit timestamp of the git repo where the containerfile was fetched from
-    value: $(tasks.git-clone-containerfile-repo.results.committer-date)
+    value: $(tasks.git-clone-containerfile-repo.results.COMMITTER_DATE)
   - name: model-files-size
     description: The size of the model files
     value: $(tasks.check-model-and-containerfile-exists.results.model-files-size)
@@ -108,20 +108,20 @@ spec:
   tasks:
   - name: fetch-model-git
     taskRef:
-      resolver: git
+      resolver: cluster
       params:
-        - name: url
-          value: https://github.com/tektoncd/catalog.git
-        - name: revision
-          value: main
-        - name: pathInRepo
-          value: task/git-clone/0.9/git-clone.yaml
+        - name: kind
+          value: task
+        - name: name
+          value: git-clone
+        - name: namespace
+          value: openshift-pipelines
     params:
-    - name: url
+    - name: URL
       value: $(params.git-model-repo)
-    - name: revision
+    - name: REVISION
       value: $(params.git-model-revision)
-    - name: subdirectory
+    - name: SUBDIRECTORY
       value: /model_dir-$(params.model-name)/
     workspaces:
     - name: output
@@ -148,20 +148,20 @@ spec:
       workspace: build-workspace-pv
   - name: git-clone-containerfile-repo
     taskRef:
-      resolver: git
+      resolver: cluster
       params:
-        - name: url
-          value: https://github.com/tektoncd/catalog.git
-        - name: revision
-          value: main
-        - name: pathInRepo
-          value: task/git-clone/0.9/git-clone.yaml  
+        - name: kind
+          value: task
+        - name: name
+          value: git-clone
+        - name: namespace
+          value: openshift-pipelines
     params:
-    - name: url
+    - name: URL
       value: $(params.git-containerfile-repo)
-    - name: revision
+    - name: REVISION
       value: $(params.git-containerfile-revision)
-    - name: subdirectory
+    - name: SUBDIRECTORY
       value: /containerfile_repo/
     runAfter:
     - move-model-to-root-dir
@@ -218,13 +218,21 @@ spec:
     runAfter:
     - sanitise-model-name
     taskRef:
-      kind: ClusterTask
-      name: buildah
+      resolver: cluster
+      params:
+        - name: kind
+          value: task
+        - name: name
+          value: buildah
+        - name: namespace
+          value: openshift-pipelines
     workspaces:
     - name: source
       workspace: build-workspace-pv
   - name: test-container-deploy
     params:
+    - name: VERSION
+      value: latest
     - name: SCRIPT
       value: |
         cat <<EOF | oc apply -f -
@@ -373,6 +381,10 @@ spec:
       workspace: build-workspace-pv
   - name: skopeo-copy
     params:
+    - name: SOURCE_IMAGE_URL
+      value: docker://docker.io/busybox:latest
+    - name: DESTINATION_IMAGE_URL
+      value: docker://image-registry.openshift-image-registry.svc:5000/task-containers/busybox:latest
     - name: srcTLSverify
       value: "true"
     - name: destTLSverify
@@ -380,14 +392,14 @@ spec:
     runAfter:
     - retrieve-build-image-info
     taskRef:
-      resolver: git
+      resolver: cluster
       params:
-        - name: url
-          value: https://github.com/tektoncd/catalog.git
-        - name: revision
-          value: main
-        - name: pathInRepo
-          value: task/skopeo-copy/0.3/skopeo-copy.yaml
+        - name: kind
+          value: task
+        - name: name
+          value: skopeo-copy
+        - name: namespace
+          value: openshift-pipelines
     workspaces:
     - name: images-url
       workspace: build-workspace-pv
