@@ -20,6 +20,8 @@ illustrates the concept of core and near edge environments.
 
 ### Terminology
 
+Refer to [AI Edge Terminology](docs/glossary.md) for terminologies used in this repo. 
+
 - **Core**
   - The central OpenShift cluster that is used to manage the edge clusters.
   - Can be an on-premise or cloud-based cluster.
@@ -29,7 +31,6 @@ illustrates the concept of core and near edge environments.
   - For the purpose of this repository, the near edge environment is represented by separate OpenShift cluster(s)
     managed from the core OpenShift cluster.
   - The near edge environment is expected to have moderate yet constrained compute resources and network.
-  - Doesn't necessarily have any open ports for inbound connections.
 
 ### Use Case
 
