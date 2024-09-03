@@ -24,6 +24,8 @@ The structure of the `config.json` is in four sections, the top level fields, `g
 - `git_container_file_repo` - Git repo containing the container file
 - `git_container_file_revision` - Git branch in the container file repo
 - `container_relative_path` - Relative path from the root of the container file repo to where the container file is
+- `git_username` - (optional) Used for when the git repos containing the containerfile and model are private. This is the username associated with the private repo, when set the `git_token` field must also be set
+- `git_token` - (optional) Used for when the git repos containing the containerfile and model are private. This is the token associated with the user who is the owner of the private repo, when set the `git_username` field must also be set, [see info here](../../pipelines/README.md#git-repository-and-credentials)
 
 After the top level fields each sub object is used for a type of test. Setting `enabled` to `true` in each of these will tell the test suite to use those values in that object and to run those tests.
 

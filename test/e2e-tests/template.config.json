@@ -6,6 +6,8 @@
   "git_container_file_repo": "https://github.com/opendatahub-io/ai-edge.git",
   "git_container_file_revision": "main",
   "container_relative_path": "path/to/containerfile/containerfile.openvino.mlserver.mlflow",
+  "git_username": "",
+  "git_token": "",
 
   "git_fetch": {
     "enabled": true,

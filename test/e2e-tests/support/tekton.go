@@ -17,6 +17,15 @@ func MountConfigMapAsWorkspaceToPipelineRun(configMapName string, workspaceName 
 	})
 }
 
+func MountSecretAsWorkspaceToPipelineRun(secretName string, workspaceName string, pipelineRun *pipelinev1.PipelineRun) {
+	pipelineRun.Spec.Workspaces = append(pipelineRun.Spec.Workspaces, pipelinev1.WorkspaceBinding{
+		Name: workspaceName,
+		Secret: &v1.SecretVolumeSource{
+			SecretName: secretName,
+		},
+	})
+}
+
 func SetPipelineRunParam(name string, value pipelinev1.ParamValue, pipelineRun *pipelinev1.PipelineRun) {
 	for index := range pipelineRun.Spec.Params {
 		param := &pipelineRun.Spec.Params[index]
