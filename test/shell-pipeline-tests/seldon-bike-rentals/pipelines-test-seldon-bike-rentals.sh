@@ -56,7 +56,7 @@ if [[ $PIPELINE_RUN_NAME == "" ]]; then
 fi
 
 ## wait for the result
-waitForOpResult 200 "True" "False" "oc get pipelinerun $PIPELINE_RUN_NAME -o jsonpath={.status.conditions[?\(@.type==\'Succeeded\'\)].status}"
+waitForOpResult 220 "True" "False" "oc get pipelinerun $PIPELINE_RUN_NAME -o jsonpath={.status.conditions[?\(@.type==\'Succeeded\'\)].status}"
 PIPELINE_RUN_RESULT=$?
 
 saveArtifacts "$PIPELINE_RUN_NAME"
