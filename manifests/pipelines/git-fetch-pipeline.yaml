@@ -287,11 +287,11 @@ spec:
       resolver: git
       params:
         - name: url
-          value: https://github.com/openshift-pipelines/tektoncd-catalog
+          value: https://github.com/tektoncd/catalog.git
         - name: revision
-          value: p
+          value: main
         - name: pathInRepo
-          value: tasks/task-openshift-client/0.2.0/task-openshift-client.yaml
+          value: task/openshift-client/0.2/openshift-client.yaml
     runAfter:
       - build-container-image
   - name: create-default-service
@@ -308,11 +308,11 @@ spec:
       resolver: git
       params:
         - name: url
-          value: https://github.com/openshift-pipelines/tektoncd-catalog
+          value: https://github.com/tektoncd/catalog.git
         - name: revision
-          value: p
+          value: main
         - name: pathInRepo
-          value: tasks/task-openshift-client/0.2.0/task-openshift-client.yaml
+          value: task/openshift-client/0.2/openshift-client.yaml
   - name: test-model-rest-svc
     params:
     - name: service-name
@@ -349,11 +349,11 @@ spec:
       resolver: git
       params:
         - name: url
-          value: https://github.com/openshift-pipelines/tektoncd-catalog
+          value: https://github.com/tektoncd/catalog.git
         - name: revision
-          value: p
+          value: main
         - name: pathInRepo
-          value: tasks/task-openshift-client/0.2.0/task-openshift-client.yaml
+          value: task/openshift-client/0.2/openshift-client.yaml
   - name: retrieve-build-image-info
     taskRef:
       kind: Task
