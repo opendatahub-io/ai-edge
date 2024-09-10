@@ -346,7 +346,7 @@ spec:
     - test-model-rest-svc
     - stop-deployment
     workspaces:
-    - name: images-url
+    - name: images_url
       workspace: build-workspace-pv
   - name: skopeo-copy
     params:
