@@ -287,11 +287,11 @@ spec:
       resolver: git
       params:
         - name: url
-          value: https://github.com/tektoncd/catalog.git
+          value: https://github.com/openshift-pipelines/tektoncd-catalog
         - name: revision
-          value: main
+          value: p
         - name: pathInRepo
-          value: task/openshift-client/0.2/openshift-client.yaml
+          value: tasks/task-openshift-client/0.2.1/task-openshift-client.yaml
     runAfter:
       - build-container-image
   - name: create-default-service
@@ -308,11 +308,11 @@ spec:
       resolver: git
       params:
         - name: url
-          value: https://github.com/tektoncd/catalog.git
+          value: https://github.com/openshift-pipelines/tektoncd-catalog
         - name: revision
-          value: main
+          value: p
         - name: pathInRepo
-          value: task/openshift-client/0.2/openshift-client.yaml
+          value: tasks/task-openshift-client/0.2.1/task-openshift-client.yaml
   - name: test-model-rest-svc
     params:
     - name: service-name
@@ -349,11 +349,11 @@ spec:
       resolver: git
       params:
         - name: url
-          value: https://github.com/tektoncd/catalog.git
+          value: https://github.com/openshift-pipelines/tektoncd-catalog
         - name: revision
-          value: main
+          value: p
         - name: pathInRepo
-          value: task/openshift-client/0.2/openshift-client.yaml
+          value: tasks/task-openshift-client/0.2.1/task-openshift-client.yaml
   - name: retrieve-build-image-info
     taskRef:
       kind: Task
@@ -382,12 +382,12 @@ spec:
   - name: skopeo-copy
     params:
     - name: SOURCE_IMAGE_URL
-      value: $(tasks.retrieve-build-image-info.source-image-url)
+      value: $(tasks.retrieve-build-image-info.results.source-image-url)
     - name: DESTINATION_IMAGE_URL
-      value: $(tasks.retrieve-build-image-info.dest-image-url)
-    - name: SRC_TLS_VERIFY
+      value: $(tasks.retrieve-build-image-info.results.dest-image-url)
+    - name: srcTLSverify
       value: "true"
-    - name: DEST_TLS_VERIFY
+    - name: destTLSverify
       value: "true"
     runAfter:
     - retrieve-build-image-info

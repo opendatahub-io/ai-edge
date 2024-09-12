@@ -57,14 +57,14 @@ spec:
       skopeo inspect --format '{{index .Labels "io.buildah.version"}}' docker://$DOCKER_IMAGE_REF | tee $(results.buildah-version.path) ;
       echo ;
       echo -n "$@" | tee $(results.target-image-tag-references.path) ;
-      
+      echo ;
       # Set source and destination image URLs in results
-      export SOURCE_IMAGE_URL=$DOCKER_IMAGE_REF
+      export SOURCE_IMAGE_URL="docker://${DOCKER_IMAGE_REF}"
       export DEST_IMAGE_URLS=""
-      for target in "$@"; do
+      for target in "$2"; do
         DEST_IMAGE_URLS="${DEST_IMAGE_URLS} docker://${target}"
       done
-
+      echo ;
       echo -n $SOURCE_IMAGE_URL | tee $(results.source-image-url.path) ;
       echo ;
       echo -n $DEST_IMAGE_URLS | tee $(results.dest-image-url.path) ;

@@ -1,6 +1,6 @@
 # `retrieve-build-image-info`
 
-This task returns more detailed info about a model that has just been built and builds a url.txt file with all image tags to be pushed to
+This task returns more detailed info about a model that has just been built and sets the results all image tags to be pushed to
 
 ## Parameters
 * **namespace**: The namespace where the model was built
@@ -12,7 +12,7 @@ This task returns more detailed info about a model that has just been built and 
 * **target-image-tag-references**: The image tag references used for the final built image
 
 ## Workspaces
-* **images-url**: workspace where url.txt file is created
+* **images_url**: workspace where url.txt file is created
 
 ## Results
 * **model-name**: The name of the model
@@ -22,3 +22,5 @@ This task returns more detailed info about a model that has just been built and 
 * **buildah-version**: The version of buildah used to build the image
 * **image-digest-reference**: The fully qualified image digest reference of the image
 * **target-image-tag-references**: The fully qualified image reference that the image was pushed to (e.g. registry.example.com/my-org/ai-model:1.0-1)
+* **source-image-url**: The source image URL that was inspected
+* **dest-image-url**: The destination image URL where the image will be pushed
