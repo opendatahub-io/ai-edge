@@ -382,14 +382,12 @@ spec:
   - name: skopeo-copy
     params:
     - name: SOURCE_IMAGE_URL
-      value: $(tasks.retrieve-build-image-info.source_image_url.path)
+      value: $(tasks.retrieve-build-image-info.source-image-url)
     - name: DESTINATION_IMAGE_URL
-      value: $(tasks.retrieve-build-image-info.destination_image_url.path)
+      value: $(tasks.retrieve-build-image-info.dest-image-url)
     - name: SRC_TLS_VERIFY
       value: "true"
     - name: DEST_TLS_VERIFY
-      value: "true"
-    - name: VERBOSE
       value: "true"
     runAfter:
     - retrieve-build-image-info

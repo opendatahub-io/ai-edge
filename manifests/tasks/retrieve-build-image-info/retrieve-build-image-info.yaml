@@ -4,6 +4,9 @@ metadata:
   name: retrieve-build-image-info
 spec:
   description: This task returns more detailed info about a model that has just been built and builds a url.txt file with all image tags to be pushed to
+  workspaces:
+  - name: images_url
+    description: workspace where url.txt file is created
   params:
   - name: namespace
     type: string
@@ -26,9 +29,6 @@ spec:
   - name: target-image-tag-references
     type: array
     description: The image tag references used for the final built image
-  workspaces:
-  - name: images_url
-    description: workspace where url.txt file is created
   steps:
   - name: get-image-sha
     image: registry.access.redhat.com/ubi9/skopeo
@@ -58,18 +58,22 @@ spec:
       echo ;
       echo -n "$@" | tee $(results.target-image-tag-references.path) ;
       
-      export source_image_url=$(cat $(results.image-digest-reference.path))
-      export destination_image_url=""
-
+      # Set source and destination image URLs in results
+      export SOURCE_IMAGE_URL=$DOCKER_IMAGE_REF
+      export DEST_IMAGE_URLS=""
       for target in "$@"; do
-        destination_image_url="docker://${target}"
+        DEST_IMAGE_URLS="${DEST_IMAGE_URLS} docker://${target}"
       done
 
+      echo -n $SOURCE_IMAGE_URL | tee $(results.source-image-url.path) ;
+      echo ;
+      echo -n $DEST_IMAGE_URLS | tee $(results.dest-image-url.path) ;
+
   results:
-  - name: source_image_url
-    description: URL of the image to be copied to the destination registry
-  - name: destination_image_url
-    description: URL of the image where the image from source should be copied to
+  - name: source-image-url
+    description: The source image URL that was inspected 
+  - name: dest-image-url
+    description: The destination image URL(s) where the image will be pushed
   - name: model-name
     description: The name of the model
   - name: model-version
