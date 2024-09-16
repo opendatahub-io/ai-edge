@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onnx-mnist
+  labels:
+    app: onnx-mnist
+spec:
+  selector:
+    matchLabels:
+      app: onnx-mnist
+  template:
+    metadata:
+      labels:
+        app: onnx-mnist
+    spec:
+      containers:
+      - args:
+        - --model_name=onnx-mnist
+        - --port=8001
+        - --rest_port=8888
+        - --model_path=/mnt/models
+        - --file_system_poll_wait_seconds=0
+        - --grpc_bind_address=0.0.0.0
+        - --rest_bind_address=0.0.0.0
+        - --target_device=AUTO
+        - --metrics_enable
+        env:
+        - name: MODEL_INIT_MODE
+          value: async
+        image: quay.io/modh/openvino_model_server@sha256:6c7795279f9075bebfcd9aecbb4a4ce4177eec41fb3f3e1f1079ce6309b7ae45
+        imagePullPolicy: IfNotPresent
+        name: kserve-container
+        ports:
+        - containerPort: 8888
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 8888
+          timeoutSeconds: 1
+        resources:
+          requests:
+            memory: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+        volumeMounts:
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          name: kube-api-access-r5fz5
+          readOnly: true
+        - mountPath: /mnt
+          name: kserve-provision-location
+      - args:
+        - sh
+        - -c
+        - ln -s /proc/$$$$/root/models /mnt/models && sleep infinity
+        image: quay.io/grdryn/onnx-mnist:modelcar-1
+        imagePullPolicy: IfNotPresent
+        name: modelcar
+        resources:
+          limits:
+            cpu: 10m
+            memory: 15Mi
+          requests:
+            cpu: 10m
+            memory: 15Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+        volumeMounts:
+        - mountPath: /mnt
+          name: kserve-provision-location
+        - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+          name: kube-api-access-r5fz5
+          readOnly: true
+      enableServiceLinks: true
+      imagePullSecrets:
+      - name: default-dockercfg-xqh74
+      restartPolicy: Always
+      shareProcessNamespace: true
+      tolerations:
+      - effect: NoExecute
+        key: node.kubernetes.io/not-ready
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoExecute
+        key: node.kubernetes.io/unreachable
+        operator: Exists
+        tolerationSeconds: 300
+      - effect: NoSchedule
+        key: node.kubernetes.io/memory-pressure
+        operator: Exists
+      volumes:
+      - name: kube-api-access-r5fz5
+        projected:
+          defaultMode: 420
+          sources:
+          - serviceAccountToken:
+              expirationSeconds: 3607
+              path: token
+          - configMap:
+              items:
+              - key: ca.crt
+                path: ca.crt
+              name: kube-root-ca.crt
+          - downwardAPI:
+              items:
+              - fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+                path: namespace
+          - configMap:
+              items:
+              - key: service-ca.crt
+                path: service-ca.crt
+              name: openshift-service-ca.crt
+      - emptyDir: {}
+        name: kserve-provision-location
