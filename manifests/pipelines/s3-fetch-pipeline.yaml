@@ -346,14 +346,10 @@ spec:
     - test-model-rest-svc
     - stop-deployment
     workspaces:
-    - name: images_url
+    - name: images-url
       workspace: build-workspace-pv
   - name: skopeo-copy
     params:
-    - name: SOURCE_IMAGE_URL
-      value: $(tasks.retrieve-build-image-info.results.source-image-url)
-    - name: DESTINATION_IMAGE_URL
-      value: $(tasks.retrieve-build-image-info.results.dest-image-url)
     - name: srcTLSverify
       value: "true"
     - name: destTLSverify
@@ -361,16 +357,10 @@ spec:
     runAfter:
     - retrieve-build-image-info
     taskRef:
-      resolver: cluster
-      params:
-        - name: kind
-          value: task
-        - name: name
-          value: skopeo-copy
-        - name: namespace
-          value: openshift-pipelines
+      kind: ClusterTask
+      name: skopeo-copy
     workspaces:
-    - name: images_url
+    - name: images-url
       workspace: build-workspace-pv
   workspaces:
   - name: build-workspace-pv

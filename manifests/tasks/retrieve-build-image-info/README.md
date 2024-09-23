@@ -22,5 +22,3 @@ This task returns more detailed info about a model that has just been built and 
 * **buildah-version**: The version of buildah used to build the image
 * **image-digest-reference**: The fully qualified image digest reference of the image
 * **target-image-tag-references**: The fully qualified image reference that the image was pushed to (e.g. registry.example.com/my-org/ai-model:1.0-1)
-* **source-image-url**: The source image URL that was inspected
-* **dest-image-url**: The destination image URL where the image will be pushed
