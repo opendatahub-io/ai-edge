@@ -1,6 +1,6 @@
 # `retrieve-build-image-info`
 
-This task returns more detailed info about a model that has just been built and sets the results all image tags to be pushed to
+This task returns more detailed info about a model that has just been built and builds a url.txt file with all image tags to be pushed to
 
 ## Parameters
 * **namespace**: The namespace where the model was built
@@ -12,7 +12,7 @@ This task returns more detailed info about a model that has just been built and 
 * **target-image-tag-references**: The image tag references used for the final built image
 
 ## Workspaces
-* **images_url**: workspace where url.txt file is created
+* **images-url**: workspace where url.txt file is created
 
 ## Results
 * **model-name**: The name of the model
