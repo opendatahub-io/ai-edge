@@ -350,15 +350,21 @@ spec:
       workspace: build-workspace-pv
   - name: skopeo-copy
     params:
-    - name: srcTLSverify
-      value: "true"
-    - name: destTLSverify
-      value: "true"
+    - name: SOURCE_IMAGE_URL
+      value: ""
+    - name: DESTINATION_IMAGE_URL
+      value: ""
     runAfter:
     - retrieve-build-image-info
     taskRef:
-      kind: ClusterTask
-      name: skopeo-copy
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/openshift-pipelines/tektoncd-catalog
+        - name: revision
+          value: p
+        - name: pathInRepo
+          value: tasks/task-skopeo-copy/0.4.2/task-skopeo-copy.yaml
     workspaces:
     - name: images-url
       workspace: build-workspace-pv
