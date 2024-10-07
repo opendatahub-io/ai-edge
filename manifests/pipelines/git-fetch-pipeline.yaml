@@ -377,7 +377,7 @@ spec:
     - test-model-rest-svc
     - stop-deployment
     workspaces:
-    - name: images-url
+    - name: images_url
       workspace: build-workspace-pv
   - name: skopeo-copy
     params:
@@ -385,6 +385,10 @@ spec:
       value: ""
     - name: DESTINATION_IMAGE_URL
       value: ""
+    - name: SRC_TLS_VERIFY
+      value: "true"
+    - name: DEST_TLS_VERIFY
+      value: "true"
     runAfter:
     - retrieve-build-image-info
     taskRef:
@@ -397,7 +401,7 @@ spec:
         - name: pathInRepo
           value: tasks/task-skopeo-copy/0.4.2/task-skopeo-copy.yaml
     workspaces:
-    - name: images-url
+    - name: images_url
       workspace: build-workspace-pv
   workspaces:
   - name: build-workspace-pv
