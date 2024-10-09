@@ -15,19 +15,21 @@ spec:
       prometheus:
         config:
           scrape_configs:
-            - job_name: 'otel-collector'
-              bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            - bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+              job_name: otel-collector
+              metrics_path: /metrics
               scrape_interval: 5s
-              metrics_path: "/metrics"
               static_configs:
-                - targets: ['tensorflow-housing-app-model-1.tensorflow-housing-app.svc.cluster.local:8080', 'bike-rental-app-model-1.bike-rental-app.svc.cluster.local:8082']
-    processors:
+                - targets:
+                    - tensorflow-housing-app-model-1.tensorflow-housing-app.svc.cluster.local:8080
+                    - bike-rental-app-model-1.bike-rental-app.svc.cluster.local:8082
     exporters:
       prometheus:
-        endpoint: "0.0.0.0:8889"
+        endpoint: 0.0.0.0:8889
     service:
       pipelines:
         metrics:
-          receivers: [prometheus]
-          processors: []
-          exporters: [prometheus]
+          exporters:
+            - prometheus
+          receivers:
+            - prometheus
