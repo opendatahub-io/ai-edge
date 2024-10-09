@@ -350,10 +350,6 @@ spec:
       workspace: build-workspace-pv
   - name: skopeo-copy
     params:
-    - name: SOURCE_IMAGE_URL
-      value: ""
-    - name: DESTINATION_IMAGE_URL
-      value: ""
     - name: SRC_TLS_VERIFY
       value: "true"
     - name: DEST_TLS_VERIFY
