@@ -56,22 +56,22 @@ spec:
   results:
   - name: git-model-fetched-commit
     description: The commit hash of the git repo where the model files were fetched from
-    value: $(tasks.fetch-model-git.results.commit)
+    value: $(tasks.fetch-model-git.results.COMMIT)
   - name: git-model-fetched-url
     description: The url of the git repo where the model files were fetched from
-    value: $(tasks.fetch-model-git.results.url)
+    value: $(tasks.fetch-model-git.results.URL)
   - name: git-model-fetched-commit-epoch
     description: The commit timestamp of the git repo where the model files were fetched from
-    value: $(tasks.fetch-model-git.results.committer-date)
+    value: $(tasks.fetch-model-git.results.COMMITTER_DATE)
   - name: git-containerfile-fetched-commit
     description: The commit hash of the git repo where the containerfile was fetched from
-    value: $(tasks.git-clone-containerfile-repo.results.commit)
+    value: $(tasks.git-clone-containerfile-repo.results.COMMIT)
   - name: git-containerfile-fetched-url
     description: The url of the git repo where the containerfile was fetched from
-    value: $(tasks.git-clone-containerfile-repo.results.url)
+    value: $(tasks.git-clone-containerfile-repo.results.URL)
   - name: git-containerfile-fetched-commit-epoch
     description: The commit timestamp of the git repo where the containerfile was fetched from
-    value: $(tasks.git-clone-containerfile-repo.results.committer-date)
+    value: $(tasks.git-clone-containerfile-repo.results.COMMITTER_DATE)
   - name: model-files-size
     description: The size of the model files
     value: $(tasks.check-model-and-containerfile-exists.results.model-files-size)
@@ -108,14 +108,20 @@ spec:
   tasks:
   - name: fetch-model-git
     taskRef:
-      kind: ClusterTask
-      name: git-clone
+      resolver: cluster
+      params:
+        - name: kind
+          value: task
+        - name: name
+          value: git-clone
+        - name: namespace
+          value: openshift-pipelines
     params:
-    - name: url
+    - name: URL
       value: $(params.git-model-repo)
-    - name: revision
+    - name: REVISION
       value: $(params.git-model-revision)
-    - name: subdirectory
+    - name: SUBDIRECTORY
       value: /model_dir-$(params.model-name)/
     workspaces:
     - name: output
@@ -141,18 +147,24 @@ spec:
     - name: workspace
       workspace: build-workspace-pv
   - name: git-clone-containerfile-repo
+    taskRef:
+      resolver: cluster
+      params:
+        - name: kind
+          value: task
+        - name: name
+          value: git-clone
+        - name: namespace
+          value: openshift-pipelines
     params:
-    - name: url
+    - name: URL
       value: $(params.git-containerfile-repo)
-    - name: revision
+    - name: REVISION
       value: $(params.git-containerfile-revision)
-    - name: subdirectory
+    - name: SUBDIRECTORY
       value: /containerfile_repo/
     runAfter:
     - move-model-to-root-dir
-    taskRef:
-      kind: ClusterTask
-      name: git-clone
     workspaces:
     - name: output
       workspace: build-workspace-pv
@@ -206,13 +218,21 @@ spec:
     runAfter:
     - sanitise-model-name
     taskRef:
-      kind: ClusterTask
-      name: buildah
+      resolver: cluster
+      params:
+        - name: kind
+          value: task
+        - name: name
+          value: buildah
+        - name: namespace
+          value: openshift-pipelines
     workspaces:
     - name: source
       workspace: build-workspace-pv
   - name: test-container-deploy
     params:
+    - name: VERSION
+      value: latest
     - name: SCRIPT
       value: |
         cat <<EOF | oc apply -f -
@@ -264,8 +284,14 @@ spec:
         oc wait deployment -n $(params.target-namespace) $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --for condition=Available=True --timeout=120s
         oc wait pod -n $(params.target-namespace) -l app=$(params.model-name)-$(params.model-version) --for condition=Ready=True --timeout=120s
     taskRef:
-      kind: ClusterTask
-      name: openshift-client
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/openshift-pipelines/tektoncd-catalog
+        - name: revision
+          value: p
+        - name: pathInRepo
+          value: tasks/task-openshift-client/0.2.1/task-openshift-client.yaml
     runAfter:
       - build-container-image
   - name: create-default-service
@@ -279,8 +305,14 @@ spec:
     runAfter:
     - test-container-deploy
     taskRef:
-      kind: ClusterTask
-      name: openshift-client
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/openshift-pipelines/tektoncd-catalog
+        - name: revision
+          value: p
+        - name: pathInRepo
+          value: tasks/task-openshift-client/0.2.1/task-openshift-client.yaml
   - name: test-model-rest-svc
     params:
     - name: service-name
@@ -314,8 +346,14 @@ spec:
     runAfter:
     - test-model-rest-svc
     taskRef:
-      kind: ClusterTask
-      name: openshift-client
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/openshift-pipelines/tektoncd-catalog
+        - name: revision
+          value: p
+        - name: pathInRepo
+          value: tasks/task-openshift-client/0.2.1/task-openshift-client.yaml
   - name: retrieve-build-image-info
     taskRef:
       kind: Task
@@ -339,21 +377,27 @@ spec:
     - test-model-rest-svc
     - stop-deployment
     workspaces:
-    - name: images-url
+    - name: images_url
       workspace: build-workspace-pv
   - name: skopeo-copy
     params:
-    - name: srcTLSverify
+    - name: SRC_TLS_VERIFY
       value: "true"
-    - name: destTLSverify
+    - name: DEST_TLS_VERIFY
       value: "true"
     runAfter:
     - retrieve-build-image-info
     taskRef:
-      kind: ClusterTask
-      name: skopeo-copy
+      resolver: git
+      params:
+        - name: url
+          value: https://github.com/openshift-pipelines/tektoncd-catalog
+        - name: revision
+          value: p
+        - name: pathInRepo
+          value: tasks/task-skopeo-copy/0.4.2/task-skopeo-copy.yaml
     workspaces:
-    - name: images-url
+    - name: images_url
       workspace: build-workspace-pv
   workspaces:
   - name: build-workspace-pv

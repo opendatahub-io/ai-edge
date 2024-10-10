@@ -12,7 +12,7 @@ This task returns more detailed info about a model that has just been built and 
 * **target-image-tag-references**: The image tag references used for the final built image
 
 ## Workspaces
-* **images-url**: workspace where url.txt file is created
+* **images_url**: workspace where url.txt file is created
 
 ## Results
 * **model-name**: The name of the model
