@@ -304,6 +304,8 @@ func WaitForAllPipelineRunsToComplete(ctx context.Context, pipelineRunName strin
 				return true, nil
 			case "Succeeded":
 				return true, nil
+			case "ResolvingTaskRef":
+				return false, nil
 			default:
 				panic(fmt.Sprintf("unknown status condition while waiting for \"%v\" pipeline run to finish: %v", pipelineRunName, condition.Reason))
 			}
