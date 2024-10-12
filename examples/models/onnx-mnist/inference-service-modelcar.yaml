@@ -1,0 +1,26 @@
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    serving.knative.openshift.io/enablePassthrough: "true"
+    sidecar.istio.io/inject: "true"
+    sidecar.istio.io/rewriteAppHTTPProbers: "true"
+    serving.kserve.io/deploymentMode: RawDeployment
+  name: onnx-mnist
+spec:
+  predictor:
+    scaleMetric:
+    minReplicas: 1
+    scaleTarget:
+    canaryTrafficPercent:
+    model:
+      env: []
+      volumeMounts: []
+      modelFormat:
+        name: onnx
+      runtime: ovms-runtime
+      storageUri: oci://quay.io/grdryn/onnx-mnist:modelcar-1
+      resources:
+        requests:
+          memory: 2Gi
+    volumes: []
