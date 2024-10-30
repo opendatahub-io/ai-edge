@@ -18,6 +18,8 @@ names:
   - ovms_request_time_us_sum
   - ovms_requests_fail
   - ovms_requests_success
+  - ovms_requests_fail_total
+  - ovms_requests_success_total
   - ovms_streams
   - ovms_wait_for_infer_req_time_us_bucket
   - ovms_wait_for_infer_req_time_us_count
