@@ -250,8 +250,8 @@ spec:
                 resources: {}
         status: {}
         EOF
-        oc wait deployment -n $(params.target-namespace) $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --for condition=Available=True --timeout=120s
-        oc wait pod -n $(params.target-namespace) -l app=$(params.model-name)-$(params.model-version) --for condition=Ready=True --timeout=120s
+        oc wait deployment -n $(params.target-namespace) $(tasks.sanitise-model-name.results.output-string)-$(params.model-version) --for condition=Available=True --timeout=5m
+        oc wait pod -n $(params.target-namespace) -l app=$(params.model-name)-$(params.model-version) --for condition=Ready=True --timeout=5m
     taskRef:
       resolver: git
       params:
