@@ -242,7 +242,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(ovms_requests_success{cluster=~\"$cluster\"}) by(namespace)",
+          "expr": "sum(ovms_requests_success_total{cluster=~\"$cluster\"}) by(namespace)",
           "hide": false,
           "interval": "",
           "legendFormat": "{{namespace}} success",
@@ -250,7 +250,7 @@
         },
         {
           "exemplar": true,
-          "expr": "sum(ovms_requests_fail{cluster=~\"$cluster\"}) by(namespace)",
+          "expr": "sum(ovms_requests_fail_total{cluster=~\"$cluster\"}) by(namespace)",
           "hide": false,
           "interval": "",
           "legendFormat": "{{namespace}} fail",
